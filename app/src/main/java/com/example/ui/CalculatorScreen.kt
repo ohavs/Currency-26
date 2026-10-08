@@ -1,439 +1,434 @@
 package com.example.ui
 
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.safeDrawingPadding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Search
-import androidx.compose.material.icons.filled.SwapVert
-import androidx.compose.material.icons.filled.LightMode
-import androidx.compose.material.icons.filled.DarkMode
-import androidx.compose.material.icons.filled.Check
-import androidx.compose.material.icons.filled.Menu
-import androidx.compose.material3.*
+import androidx.compose.material.icons.automirrored.rounded.Backspace
+import androidx.compose.material.icons.rounded.KeyboardArrowDown
+import androidx.compose.material.icons.rounded.Refresh
+import androidx.compose.material.icons.rounded.SwapVert
+import androidx.compose.material.icons.rounded.Tune
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
+import androidx.compose.ui.platform.LocalHapticFeedback
+import androidx.compose.ui.platform.LocalLayoutDirection
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextDirection
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.ui.theme.AmountTextStyle
+import com.example.ui.theme.CurrencyCodeTextStyle
+import com.example.ui.theme.LocalPalette
+import com.example.utils.formatAmount
+import com.example.utils.formatAmountInput
+import com.example.utils.formatRate
+import com.example.utils.formatUpdatedAt
 import com.example.utils.getCurrencyInfo
-import java.text.DecimalFormat
-import java.text.SimpleDateFormat
-import java.util.Date
-import java.util.Locale
 
-import androidx.compose.material.icons.filled.Menu
-import androidx.compose.material3.DrawerValue
-import androidx.compose.material3.rememberDrawerState
-import androidx.compose.runtime.rememberCoroutineScope
-import kotlinx.coroutines.launch
+private enum class AppScreen { Calculator, Settings, Picker }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CalculatorScreen(viewModel: MainViewModel) {
     val state by viewModel.state.collectAsState()
     val themeMode by viewModel.themeMode.collectAsState()
     val colorTheme by viewModel.colorTheme.collectAsState()
+    val autoUpdate by viewModel.autoUpdate.collectAsState()
+    val palette = LocalPalette.current
 
-    val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
-    val scope = rememberCoroutineScope()
+    val screen = when {
+        state.showCurrencySelector -> AppScreen.Picker
+        state.showSettings -> AppScreen.Settings
+        else -> AppScreen.Calculator
+    }
 
-    androidx.compose.runtime.CompositionLocalProvider(androidx.compose.ui.platform.LocalLayoutDirection provides androidx.compose.ui.unit.LayoutDirection.Rtl) {
-        ModalNavigationDrawer(
-            drawerState = drawerState,
-            drawerContent = {
-                ModalDrawerSheet {
-                    Column(modifier = Modifier.fillMaxWidth()) {
-                        Text("הגדרות", style = MaterialTheme.typography.headlineMedium, modifier = Modifier.padding(16.dp))
-                        HorizontalDivider()
-                        NavigationDrawerItem(
-                            label = { Text("הוסף וידג'ט לדף הבית") },
-                            selected = false,
-                            onClick = { 
-                                viewModel.addWidgetToHomeScreen()
-                                scope.launch { drawerState.close() }
-                            },
-                            modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
-                        )
-                        HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
-                        
-                        Row(
-                            modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp),
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.SpaceBetween
-                        ) {
-                            Text("מצב תצוגה", style = MaterialTheme.typography.titleSmall)
-                            IconButton(onClick = { viewModel.setThemeMode(if (themeMode == "dark") "light" else "dark") }) {
-                                Icon(
-                                    imageVector = if (themeMode == "dark") androidx.compose.material.icons.Icons.Default.LightMode else androidx.compose.material.icons.Icons.Default.DarkMode,
-                                    contentDescription = "שנה מצב תצוגה"
-                                )
-                            }
-                        }
-
-                        HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
-                        
-                        Text("ערכת צבעים", modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp), style = MaterialTheme.typography.titleSmall)
-                        val themes = listOf(
-                            "standard" to Color.White, 
-                            "ocean" to Color(0xFF006C52), 
-                            "forest" to Color(0xFF376A20), 
-                            "sunset" to Color(0xFF9E4200),
-                            "rose" to Color(0xFF904A4C),
-                            "lavender" to Color(0xFF4758A9)
-                        )
-                        Row(
-                            modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp),
-                            horizontalArrangement = Arrangement.spacedBy(8.dp)
-                        ) {
-                            themes.forEach { (theme, color) ->
-                                Box(
-                                    modifier = Modifier
-                                        .size(36.dp)
-                                        .clip(CircleShape)
-                                        .background(color)
-                                        .border(1.dp, Color.Gray, CircleShape)
-                                        .clickable { viewModel.setColorTheme(theme) },
-                                    contentAlignment = Alignment.Center
-                                ) {
-                                    if (colorTheme == theme) {
-                                        val checkColor = if (theme == "standard") Color.Black else Color.White
-                                        Icon(androidx.compose.material.icons.Icons.Default.Check, contentDescription = "נבחר", tint = checkColor, modifier = Modifier.size(20.dp))
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            }
+    CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Rtl) {
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(palette.background)
         ) {
-            if (state.showCurrencySelector) {
-                CurrencySelector(
-                    state = state,
-                    onClose = { viewModel.closeCurrencySelector() },
-                    onSelect = { viewModel.selectCurrency(it) },
-                    onSearch = { viewModel.updateSearchQuery(it) }
-                )
-            } else {
-                Scaffold(
-                    bottomBar = { BottomRateInfo(state) }
-                ) { paddingValues ->
-                    androidx.compose.runtime.CompositionLocalProvider(androidx.compose.ui.platform.LocalLayoutDirection provides androidx.compose.ui.unit.LayoutDirection.Ltr) {
-                        Box(modifier = Modifier.fillMaxSize().padding(paddingValues)) {
-                            CalculatorContent(
-                                state = state,
-                                onSwap = { viewModel.swapCurrencies() },
-                                onCurrencyClick = { isSource -> viewModel.openCurrencySelector(isSource) },
-                                onKeypad = { viewModel.onKeypadPress(it) },
-                                modifier = Modifier.fillMaxSize()
-                            )
-                            IconButton(
-                                onClick = { scope.launch { drawerState.open() } },
-                                modifier = Modifier
-                                    .align(Alignment.TopEnd)
-                                    .padding(top = 16.dp, end = 16.dp)
-                                    .background(MaterialTheme.colorScheme.surface.copy(alpha = 0.5f), CircleShape)
-                            ) {
-                                Icon(Icons.Default.Menu, contentDescription = "תפריט", tint = MaterialTheme.colorScheme.onSurface)
-                            }
-                        }
-                    }
+            AnimatedContent(
+                targetState = screen,
+                transitionSpec = { fadeIn(tween(220)) togetherWith fadeOut(tween(150)) },
+                label = "screen"
+            ) { target ->
+                when (target) {
+                    AppScreen.Calculator -> CalculatorContent(
+                        state = state,
+                        onSwap = viewModel::swapCurrencies,
+                        onCurrencyClick = viewModel::openCurrencySelector,
+                        onKeypad = viewModel::onKeypadPress,
+                        onOpenSettings = viewModel::openSettings,
+                        onRefresh = viewModel::refreshRates,
+                    )
+                    AppScreen.Settings -> SettingsScreen(
+                        themeMode = themeMode,
+                        colorTheme = colorTheme,
+                        autoUpdate = autoUpdate,
+                        lastUpdateTimestamp = state.lastUpdateTimestamp,
+                        isRefreshing = state.isRefreshing,
+                        lastRefreshFailed = state.lastRefreshFailed,
+                        canPinWidget = viewModel.canPinWidget,
+                        onClose = viewModel::closeSettings,
+                        onThemeModeChange = viewModel::setThemeMode,
+                        onColorThemeChange = viewModel::setColorTheme,
+                        onAutoUpdateEnabledChange = viewModel::setAutoUpdateEnabled,
+                        onIntervalChange = viewModel::setAutoUpdateInterval,
+                        onWifiOnlyChange = viewModel::setAutoUpdateWifiOnly,
+                        onRefreshOnOpenChange = viewModel::setRefreshOnOpen,
+                        onRefreshNow = viewModel::refreshRates,
+                        onAddWidget = viewModel::addWidgetToHomeScreen,
+                    )
+                    AppScreen.Picker -> CurrencySelector(
+                        state = state,
+                        onClose = viewModel::closeCurrencySelector,
+                        onSelect = viewModel::selectCurrency,
+                        onSearch = viewModel::updateSearchQuery
+                    )
                 }
             }
         }
-    }
-}
-
-@Composable
-fun BottomRateInfo(state: CalculatorState) {
-    val sourceRate = state.rates[state.sourceCurrency] ?: 1.0
-    val targetRate = state.rates[state.targetCurrency] ?: 1.0
-    val rate = targetRate / sourceRate
-    val formattedRate = DecimalFormat("#,##0.0000").format(rate)
-    
-    val timeString = if (state.lastUpdateTimestamp > 0) {
-        SimpleDateFormat("dd/MM/yyyy HH:mm", Locale.getDefault()).format(Date(state.lastUpdateTimestamp))
-    } else {
-        "לא התעדכן"
-    }
-
-    Box(
-        modifier = Modifier
-            .fillMaxWidth()
-            .background(MaterialTheme.colorScheme.surfaceVariant)
-            .padding(vertical = 12.dp, horizontal = 16.dp),
-        contentAlignment = Alignment.Center
-    ) {
-        val direction = androidx.compose.ui.text.style.TextDirection.Rtl
-        Text(
-            text = "שער חליפין: 1 ${state.sourceCurrency} = $formattedRate ${state.targetCurrency}\nעודכן לאחרונה: $timeString",
-            style = MaterialTheme.typography.labelMedium.copy(textDirection = direction),
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-            textAlign = TextAlign.Center
-        )
     }
 }
 
 @Composable
 fun CalculatorContent(
-    modifier: Modifier = Modifier,
     state: CalculatorState,
     onSwap: () -> Unit,
     onCurrencyClick: (Boolean) -> Unit,
-    onKeypad: (Char) -> Unit
+    onKeypad: (String) -> Unit,
+    onOpenSettings: () -> Unit,
+    onRefresh: () -> Unit,
+    modifier: Modifier = Modifier,
 ) {
+    val updatedAt = formatUpdatedAt(state.lastUpdateTimestamp)
+    val subtitle = when {
+        state.isRefreshing -> "מעדכן שערים…"
+        state.lastRefreshFailed && updatedAt != null -> "אין חיבור · עודכן $updatedAt"
+        state.lastRefreshFailed -> "אין חיבור לאינטרנט"
+        updatedAt != null -> "עודכן $updatedAt"
+        else -> null
+    }
+
     Column(
         modifier = modifier
             .fillMaxSize()
-            .background(MaterialTheme.colorScheme.background)
-            .padding(16.dp),
-        horizontalAlignment = Alignment.CenterHorizontally
+            .safeDrawingPadding()
+            .padding(horizontal = 16.dp)
     ) {
-        Spacer(modifier = Modifier.height(56.dp))
-        
-        // Source Currency Display
-        CurrencyRow(
-            currency = state.sourceCurrency,
-            amount = state.sourceAmountRaw.ifEmpty { "0" },
+        AppTopBar(
+            title = "המרת מטבע",
+            subtitle = subtitle,
+            navigation = { RoundIconButton(Icons.Rounded.Tune, "הגדרות", onOpenSettings) },
+            action = { RoundIconButton(Icons.Rounded.Refresh, "עדכון שערים", onRefresh, loading = state.isRefreshing) }
+        )
+
+        Spacer(Modifier.height(6.dp))
+
+        CurrencyBlock(
+            code = state.sourceCurrency,
+            caption = "ממטבע",
+            amount = formatAmountInput(state.sourceAmountRaw),
+            highlighted = false,
             onClick = { onCurrencyClick(true) }
         )
-        
-        Spacer(modifier = Modifier.height(16.dp))
-        
-        // Swap Button
-        FilledIconButton(
-            onClick = onSwap,
-            modifier = Modifier.size(48.dp),
-            colors = IconButtonDefaults.filledIconButtonColors(
-                containerColor = MaterialTheme.colorScheme.primary,
-                contentColor = MaterialTheme.colorScheme.onPrimary
-            )
-        ) {
-            Icon(Icons.Default.SwapVert, contentDescription = "Swap Currencies")
-        }
-        
-        Spacer(modifier = Modifier.height(16.dp))
-        
-        // Target Currency Display
-        val formatter = DecimalFormat("#,##0.00")
-        val targetAmountStr = formatter.format(state.targetAmount)
-        CurrencyRow(
-            currency = state.targetCurrency,
-            amount = targetAmountStr,
-            onClick = { onCurrencyClick(false) },
-            isTarget = true
+
+        Spacer(Modifier.height(8.dp))
+
+        SwapRow(
+            rateText = "1 ${state.sourceCurrency} = ${formatRate(state.rate)} ${state.targetCurrency}",
+            onSwap = onSwap
         )
-        
-        Spacer(modifier = Modifier.weight(1f))
-        
-        // Keypad
-        Keypad(onKeyClick = onKeypad)
+
+        Spacer(Modifier.height(8.dp))
+
+        CurrencyBlock(
+            code = state.targetCurrency,
+            caption = "למטבע",
+            amount = formatAmount(state.targetAmount),
+            highlighted = true,
+            onClick = { onCurrencyClick(false) }
+        )
+
+        Spacer(Modifier.height(14.dp))
+
+        Box(
+            modifier = Modifier
+                .weight(1f)
+                .fillMaxWidth(),
+            contentAlignment = Alignment.BottomCenter
+        ) {
+            Keypad(
+                onKey = onKeypad,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .heightIn(max = 360.dp)
+                    .fillMaxHeight()
+            )
+        }
+
+        Spacer(Modifier.height(12.dp))
     }
 }
 
+/** Currency header card stacked on top of its amount card (reference: "USD" over "1250"). */
 @Composable
-fun CurrencyRow(
-    currency: String,
+private fun CurrencyBlock(
+    code: String,
+    caption: String,
     amount: String,
+    highlighted: Boolean,
     onClick: () -> Unit,
-    isTarget: Boolean = false
 ) {
-    val info = getCurrencyInfo(currency)
+    val palette = LocalPalette.current
+    val info = getCurrencyInfo(code)
+    val headerColor = if (highlighted) palette.highlight else palette.card
+    val bodyColor = if (highlighted) palette.highlightSoft else palette.cardSoft
+
+    Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .clip(RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp, bottomStart = 10.dp, bottomEnd = 10.dp))
+                .background(headerColor)
+                .clickable(role = Role.Button, onClickLabel = "בחירת מטבע", onClick = onClick)
+                .padding(horizontal = 14.dp, vertical = 10.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            FlagBadge(info.flag, background = bodyColor)
+            Spacer(Modifier.width(10.dp))
+            Text(code, style = CurrencyCodeTextStyle, color = palette.ink)
+            Icon(
+                Icons.Rounded.KeyboardArrowDown,
+                contentDescription = null,
+                tint = palette.inkMuted,
+                modifier = Modifier.size(22.dp)
+            )
+            Spacer(Modifier.weight(1f))
+            Column(horizontalAlignment = Alignment.End, modifier = Modifier.padding(start = 12.dp)) {
+                Text(caption, style = MaterialTheme.typography.labelMedium, color = palette.inkMuted)
+                Text(
+                    text = info.hebrewName,
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = palette.ink,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
+            }
+        }
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .clip(RoundedCornerShape(topStart = 10.dp, topEnd = 10.dp, bottomStart = 24.dp, bottomEnd = 24.dp))
+                .background(bodyColor)
+                .padding(horizontal = 20.dp, vertical = 12.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(
+                text = amount,
+                style = AmountTextStyle.copy(fontSize = amountFontSize(amount)),
+                color = palette.ink,
+                // Right edge = reading start in Hebrew, lined up with the currency code above.
+                textAlign = TextAlign.Right,
+                maxLines = 1,
+                softWrap = false,
+                overflow = TextOverflow.Ellipsis,
+                modifier = Modifier.weight(1f)
+            )
+            Text(
+                text = info.symbol,
+                style = MaterialTheme.typography.titleMedium.copy(textDirection = TextDirection.Ltr),
+                color = palette.inkMuted,
+                maxLines = 1,
+                modifier = Modifier.padding(start = 12.dp)
+            )
+        }
+    }
+}
+
+private fun amountFontSize(text: String) = when {
+    text.length <= 9 -> 34.sp
+    text.length <= 12 -> 29.sp
+    text.length <= 15 -> 24.sp
+    else -> 20.sp
+}
+
+/** Small square swap button next to the live rate pill (reference: "⇅  $1=€0.919137"). */
+@Composable
+private fun SwapRow(rateText: String, onSwap: () -> Unit) {
+    val palette = LocalPalette.current
+    var turns by remember { mutableIntStateOf(0) }
+    val rotation by animateFloatAsState(turns * 180f, label = "swap")
+
     Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clip(RoundedCornerShape(16.dp))
-            .clickable(onClick = onClick)
-            .background(if (isTarget) MaterialTheme.colorScheme.secondaryContainer else MaterialTheme.colorScheme.primaryContainer)
-            .padding(vertical = 16.dp, horizontal = 20.dp),
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        Text(
-            text = amount,
-            style = MaterialTheme.typography.headlineLarge,
-            color = if (isTarget) MaterialTheme.colorScheme.onSecondaryContainer else MaterialTheme.colorScheme.onPrimaryContainer,
-            textAlign = TextAlign.Start,
-            maxLines = 1,
-            overflow = TextOverflow.Ellipsis,
-            modifier = Modifier.weight(1.5f)
-        )
-        
-        Spacer(modifier = Modifier.weight(0.1f))
-
-        Column(modifier = Modifier.weight(1f), horizontalAlignment = Alignment.End) {
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Text(
-                    text = currency,
-                    style = MaterialTheme.typography.headlineMedium.copy(fontWeight = FontWeight.Bold),
-                    color = if (isTarget) MaterialTheme.colorScheme.onSecondaryContainer else MaterialTheme.colorScheme.onPrimaryContainer
-                )
-                Text(
-                    text = info.flag,
-                    fontSize = 24.sp,
-                    modifier = Modifier.padding(start = 8.dp)
-                )
-            }
-            Text(
-                text = "${info.symbol} ${info.hebrewName}",
-                style = MaterialTheme.typography.bodyMedium,
-                color = if (isTarget) MaterialTheme.colorScheme.onSecondaryContainer else MaterialTheme.colorScheme.onPrimaryContainer,
-                textAlign = TextAlign.End
-            )
-        }
-    }
-}
-
-@Composable
-fun Keypad(onKeyClick: (Char) -> Unit) {
-    val keys = listOf(
-        listOf('7', '8', '9'),
-        listOf('4', '5', '6'),
-        listOf('1', '2', '3'),
-        listOf('.', '0', '⌫')
-    )
-    
-    Column(
-        modifier = Modifier.fillMaxWidth().padding(bottom = 8.dp),
-        verticalArrangement = Arrangement.spacedBy(8.dp)
-    ) {
-        // C Button row
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.End
+        Box(
+            modifier = Modifier
+                .size(52.dp)
+                .clip(RoundedCornerShape(18.dp))
+                .background(palette.accent)
+                .clickable(role = Role.Button, onClickLabel = "החלפת מטבעות") {
+                    turns++
+                    onSwap()
+                },
+            contentAlignment = Alignment.Center
         ) {
-            KeypadButton(text = "C", weight = 0.3f, color = MaterialTheme.colorScheme.errorContainer, textColor = MaterialTheme.colorScheme.onErrorContainer) {
-                onKeyClick('C')
-            }
-        }
-        
-        keys.forEach { row ->
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
-                row.forEach { key ->
-                    val isAction = key == '⌫'
-                    val color = if (isAction) MaterialTheme.colorScheme.secondary else MaterialTheme.colorScheme.primaryContainer
-                    val textColor = if (isAction) MaterialTheme.colorScheme.onSecondary else MaterialTheme.colorScheme.onPrimaryContainer
-                    KeypadButton(text = key.toString(), weight = 1f, color = color, textColor = textColor) {
-                        onKeyClick(key)
-                    }
-                }
-            }
-        }
-    }
-}
-
-@Composable
-fun RowScope.KeypadButton(
-    text: String,
-    weight: Float,
-    color: Color = MaterialTheme.colorScheme.surfaceVariant,
-    textColor: Color = MaterialTheme.colorScheme.onSurfaceVariant,
-    onClick: () -> Unit
-) {
-    Box(
-        modifier = Modifier
-            .weight(weight)
-            .height(60.dp)
-            .clip(RoundedCornerShape(30.dp))
-            .background(color)
-            .clickable(onClick = onClick),
-        contentAlignment = Alignment.Center
-    ) {
-        Text(
-            text = text,
-            style = MaterialTheme.typography.headlineMedium,
-            color = textColor
-        )
-    }
-}
-
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-fun CurrencySelector(
-    state: CalculatorState,
-    onClose: () -> Unit,
-    onSelect: (String) -> Unit,
-    onSearch: (String) -> Unit
-) {
-    val allCurrencies = state.rates.keys.toList()
-    val filtered = allCurrencies.filter { 
-        val info = getCurrencyInfo(it)
-        it.contains(state.searchQuery, ignoreCase = true) || 
-        info.hebrewName.contains(state.searchQuery, ignoreCase = true) ||
-        info.keywords.any { keyword -> keyword.contains(state.searchQuery, ignoreCase = true) }
-    }
-    
-    // Sort logic: put recent currencies first
-    val sorted = filtered.sortedByDescending { state.recentCurrencies.indexOf(it) }
-
-    Scaffold(
-        topBar = {
-            TopAppBar(
-                title = { Text("בחר מטבע") },
-                navigationIcon = {
-                    TextButton(onClick = onClose) {
-                        Text("חזור")
-                    }
-                }
+            Icon(
+                Icons.Rounded.SwapVert,
+                contentDescription = "החלפת מטבעות",
+                tint = palette.onAccent,
+                modifier = Modifier.rotate(rotation)
             )
         }
-    ) { pd ->
-        Column(modifier = Modifier.padding(pd).fillMaxSize()) {
-            androidx.compose.runtime.CompositionLocalProvider(androidx.compose.ui.platform.LocalLayoutDirection provides androidx.compose.ui.unit.LayoutDirection.Rtl) {
-                OutlinedTextField(
-                    value = state.searchQuery,
-                    onValueChange = onSearch,
-                    modifier = Modifier.fillMaxWidth().padding(16.dp),
-                    placeholder = { Text("חיפוש לפי קוד או שם...") },
-                    leadingIcon = { Icon(Icons.Default.Search, "Search") },
-                    singleLine = true
-                )
-                LazyColumn(modifier = Modifier.fillMaxSize()) {
-                    items(sorted) { code ->
-                        val info = getCurrencyInfo(code)
-                        Row(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .clickable { onSelect(code) }
-                                .padding(horizontal = 24.dp, vertical = 16.dp),
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            Text(
-                                text = info.flag,
-                                fontSize = 32.sp,
-                                modifier = Modifier.padding(end = 16.dp)
-                            )
-                            Column(modifier = Modifier.weight(1f)) {
-                                Text(
-                                    text = info.hebrewName,
-                                    style = MaterialTheme.typography.titleMedium,
-                                    fontWeight = if (state.recentCurrencies.contains(code)) FontWeight.Bold else FontWeight.Normal
-                                )
-                                Text(
-                                    text = "${info.symbol} $code",
-                                    style = MaterialTheme.typography.bodyMedium,
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                                )
+        Box(
+            modifier = Modifier
+                .weight(1f)
+                .height(52.dp)
+                .clip(RoundedCornerShape(18.dp))
+                .background(palette.card)
+                .padding(horizontal = 18.dp),
+            contentAlignment = Alignment.CenterStart
+        ) {
+            Text(
+                text = rateText,
+                style = MaterialTheme.typography.titleSmall.copy(textDirection = TextDirection.Ltr),
+                color = palette.ink,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
+            )
+        }
+    }
+}
+
+@Composable
+private fun Keypad(onKey: (String) -> Unit, modifier: Modifier = Modifier) {
+    val palette = LocalPalette.current
+    val haptics = LocalHapticFeedback.current
+    val press: (String) -> Unit = { key ->
+        haptics.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+        onKey(key)
+    }
+    val digitRows = listOf(
+        listOf("7", "8", "9"),
+        listOf("4", "5", "6"),
+        listOf("1", "2", "3"),
+        listOf(".", "0", "00")
+    )
+
+    // Numbers keep the familiar left-to-right keypad order inside the RTL app.
+    CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Ltr) {
+        Row(modifier = modifier, horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+            Column(
+                modifier = Modifier
+                    .weight(3f)
+                    .fillMaxHeight(),
+                verticalArrangement = Arrangement.spacedBy(10.dp)
+            ) {
+                digitRows.forEach { row ->
+                    Row(
+                        modifier = Modifier
+                            .weight(1f)
+                            .fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(10.dp)
+                    ) {
+                        row.forEach { key ->
+                            KeyButton(
+                                color = palette.cardSoft,
+                                modifier = Modifier
+                                    .weight(1f)
+                                    .fillMaxHeight(),
+                                onClick = { press(key) }
+                            ) {
+                                Text(key, style = MaterialTheme.typography.headlineSmall.copy(fontSize = 26.sp), color = palette.ink)
                             }
                         }
-                        HorizontalDivider()
                     }
                 }
             }
+            Column(
+                modifier = Modifier
+                    .weight(1f)
+                    .fillMaxHeight(),
+                verticalArrangement = Arrangement.spacedBy(10.dp)
+            ) {
+                KeyButton(
+                    color = palette.card,
+                    modifier = Modifier
+                        .weight(1f)
+                        .fillMaxWidth(),
+                    onClick = { press("⌫") }
+                ) {
+                    Icon(Icons.AutoMirrored.Rounded.Backspace, contentDescription = "מחיקה", tint = palette.ink)
+                }
+                KeyButton(
+                    color = palette.accent,
+                    modifier = Modifier
+                        .weight(1f)
+                        .fillMaxWidth(),
+                    onClick = { press("C") }
+                ) {
+                    Text("C", style = MaterialTheme.typography.headlineSmall.copy(fontSize = 26.sp), color = palette.onAccent)
+                }
+            }
         }
+    }
+}
+
+@Composable
+private fun KeyButton(
+    color: Color,
+    modifier: Modifier = Modifier,
+    onClick: () -> Unit,
+    content: @Composable () -> Unit,
+) {
+    Box(
+        modifier = modifier
+            .clip(RoundedCornerShape(22.dp))
+            .background(color)
+            .clickable(role = Role.Button, onClick = onClick),
+        contentAlignment = Alignment.Center
+    ) {
+        content()
     }
 }

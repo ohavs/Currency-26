@@ -36,8 +36,11 @@ class CurrencyRepository(
     private val _themeMode = MutableStateFlow(prefs.getString("theme_mode", "system") ?: "system")
     val themeMode: StateFlow<String> = _themeMode.asStateFlow()
 
-    private val _colorTheme = MutableStateFlow(prefs.getString("color_theme", "standard") ?: "standard")
+    private val _colorTheme = MutableStateFlow(prefs.getString("color_theme", "sage") ?: "sage")
     val colorTheme: StateFlow<String> = _colorTheme.asStateFlow()
+
+    private val _autoUpdate = MutableStateFlow(readAutoUpdate())
+    val autoUpdate: StateFlow<AutoUpdateSettings> = _autoUpdate.asStateFlow()
 
     fun getSourceCurrency(): String = prefs.getString("source", "USD") ?: "USD"
     fun getTargetCurrency(): String = prefs.getString("target", "ILS") ?: "ILS"
@@ -57,9 +60,29 @@ class CurrencyRepository(
         _colorTheme.value = theme
     }
 
-    suspend fun refreshRates() {
-        try {
-            // Fetch rates base on USD
+    private fun readAutoUpdate(): AutoUpdateSettings {
+        val defaults = AutoUpdateSettings()
+        return AutoUpdateSettings(
+            enabled = prefs.getBoolean("auto_update_enabled", defaults.enabled),
+            intervalMinutes = prefs.getLong("auto_update_interval", defaults.intervalMinutes),
+            wifiOnly = prefs.getBoolean("auto_update_wifi_only", defaults.wifiOnly),
+            refreshOnOpen = prefs.getBoolean("refresh_on_open", defaults.refreshOnOpen),
+        )
+    }
+
+    fun setAutoUpdate(settings: AutoUpdateSettings) {
+        prefs.edit()
+            .putBoolean("auto_update_enabled", settings.enabled)
+            .putLong("auto_update_interval", settings.intervalMinutes)
+            .putBoolean("auto_update_wifi_only", settings.wifiOnly)
+            .putBoolean("refresh_on_open", settings.refreshOnOpen)
+            .apply()
+        _autoUpdate.value = settings
+    }
+
+    /** Downloads the latest USD-based rates. Returns true when the local rates were updated. */
+    suspend fun refreshRates(): Boolean {
+        return try {
             val response = api.getLatestRates("USD")
             if (response.result.equals("success", ignoreCase = true)) {
                 val timestamp = System.currentTimeMillis()
@@ -67,11 +90,19 @@ class CurrencyRepository(
                     ExchangeRateEntity(code, rate, timestamp)
                 }
                 dao.insertRates(entities)
+                true
+            } else {
+                false
             }
         } catch (e: Exception) {
             e.printStackTrace()
+            false
         }
     }
+
+    suspend fun getRate(code: String): Double? = dao.getRate(code)?.rateRelativeToUSD
+
+    suspend fun getLastUpdateTimestamp(): Long = dao.getLastUpdateTimestamp() ?: 0L
 
     suspend fun markCurrencyUsed(code: String) {
         dao.updateCurrencyUsage(CurrencyUsageEntity(code, System.currentTimeMillis()))
