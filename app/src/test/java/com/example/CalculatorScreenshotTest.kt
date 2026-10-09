@@ -1,5 +1,6 @@
 package com.example
 
+import android.app.Application
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onRoot
 import com.example.ui.CalculatorContent
@@ -16,7 +17,8 @@ import org.robolectric.annotation.GraphicsMode
 
 @RunWith(RobolectricTestRunner::class)
 @GraphicsMode(GraphicsMode.Mode.NATIVE)
-@Config(qualifiers = RobolectricDeviceQualifiers.Pixel8, sdk = [36])
+// Plain Application: CurrencyApp schedules WorkManager jobs, which is not initialized under Robolectric.
+@Config(qualifiers = RobolectricDeviceQualifiers.Pixel8, sdk = [36], application = Application::class)
 class CalculatorScreenshotTest {
 
   @get:Rule val composeTestRule = createComposeRule()
