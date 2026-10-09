@@ -26,6 +26,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.ArrowBack
 import androidx.compose.material.icons.rounded.Check
+import androidx.compose.material.icons.rounded.Language
 import androidx.compose.material.icons.rounded.Palette
 import androidx.compose.material.icons.rounded.Refresh
 import androidx.compose.material.icons.rounded.SystemUpdate
@@ -41,12 +42,15 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.unit.dp
+import com.example.R
 import com.example.data.AutoUpdateSettings
 import com.example.ui.theme.ColorThemeOption
 import com.example.ui.theme.LocalPalette
 import com.example.ui.theme.Palettes
+import com.example.utils.AppLanguage
 import com.example.utils.formatUpdatedAt
 
 @Composable
@@ -72,6 +76,8 @@ fun SettingsScreen(
     onCheckAppUpdatesChange: (Boolean) -> Unit,
     onCheckForAppUpdate: () -> Unit,
     onStartAppUpdate: () -> Unit,
+    language: String = AppLanguage.DEFAULT,
+    onLanguageChange: (String) -> Unit = {},
 ) {
     BackHandler(onBack = onClose)
     val palette = LocalPalette.current
@@ -83,8 +89,8 @@ fun SettingsScreen(
             .padding(horizontal = 16.dp)
     ) {
         AppTopBar(
-            title = "הגדרות",
-            navigation = { RoundIconButton(Icons.AutoMirrored.Rounded.ArrowBack, "חזרה", onClose) }
+            title = stringResource(R.string.settings),
+            navigation = { RoundIconButton(Icons.AutoMirrored.Rounded.ArrowBack, stringResource(R.string.back), onClose) }
         )
 
         Column(
@@ -94,16 +100,29 @@ fun SettingsScreen(
                 .padding(bottom = 24.dp),
             verticalArrangement = Arrangement.spacedBy(14.dp)
         ) {
-            SettingsSection(title = "מראה", icon = Icons.Rounded.Palette) {
-                SettingLabel("מצב תצוגה")
+            SettingsSection(title = stringResource(R.string.language), icon = Icons.Rounded.Language) {
                 SegmentedControl(
-                    options = listOf("light" to "בהיר", "dark" to "כהה", "system" to "לפי המערכת"),
+                    options = AppLanguage.OPTIONS + (AppLanguage.SYSTEM to stringResource(R.string.language_system)),
+                    selected = language,
+                    onSelect = onLanguageChange,
+                    modifier = Modifier.fillMaxWidth()
+                )
+            }
+
+            SettingsSection(title = stringResource(R.string.appearance), icon = Icons.Rounded.Palette) {
+                SettingLabel(stringResource(R.string.display_mode))
+                SegmentedControl(
+                    options = listOf(
+                        "light" to stringResource(R.string.mode_light),
+                        "dark" to stringResource(R.string.mode_dark),
+                        "system" to stringResource(R.string.mode_system)
+                    ),
                     selected = themeMode,
                     onSelect = onThemeModeChange,
                     modifier = Modifier.fillMaxWidth()
                 )
                 Spacer(Modifier.height(4.dp))
-                SettingLabel("ערכת צבעים")
+                SettingLabel(stringResource(R.string.color_theme))
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceBetween
@@ -120,10 +139,10 @@ fun SettingsScreen(
                 }
             }
 
-            SettingsSection(title = "עדכוני אפליקציה", icon = Icons.Rounded.SystemUpdate) {
+            SettingsSection(title = stringResource(R.string.app_updates), icon = Icons.Rounded.SystemUpdate) {
                 SwitchRow(
-                    title = "בדיקת עדכונים אוטומטית",
-                    subtitle = "בכל פתיחה בודקים אם יצאה גרסה חדשה",
+                    title = stringResource(R.string.auto_check_updates),
+                    subtitle = stringResource(R.string.auto_check_updates_desc),
                     checked = checkAppUpdates,
                     onCheckedChange = onCheckAppUpdatesChange
                 )
@@ -138,15 +157,15 @@ fun SettingsScreen(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Column(modifier = Modifier.weight(1f)) {
-                        Text("גרסה מותקנת ${appUpdate.installedVersion}", style = MaterialTheme.typography.labelMedium, color = palette.inkMuted)
+                        Text(stringResource(R.string.installed_version, appUpdate.installedVersion), style = MaterialTheme.typography.labelMedium, color = palette.inkMuted)
                         Text(
                             text = when {
-                                downloading != null -> "מוריד… ${(downloading * 100).toInt()}%"
-                                appUpdate.checking -> "בודק עדכונים…"
-                                available != null -> "גרסה ${available.versionName} זמינה"
-                                appUpdate.failed -> "הבדיקה נכשלה – בדקו את החיבור"
-                                appUpdate.checked -> "האפליקציה מעודכנת"
-                                else -> "עוד לא נבדק"
+                                downloading != null -> stringResource(R.string.downloading, (downloading * 100).toInt())
+                                appUpdate.checking -> stringResource(R.string.checking_updates)
+                                available != null -> stringResource(R.string.update_available, available.versionName)
+                                appUpdate.failed -> stringResource(R.string.update_check_failed)
+                                appUpdate.checked -> stringResource(R.string.up_to_date)
+                                else -> stringResource(R.string.not_checked)
                             },
                             style = MaterialTheme.typography.bodyLarge,
                             color = palette.ink
@@ -154,14 +173,14 @@ fun SettingsScreen(
                     }
                     if (available != null) {
                         PillButton(
-                            text = "עדכון",
+                            text = stringResource(R.string.update_action),
                             icon = Icons.Rounded.SystemUpdate,
                             loading = downloading != null,
                             onClick = onStartAppUpdate
                         )
                     } else {
                         PillButton(
-                            text = "בדיקה",
+                            text = stringResource(R.string.check_action),
                             icon = Icons.Rounded.Refresh,
                             loading = appUpdate.checking,
                             onClick = onCheckForAppUpdate
@@ -170,23 +189,23 @@ fun SettingsScreen(
                 }
                 if (appUpdate.needsInstallPermission) {
                     Text(
-                        text = "אשרו לאפליקציה להתקין עדכונים במסך שנפתח, ואז לחצו שוב על \"עדכון\".",
+                        text = stringResource(R.string.install_permission_hint),
                         style = MaterialTheme.typography.bodySmall,
                         color = palette.inkMuted
                     )
                 }
             }
 
-            SettingsSection(title = "עדכון שערים", icon = Icons.Rounded.Update) {
+            SettingsSection(title = stringResource(R.string.rate_updates), icon = Icons.Rounded.Update) {
                 SwitchRow(
-                    title = "עדכון שערים ברקע",
-                    subtitle = "השערים והווידג'ט מתעדכנים אוטומטית גם כשהאפליקציה סגורה",
+                    title = stringResource(R.string.background_updates),
+                    subtitle = stringResource(R.string.background_updates_desc),
                     checked = autoUpdate.enabled,
                     onCheckedChange = onAutoUpdateEnabledChange
                 )
                 AnimatedVisibility(visible = autoUpdate.enabled) {
                     Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                        SettingLabel("תדירות עדכון")
+                        SettingLabel(stringResource(R.string.update_frequency))
                         ChipSelector(
                             options = AutoUpdateSettings.INTERVAL_OPTIONS.map { it to intervalLabel(it) },
                             selected = autoUpdate.intervalMinutes,
@@ -194,16 +213,16 @@ fun SettingsScreen(
                             modifier = Modifier.fillMaxWidth()
                         )
                         SwitchRow(
-                            title = "רק ב-Wi-Fi",
-                            subtitle = "חוסך בחבילת הגלישה",
+                            title = stringResource(R.string.wifi_only),
+                            subtitle = stringResource(R.string.wifi_only_desc),
                             checked = autoUpdate.wifiOnly,
                             onCheckedChange = onWifiOnlyChange
                         )
                     }
                 }
                 SwitchRow(
-                    title = "עדכון בפתיחת האפליקציה",
-                    subtitle = "משיכת שערים עדכניים בכל כניסה",
+                    title = stringResource(R.string.refresh_on_open),
+                    subtitle = stringResource(R.string.refresh_on_open_desc),
                     checked = autoUpdate.refreshOnOpen,
                     onCheckedChange = onRefreshOnOpenChange
                 )
@@ -216,19 +235,23 @@ fun SettingsScreen(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Column(modifier = Modifier.weight(1f)) {
-                        Text("עודכן לאחרונה", style = MaterialTheme.typography.labelMedium, color = palette.inkMuted)
+                        Text(stringResource(R.string.last_updated), style = MaterialTheme.typography.labelMedium, color = palette.inkMuted)
                         Text(
                             text = when {
-                                isRefreshing -> "מעדכן…"
-                                lastRefreshFailed -> "העדכון נכשל – בדקו את החיבור"
-                                else -> formatUpdatedAt(lastUpdateTimestamp) ?: "עדיין לא עודכן"
+                                isRefreshing -> stringResource(R.string.updating)
+                                lastRefreshFailed -> stringResource(R.string.update_failed)
+                                else -> formatUpdatedAt(
+                                    lastUpdateTimestamp,
+                                    todayFormat = stringResource(R.string.today_at),
+                                    yesterdayFormat = stringResource(R.string.yesterday_at)
+                                ) ?: stringResource(R.string.never_updated)
                             },
                             style = MaterialTheme.typography.bodyLarge,
                             color = palette.ink
                         )
                     }
                     PillButton(
-                        text = "עדכן עכשיו",
+                        text = stringResource(R.string.update_now),
                         icon = Icons.Rounded.Refresh,
                         loading = isRefreshing,
                         onClick = onRefreshNow
@@ -236,14 +259,14 @@ fun SettingsScreen(
                 }
             }
 
-            SettingsSection(title = "וידג'ט", icon = Icons.Rounded.Widgets) {
+            SettingsSection(title = stringResource(R.string.widget), icon = Icons.Rounded.Widgets) {
                 Text(
-                    text = "לחיצה על מטבע בווידג'ט פותחת ישירות את בחירת המטבע באפליקציה.",
+                    text = stringResource(R.string.widget_desc),
                     style = MaterialTheme.typography.bodyMedium,
                     color = palette.inkMuted
                 )
                 PillButton(
-                    text = "הוספת וידג'ט למסך הבית",
+                    text = stringResource(R.string.add_widget),
                     icon = Icons.Rounded.Widgets,
                     enabled = canPinWidget,
                     onClick = onAddWidget,
@@ -251,7 +274,7 @@ fun SettingsScreen(
                 )
                 if (!canPinWidget) {
                     Text(
-                        text = "אפשר להוסיף את הווידג'ט ידנית: לחיצה ארוכה על מסך הבית ← ווידג'טים.",
+                        text = stringResource(R.string.add_widget_manual),
                         style = MaterialTheme.typography.bodySmall,
                         color = palette.inkMuted
                     )
@@ -261,11 +284,12 @@ fun SettingsScreen(
     }
 }
 
-private fun intervalLabel(minutes: Long): String = when (minutes) {
-    15L -> "15 דק'"
-    60L -> "שעה"
-    1440L -> "יום"
-    else -> if (minutes % 60L == 0L) "${minutes / 60} שע'" else "$minutes דק'"
+@Composable
+private fun intervalLabel(minutes: Long): String = when {
+    minutes == 60L -> stringResource(R.string.interval_hour)
+    minutes == 1440L -> stringResource(R.string.interval_day)
+    minutes % 60L == 0L -> stringResource(R.string.interval_hours, (minutes / 60).toInt())
+    else -> stringResource(R.string.interval_minutes, minutes.toInt())
 }
 
 @Composable
@@ -379,7 +403,7 @@ private fun ThemeSwatch(option: ColorThemeOption, dark: Boolean, selected: Boole
         }
         Spacer(Modifier.height(6.dp))
         Text(
-            text = option.label,
+            text = stringResource(option.labelRes),
             style = MaterialTheme.typography.labelMedium,
             color = if (selected) palette.ink else palette.inkMuted
         )

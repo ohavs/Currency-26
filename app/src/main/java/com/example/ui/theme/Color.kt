@@ -1,7 +1,9 @@
 package com.example.ui.theme
 
+import androidx.annotation.StringRes
 import androidx.compose.runtime.Immutable
 import androidx.compose.ui.graphics.Color
+import com.example.R
 
 /**
  * Design tokens shared by the app and the home-screen widgets.
@@ -33,7 +35,7 @@ data class AppPalette(
 @Immutable
 data class ColorThemeOption(
     val key: String,
-    val label: String,
+    @param:StringRes val labelRes: Int,
     val light: AppPalette,
     val dark: AppPalette,
 )
@@ -43,7 +45,7 @@ object Palettes {
 
     private val sage = ColorThemeOption(
         key = "sage",
-        label = "מרווה",
+        labelRes = R.string.theme_sage,
         light = AppPalette(
             isDark = false,
             background = Color(0xFFD9EBD7),
@@ -72,7 +74,7 @@ object Palettes {
 
     private val ocean = ColorThemeOption(
         key = "ocean",
-        label = "אוקיינוס",
+        labelRes = R.string.theme_ocean,
         light = AppPalette(
             isDark = false,
             background = Color(0xFFD8E7EF),
@@ -101,7 +103,7 @@ object Palettes {
 
     private val sunset = ColorThemeOption(
         key = "sunset",
-        label = "חול",
+        labelRes = R.string.theme_sunset,
         light = AppPalette(
             isDark = false,
             background = Color(0xFFF2E4D8),
@@ -130,7 +132,7 @@ object Palettes {
 
     private val rose = ColorThemeOption(
         key = "rose",
-        label = "ורד",
+        labelRes = R.string.theme_rose,
         light = AppPalette(
             isDark = false,
             background = Color(0xFFF2E0E2),
@@ -159,7 +161,7 @@ object Palettes {
 
     private val lavender = ColorThemeOption(
         key = "lavender",
-        label = "לבנדר",
+        labelRes = R.string.theme_lavender,
         light = AppPalette(
             isDark = false,
             background = Color(0xFFE3E1F1),

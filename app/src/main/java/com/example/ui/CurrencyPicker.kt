@@ -38,14 +38,18 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.SolidColor
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.style.TextDirection
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import com.example.R
 import com.example.data.CurrencySlot
 import com.example.ui.theme.LocalPalette
 import com.example.utils.currencyMap
 import com.example.utils.formatRate
+import com.example.utils.countryName
+import com.example.utils.currencyName
 import com.example.utils.getCurrencyInfo
 
 @Composable
@@ -71,17 +75,21 @@ fun CurrencySelector(
     }
 
     // Before the first download there are no rates yet - still offer the well-known currencies.
+    val locale = LocalAppLocale.current
     val allCurrencies = remember(state.rates.keys, hidden) {
         state.rates.keys.ifEmpty { currencyMap.keys }.filterNot { it in hidden }.sorted()
     }
     val query = state.searchQuery.trim()
-    val filtered = remember(allCurrencies, query) {
+    val filtered = remember(allCurrencies, query, locale) {
         if (query.isEmpty()) {
             allCurrencies
         } else {
             allCurrencies.filter {
                 val info = getCurrencyInfo(it)
+                // Match the code, the names in the UI language, and the Hebrew names/keywords.
                 it.contains(query, ignoreCase = true) ||
+                    currencyName(it, locale).contains(query, ignoreCase = true) ||
+                    countryName(it, locale).contains(query, ignoreCase = true) ||
                     info.hebrewName.contains(query, ignoreCase = true) ||
                     info.keywords.any { keyword -> keyword.contains(query, ignoreCase = true) }
             }
@@ -96,15 +104,15 @@ fun CurrencySelector(
             .padding(horizontal = 16.dp)
     ) {
         AppTopBar(
-            title = "בחירת מטבע",
+            title = stringResource(R.string.choose_currency),
             subtitle = when (slot) {
-                CurrencySlot.SOURCE -> "מטבע המקור"
-                CurrencySlot.TARGET -> "מטבע היעד"
-                CurrencySlot.EXTRA_TARGET -> "מטבע נוסף"
+                CurrencySlot.SOURCE -> stringResource(R.string.slot_source)
+                CurrencySlot.TARGET -> stringResource(R.string.slot_target)
+                CurrencySlot.EXTRA_TARGET -> stringResource(R.string.slot_extra)
             },
-            navigation = { RoundIconButton(Icons.AutoMirrored.Rounded.ArrowBack, "חזרה", onClose) },
+            navigation = { RoundIconButton(Icons.AutoMirrored.Rounded.ArrowBack, stringResource(R.string.back), onClose) },
             action = if (slot == CurrencySlot.EXTRA_TARGET && currentCode != null) {
-                { RoundIconButton(Icons.Rounded.DeleteOutline, "הסרת המטבע הנוסף", onRemove) }
+                { RoundIconButton(Icons.Rounded.DeleteOutline, stringResource(R.string.remove_extra_currency), onRemove) }
             } else {
                 null
             }
@@ -122,7 +130,7 @@ fun CurrencySelector(
             verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
             if (query.isEmpty() && recents.isNotEmpty()) {
-                item(key = "recent-label") { SectionLabel("בשימוש לאחרונה") }
+                item(key = "recent-label") { SectionLabel(stringResource(R.string.recently_used)) }
                 item(key = "recent-row") {
                     Row(
                         modifier = Modifier
@@ -136,7 +144,7 @@ fun CurrencySelector(
                     }
                 }
                 item(key = "all-label") {
-                    SectionLabel("כל המטבעות", modifier = Modifier.padding(top = 8.dp))
+                    SectionLabel(stringResource(R.string.all_currencies), modifier = Modifier.padding(top = 8.dp))
                 }
             }
 
@@ -158,7 +166,7 @@ fun CurrencySelector(
             if (filtered.isEmpty()) {
                 item(key = "empty") {
                     Text(
-                        text = "לא נמצאו מטבעות עבור \"$query\"",
+                        text = stringResource(R.string.no_results, query),
                         style = MaterialTheme.typography.bodyLarge,
                         color = palette.inkMuted,
                         modifier = Modifier
@@ -187,7 +195,7 @@ private fun SearchField(query: String, onQueryChange: (String) -> Unit) {
         Spacer(Modifier.width(10.dp))
         Box(modifier = Modifier.weight(1f), contentAlignment = Alignment.CenterStart) {
             if (query.isEmpty()) {
-                Text("חיפוש לפי מדינה, שם או קוד", style = MaterialTheme.typography.bodyLarge, color = palette.inkMuted)
+                Text(stringResource(R.string.search_hint), style = MaterialTheme.typography.bodyLarge, color = palette.inkMuted)
             }
             BasicTextField(
                 value = query,
@@ -201,7 +209,7 @@ private fun SearchField(query: String, onQueryChange: (String) -> Unit) {
         if (query.isNotEmpty()) {
             Icon(
                 Icons.Rounded.Close,
-                contentDescription = "ניקוי חיפוש",
+                contentDescription = stringResource(R.string.clear_search),
                 tint = palette.inkMuted,
                 modifier = Modifier
                     .clip(CircleShape)
@@ -251,7 +259,7 @@ private fun CurrencyListItem(code: String, rateText: String?, selected: Boolean,
         Spacer(Modifier.width(12.dp))
         Column(modifier = Modifier.weight(1f)) {
             Text(
-                text = info.hebrewName,
+                text = currencyName(code, LocalAppLocale.current),
                 style = MaterialTheme.typography.titleMedium,
                 color = palette.ink,
                 maxLines = 1,
@@ -272,7 +280,7 @@ private fun CurrencyListItem(code: String, rateText: String?, selected: Boolean,
                     .background(palette.accent),
                 contentAlignment = Alignment.Center
             ) {
-                Icon(Icons.Rounded.Check, contentDescription = "נבחר", tint = palette.onAccent, modifier = Modifier.size(18.dp))
+                Icon(Icons.Rounded.Check, contentDescription = stringResource(R.string.selected), tint = palette.onAccent, modifier = Modifier.size(18.dp))
             }
         } else if (rateText != null) {
             Text(

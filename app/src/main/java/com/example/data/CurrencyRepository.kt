@@ -1,6 +1,7 @@
 package com.example.data
 
 import android.content.Context
+import com.example.utils.AppLanguage
 import androidx.room.Room
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
@@ -41,6 +42,10 @@ class CurrencyRepository(
 
     private val _autoUpdate = MutableStateFlow(readAutoUpdate())
     val autoUpdate: StateFlow<AutoUpdateSettings> = _autoUpdate.asStateFlow()
+
+    private val _language = MutableStateFlow(prefs.getString(AppLanguage.KEY, AppLanguage.DEFAULT) ?: AppLanguage.DEFAULT)
+    /** App UI language: "he", "en", "es" or "system". */
+    val language: StateFlow<String> = _language.asStateFlow()
 
     private val _checkAppUpdates = MutableStateFlow(prefs.getBoolean("check_app_updates", true))
     /** Look for a new app version on GitHub every time the app opens. */
@@ -85,6 +90,12 @@ class CurrencyRepository(
             .putBoolean("refresh_on_open", settings.refreshOnOpen)
             .apply()
         _autoUpdate.value = settings
+    }
+
+    fun setLanguage(language: String) {
+        // commit() so the activity recreated right after reads the new value.
+        prefs.edit().putString(AppLanguage.KEY, language).commit()
+        _language.value = language
     }
 
     fun setCheckAppUpdates(enabled: Boolean) {

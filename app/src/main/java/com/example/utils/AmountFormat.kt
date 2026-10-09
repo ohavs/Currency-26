@@ -60,18 +60,26 @@ fun applyKeypadKey(current: String, key: String): String {
     }
 }
 
-/** "היום 15:28" / "אתמול 09:10" / "20.01 15:28"; null when rates were never downloaded. */
-fun formatUpdatedAt(timestamp: Long, now: Long = System.currentTimeMillis()): String? {
+/**
+ * "today 15:28" / "yesterday 09:10" / "20.01 15:28" (the day words come from [todayFormat] / [yesterdayFormat],
+ * e.g. "today %1$s"); null when rates were never downloaded.
+ */
+fun formatUpdatedAt(
+    timestamp: Long,
+    todayFormat: String,
+    yesterdayFormat: String,
+    now: Long = System.currentTimeMillis(),
+): String? {
     if (timestamp <= 0L) return null
-    val time = SimpleDateFormat("HH:mm", Locale.getDefault()).format(Date(timestamp))
+    val time = SimpleDateFormat("HH:mm", Locale.US).format(Date(timestamp))
     val then = Calendar.getInstance().apply { timeInMillis = timestamp }
     val today = Calendar.getInstance().apply { timeInMillis = now }
     fun Calendar.sameDayAs(other: Calendar) =
         get(Calendar.YEAR) == other.get(Calendar.YEAR) && get(Calendar.DAY_OF_YEAR) == other.get(Calendar.DAY_OF_YEAR)
     val yesterday = (today.clone() as Calendar).apply { add(Calendar.DAY_OF_YEAR, -1) }
     return when {
-        then.sameDayAs(today) -> "היום $time"
-        then.sameDayAs(yesterday) -> "אתמול $time"
-        else -> "${SimpleDateFormat("dd.MM", Locale.getDefault()).format(Date(timestamp))} $time"
+        then.sameDayAs(today) -> String.format(todayFormat, time)
+        then.sameDayAs(yesterday) -> String.format(yesterdayFormat, time)
+        else -> "${SimpleDateFormat("dd.MM", Locale.US).format(Date(timestamp))} $time"
     }
 }

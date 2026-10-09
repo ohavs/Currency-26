@@ -40,6 +40,31 @@ fun getCountryName(code: String): String {
     return if (name.isNotBlank() && !name.equals(region, ignoreCase = true)) name else getCurrencyInfo(code).hebrewName
 }
 
+private fun java.util.Locale.isHebrew() = language == "he" || language == "iw"
+
+/** Currency name in the UI language, e.g. USD -> "דולר אמריקאי" / "US Dollar" / "Dólar estadounidense". */
+fun currencyName(code: String, locale: java.util.Locale): String {
+    if (locale.isHebrew()) return getCurrencyInfo(code).hebrewName
+    val name = try {
+        java.util.Currency.getInstance(code).getDisplayName(locale)
+    } catch (e: Exception) {
+        code
+    }
+    return name.replaceFirstChar { if (it.isLowerCase()) it.titlecase(locale) else it.toString() }
+}
+
+/** Country (or region) of a currency in the UI language, e.g. USD -> "ארצות הברית" / "United States" / "Estados Unidos". */
+fun countryName(code: String, locale: java.util.Locale): String {
+    if (locale.isHebrew()) return getCountryName(code)
+    val region = if (code.equals("EUR", ignoreCase = true)) "EU" else code.take(2).uppercase()
+    val name = try {
+        java.util.Locale.Builder().setRegion(region).build().getDisplayCountry(locale)
+    } catch (e: Exception) {
+        ""
+    }
+    return if (name.isNotBlank() && !name.equals(region, ignoreCase = true)) name else currencyName(code, locale)
+}
+
 val currencyMap = mapOf(
     "USD" to CurrencyInfo("USD", "דולר אמריקאי", "🇺🇸", "$", listOf("ארצות הברית", "ארה\"ב", "דולר", "אמריקה")),
     "ILS" to CurrencyInfo("ILS", "שקל חדש", "🇮🇱", "₪", listOf("ישראל", "שקל", "שקלים", "ארץ")),
