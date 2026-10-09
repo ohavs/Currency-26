@@ -7,6 +7,8 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.gestures.detectDragGesturesAfterLongPress
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -19,6 +21,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawingPadding
 import androidx.compose.foundation.layout.size
@@ -41,13 +44,22 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateMapOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.rotate
+import androidx.compose.ui.geometry.Rect
+import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.layout.boundsInParent
+import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalHapticFeedback
@@ -62,6 +74,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.zIndex
 import com.example.data.CurrencySlot
 import com.example.ui.theme.AmountTextStyle
 import com.example.ui.theme.LocalPalette
@@ -105,6 +118,7 @@ fun CalculatorScreen(viewModel: MainViewModel) {
                     AppScreen.Calculator -> CalculatorContent(
                         state = state,
                         onSwap = viewModel::swapCurrencies,
+                        onSwapSlots = viewModel::swapSlots,
                         onCurrencyClick = viewModel::openCurrencySelector,
                         onKeypad = viewModel::onKeypadPress,
                         onOpenSettings = viewModel::openSettings,
@@ -161,6 +175,7 @@ fun CalculatorContent(
     appUpdate: AppUpdateState? = null,
     onStartAppUpdate: () -> Unit = {},
     onDismissAppUpdate: () -> Unit = {},
+    onSwapSlots: (CurrencySlot, CurrencySlot) -> Unit = { _, _ -> },
 ) {
     val updatedAt = formatUpdatedAt(state.lastUpdateTimestamp)
     val subtitle = when {
@@ -199,26 +214,24 @@ fun CalculatorContent(
 
         Spacer(Modifier.height(4.dp))
 
-        CurrencyPair(
-            sourceCode = state.sourceCurrency,
-            sourceAmount = formatAmountInput(state.sourceAmountRaw),
-            targetCode = state.targetCurrency,
-            targetAmount = formatAmount(state.targetAmount),
-            onSwap = onSwap,
-            onCurrencyClick = onCurrencyClick
-        )
-
+        val palette = LocalPalette.current
         val extraCode = state.extraTargetCurrency
         val extraAmount = state.extraTargetAmount
-        if (extraCode != null && extraAmount != null) {
-            Spacer(Modifier.height(6.dp))
-            CurrencyRow(
-                code = extraCode,
-                amount = formatAmount(extraAmount),
-                cardColor = LocalPalette.current.highlightSoft,
-                badgeColor = LocalPalette.current.highlight,
-                onClick = { onCurrencyClick(CurrencySlot.EXTRA_TARGET) }
-            )
+        val entries = buildList {
+            add(StackEntry(CurrencySlot.SOURCE, state.sourceCurrency, formatAmountInput(state.sourceAmountRaw), palette.card, palette.cardSoft))
+            add(StackEntry(CurrencySlot.TARGET, state.targetCurrency, formatAmount(state.targetAmount), palette.highlight, palette.highlightSoft))
+            if (extraCode != null && extraAmount != null) {
+                add(StackEntry(CurrencySlot.EXTRA_TARGET, extraCode, formatAmount(extraAmount), palette.highlightSoft, palette.highlight))
+            }
+        }
+        CurrencyStack(
+            entries = entries,
+            onSwap = onSwap,
+            onCurrencyClick = onCurrencyClick,
+            onSwapSlots = onSwapSlots
+        )
+
+        if (extraCode != null) {
             Spacer(Modifier.height(14.dp))
         } else {
             AddCurrencyButton(onClick = { onCurrencyClick(CurrencySlot.EXTRA_TARGET) })
@@ -293,59 +306,135 @@ private fun UpdateBanner(versionName: String, progress: Float?, onUpdate: () -> 
     }
 }
 
-/** Source and target cards, one row each, with the swap button sitting in the gap between them. */
+private val RowHeight = 80.dp
+private val RowGap = 6.dp
+private val RowShape = RoundedCornerShape(26.dp)
+
+private data class StackEntry(
+    val slot: CurrencySlot,
+    val code: String,
+    val amount: String,
+    val cardColor: Color,
+    val badgeColor: Color,
+)
+
+/**
+ * The currency rows, one per slot, with the swap button in the gap under the source.
+ * Long-press a row and drag it onto another one to swap the two currencies.
+ */
 @Composable
-private fun CurrencyPair(
-    sourceCode: String,
-    sourceAmount: String,
-    targetCode: String,
-    targetAmount: String,
+private fun CurrencyStack(
+    entries: List<StackEntry>,
     onSwap: () -> Unit,
     onCurrencyClick: (CurrencySlot) -> Unit,
+    onSwapSlots: (CurrencySlot, CurrencySlot) -> Unit,
 ) {
     val palette = LocalPalette.current
+    val haptics = LocalHapticFeedback.current
     var turns by remember { mutableIntStateOf(0) }
     val rotation by animateFloatAsState(turns * 180f, label = "swap")
 
+    // Drag-to-swap: the lifted row, how far it moved, and the row it currently hovers over.
+    var dragging by remember { mutableStateOf<CurrencySlot?>(null) }
+    var dragOffset by remember { mutableFloatStateOf(0f) }
+    var hover by remember { mutableStateOf<CurrencySlot?>(null) }
+    val bounds = remember { mutableStateMapOf<CurrencySlot, Rect>() }
+    val visibleSlots by rememberUpdatedState(entries.map { it.slot })
+    val currentOnSwapSlots by rememberUpdatedState(onSwapSlots)
+
     Box(modifier = Modifier.fillMaxWidth()) {
-        Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
-            CurrencyRow(
-                code = sourceCode,
-                amount = sourceAmount,
-                cardColor = palette.card,
-                badgeColor = palette.cardSoft,
-                onClick = { onCurrencyClick(CurrencySlot.SOURCE) }
-            )
-            CurrencyRow(
-                code = targetCode,
-                amount = targetAmount,
-                cardColor = palette.highlight,
-                badgeColor = palette.highlightSoft,
-                onClick = { onCurrencyClick(CurrencySlot.TARGET) }
-            )
+        Column(verticalArrangement = Arrangement.spacedBy(RowGap)) {
+            entries.forEach { entry ->
+                val slot = entry.slot
+                val isDragged = dragging == slot
+                val isHover = hover == slot
+                val scale by animateFloatAsState(
+                    targetValue = when {
+                        isDragged -> 1.03f
+                        isHover -> 0.97f
+                        else -> 1f
+                    },
+                    label = "rowScale"
+                )
+                CurrencyRow(
+                    code = entry.code,
+                    amount = entry.amount,
+                    cardColor = entry.cardColor,
+                    badgeColor = entry.badgeColor,
+                    highlighted = isHover,
+                    onClick = { onCurrencyClick(slot) },
+                    modifier = Modifier
+                        .onGloballyPositioned { bounds[slot] = it.boundsInParent() }
+                        .zIndex(if (isDragged) 1f else 0f)
+                        .graphicsLayer {
+                            translationY = if (isDragged) dragOffset else 0f
+                            scaleX = scale
+                            scaleY = scale
+                            shadowElevation = if (isDragged) 16.dp.toPx() else 0f
+                            shape = RowShape
+                        }
+                        .pointerInput(slot) {
+                            detectDragGesturesAfterLongPress(
+                                onDragStart = {
+                                    dragging = slot
+                                    dragOffset = 0f
+                                    hover = null
+                                    haptics.performHapticFeedback(HapticFeedbackType.LongPress)
+                                },
+                                onDrag = { change, amount ->
+                                    change.consume()
+                                    dragOffset += amount.y
+                                    val centerY = (bounds[slot]?.center?.y ?: 0f) + dragOffset
+                                    val over = visibleSlots.firstOrNull { other ->
+                                        other != slot && bounds[other]?.let { centerY in it.top..it.bottom } == true
+                                    }
+                                    if (over != hover) {
+                                        hover = over
+                                        if (over != null) haptics.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+                                    }
+                                },
+                                onDragEnd = {
+                                    val target = hover
+                                    dragging = null
+                                    dragOffset = 0f
+                                    hover = null
+                                    if (target != null) currentOnSwapSlots(slot, target)
+                                },
+                                onDragCancel = {
+                                    dragging = null
+                                    dragOffset = 0f
+                                    hover = null
+                                }
+                            )
+                        }
+                )
+            }
         }
-        // Background-colored ring makes the button look cut into both cards.
-        Box(
-            modifier = Modifier
-                .align(Alignment.Center)
-                .size(50.dp)
-                .clip(RoundedCornerShape(19.dp))
-                .background(palette.background)
-                .padding(4.dp)
-                .clip(RoundedCornerShape(15.dp))
-                .background(palette.accent)
-                .clickable(role = Role.Button, onClickLabel = "החלפת מטבעות") {
-                    turns++
-                    onSwap()
-                },
-            contentAlignment = Alignment.Center
-        ) {
-            Icon(
-                Icons.Rounded.SwapVert,
-                contentDescription = "החלפת מטבעות",
-                tint = palette.onAccent,
-                modifier = Modifier.rotate(rotation)
-            )
+        // Background-colored ring makes the button look cut into the first two cards.
+        if (dragging == null) {
+            Box(
+                modifier = Modifier
+                    .align(Alignment.TopCenter)
+                    .offset(y = RowHeight + RowGap / 2 - 25.dp)
+                    .size(50.dp)
+                    .clip(RoundedCornerShape(19.dp))
+                    .background(palette.background)
+                    .padding(4.dp)
+                    .clip(RoundedCornerShape(15.dp))
+                    .background(palette.accent)
+                    .clickable(role = Role.Button, onClickLabel = "החלפת מטבעות") {
+                        turns++
+                        onSwap()
+                    },
+                contentAlignment = Alignment.Center
+            ) {
+                Icon(
+                    Icons.Rounded.SwapVert,
+                    contentDescription = "החלפת מטבעות",
+                    tint = palette.onAccent,
+                    modifier = Modifier.rotate(rotation)
+                )
+            }
         }
     }
 }
@@ -358,14 +447,17 @@ private fun CurrencyRow(
     cardColor: Color,
     badgeColor: Color,
     onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+    highlighted: Boolean = false,
 ) {
     val palette = LocalPalette.current
     Row(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxWidth()
-            .height(80.dp)
-            .clip(RoundedCornerShape(26.dp))
+            .height(RowHeight)
+            .clip(RowShape)
             .background(cardColor)
+            .then(if (highlighted) Modifier.border(2.dp, palette.accent, RowShape) else Modifier)
             .padding(start = 6.dp, end = 18.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
