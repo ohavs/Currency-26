@@ -49,10 +49,13 @@ class CurrencyRepository(
     fun getSourceCurrency(): String = prefs.getString("source", "USD") ?: "USD"
     fun getTargetCurrency(): String = prefs.getString("target", "ILS") ?: "ILS"
     fun getAmount(): String = prefs.getString("amount", "1") ?: "1"
+    /** Optional second target currency; null when only one target is shown (the default). */
+    fun getExtraTargetCurrency(): String? = prefs.getString("target2", null)
 
     fun setSourceCurrency(code: String) { prefs.edit().putString("source", code).apply() }
     fun setTargetCurrency(code: String) { prefs.edit().putString("target", code).apply() }
     fun setAmount(amount: String) { prefs.edit().putString("amount", amount).apply() }
+    fun setExtraTargetCurrency(code: String?) { prefs.edit().putString("target2", code).apply() }
 
     fun setThemeMode(mode: String) {
         prefs.edit().putString("theme_mode", mode).apply()

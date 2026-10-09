@@ -16,6 +16,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
+import com.example.data.CurrencySlot
 import com.example.ui.CalculatorScreen
 import com.example.ui.MainViewModel
 import com.example.ui.theme.MyApplicationTheme
@@ -77,21 +78,26 @@ class MainActivity : ComponentActivity() {
 
     private fun handleWidgetIntent(intent: Intent?) {
         if (intent?.action == ACTION_PICK_CURRENCY) {
-            viewModel.openCurrencySelector(intent.getBooleanExtra(EXTRA_PICK_SOURCE, true))
+            val slot = intent.getStringExtra(EXTRA_PICK_SLOT)
+                ?.let { name -> CurrencySlot.values().firstOrNull { it.name == name } }
+                ?: if (intent.getBooleanExtra(EXTRA_PICK_SOURCE, true)) CurrencySlot.SOURCE else CurrencySlot.TARGET
+            viewModel.openCurrencySelector(slot)
         }
     }
 
     companion object {
         const val ACTION_PICK_CURRENCY = "com.example.action.PICK_CURRENCY"
-        const val EXTRA_PICK_SOURCE = "pick_source"
+        const val EXTRA_PICK_SLOT = "pick_slot"
+        /** Written by older widget versions. */
+        private const val EXTRA_PICK_SOURCE = "pick_source"
 
-        /** Opens the app straight on the currency picker for the source (or target) side. */
-        fun pickCurrencyIntent(context: Context, forSource: Boolean): Intent =
+        /** Opens the app straight on the currency picker for one of the displayed currencies. */
+        fun pickCurrencyIntent(context: Context, slot: CurrencySlot): Intent =
             Intent(context, MainActivity::class.java)
                 .setAction(ACTION_PICK_CURRENCY)
-                // Distinct data per side so the two widget PendingIntents never overwrite each other.
-                .setData(Uri.parse("currency26://pick/" + if (forSource) "source" else "target"))
-                .putExtra(EXTRA_PICK_SOURCE, forSource)
+                // Distinct data per slot so the widget PendingIntents never overwrite each other.
+                .setData(Uri.parse("currency26://pick/" + slot.name.lowercase()))
+                .putExtra(EXTRA_PICK_SLOT, slot.name)
                 .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP)
 
         fun openAppIntent(context: Context): Intent =

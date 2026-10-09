@@ -6,6 +6,7 @@ import com.example.BuildConfig
 import com.example.data.AppRelease
 import com.example.data.AutoUpdateSettings
 import com.example.data.CurrencyRepository
+import com.example.data.CurrencySlot
 import com.example.update.AppUpdater
 import com.example.utils.applyKeypadKey
 import com.example.utils.isNewerVersion
@@ -18,11 +19,13 @@ import kotlinx.coroutines.launch
 data class CalculatorState(
     val sourceCurrency: String = "USD",
     val targetCurrency: String = "ILS",
+    /** Optional second target; null = single conversion (the default). */
+    val extraTargetCurrency: String? = null,
     val sourceAmountRaw: String = "1",
     val rates: Map<String, Double> = emptyMap(),
     val recentCurrencies: List<String> = emptyList(),
     val searchQuery: String = "",
-    val selectingForSource: Boolean = true, // true if selecting source currency, false if target
+    val pickerSlot: CurrencySlot = CurrencySlot.SOURCE,
     val showCurrencySelector: Boolean = false,
     val showSettings: Boolean = false,
     val isRefreshing: Boolean = false,
@@ -32,16 +35,25 @@ data class CalculatorState(
     val sourceAmount: Double
         get() = sourceAmountRaw.toDoubleOrNull() ?: 0.0
 
+    /** How many [code] units one source unit buys. */
+    fun rateTo(code: String): Double = (rates[code] ?: 1.0) / (rates[sourceCurrency] ?: 1.0)
+
     /** How many target units one source unit buys. */
     val rate: Double
-        get() {
-            val sourceRate = rates[sourceCurrency] ?: 1.0
-            val targetRate = rates[targetCurrency] ?: 1.0
-            return targetRate / sourceRate
-        }
+        get() = rateTo(targetCurrency)
 
     val targetAmount: Double
         get() = sourceAmount * rate
+
+    val extraTargetAmount: Double?
+        get() = extraTargetCurrency?.let { sourceAmount * rateTo(it) }
+
+    /** The currency currently assigned to [slot], or null for an empty extra slot. */
+    fun currencyIn(slot: CurrencySlot): String? = when (slot) {
+        CurrencySlot.SOURCE -> sourceCurrency
+        CurrencySlot.TARGET -> targetCurrency
+        CurrencySlot.EXTRA_TARGET -> extraTargetCurrency
+    }
 }
 
 /** In-app update flow: check GitHub Releases -> download the APK -> hand it to the system installer. */
@@ -68,6 +80,7 @@ class MainViewModel(
     private val _state = MutableStateFlow(CalculatorState(
         sourceCurrency = repository.getSourceCurrency(),
         targetCurrency = repository.getTargetCurrency(),
+        extraTargetCurrency = repository.getExtraTargetCurrency(),
         sourceAmountRaw = repository.getAmount()
     ))
     val state: StateFlow<CalculatorState> = _state.asStateFlow()
@@ -192,6 +205,7 @@ class MainViewModel(
             it.copy(
                 sourceCurrency = repository.getSourceCurrency(),
                 targetCurrency = repository.getTargetCurrency(),
+                extraTargetCurrency = repository.getExtraTargetCurrency(),
                 sourceAmountRaw = repository.getAmount()
             )
         }
@@ -258,12 +272,12 @@ class MainViewModel(
         _state.update { it.copy(showSettings = false) }
     }
 
-    fun openCurrencySelector(isSource: Boolean) {
+    fun openCurrencySelector(slot: CurrencySlot) {
         _state.update {
             it.copy(
                 showCurrencySelector = true,
                 showSettings = false,
-                selectingForSource = isSource,
+                pickerSlot = slot,
                 searchQuery = ""
             )
         }
@@ -275,26 +289,43 @@ class MainViewModel(
 
     fun selectCurrency(currencyCode: String) {
         val current = _state.value
+        val slot = current.pickerSlot
+        val slots = CurrencySlot.values().associateWith { current.currencyIn(it) }.toMutableMap()
+        val ownCode = slots[slot]
+        // Picking a currency that is already shown elsewhere swaps the two instead of showing it twice.
+        val clash = slots.entries.firstOrNull { it.key != slot && it.value == currencyCode }?.key
+        if (clash != null) {
+            if (ownCode == null) {
+                closeCurrencySelector()
+                return
+            }
+            slots[clash] = ownCode
+        }
+        slots[slot] = currencyCode
+
         viewModelScope.launch {
             repository.markCurrencyUsed(currencyCode)
         }
-        // Picking the currency that is already on the other side swaps the pair instead of showing X -> X.
-        val otherSide = if (current.selectingForSource) current.targetCurrency else current.sourceCurrency
-        val ownSide = if (current.selectingForSource) current.sourceCurrency else current.targetCurrency
-        val newSource: String
-        val newTarget: String
-        if (current.selectingForSource) {
-            newSource = currencyCode
-            newTarget = if (currencyCode == otherSide) ownSide else current.targetCurrency
-        } else {
-            newTarget = currencyCode
-            newSource = if (currencyCode == otherSide) ownSide else current.sourceCurrency
-        }
+        val newSource = slots.getValue(CurrencySlot.SOURCE)!!
+        val newTarget = slots.getValue(CurrencySlot.TARGET)!!
+        val newExtra = slots[CurrencySlot.EXTRA_TARGET]
         repository.setSourceCurrency(newSource)
         repository.setTargetCurrency(newTarget)
+        repository.setExtraTargetCurrency(newExtra)
         _state.update {
-            it.copy(sourceCurrency = newSource, targetCurrency = newTarget, showCurrencySelector = false)
+            it.copy(
+                sourceCurrency = newSource,
+                targetCurrency = newTarget,
+                extraTargetCurrency = newExtra,
+                showCurrencySelector = false
+            )
         }
+        notifyWidgets()
+    }
+
+    fun removeExtraTarget() {
+        repository.setExtraTargetCurrency(null)
+        _state.update { it.copy(extraTargetCurrency = null, showCurrencySelector = false) }
         notifyWidgets()
     }
 

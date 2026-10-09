@@ -22,6 +22,9 @@ data class WidgetData(
     val sourceCurrency: String,
     val targetCurrency: String,
     val rate: Double,
+    /** Optional second target and its rate from the source currency. */
+    val extraTargetCurrency: String?,
+    val extraRate: Double,
     val themeMode: String,
     val colorTheme: String,
     val updatedAt: Long,
@@ -35,6 +38,9 @@ object WidgetStateKeys {
     val themeMode = stringPreferencesKey("theme_mode")
     val colorTheme = stringPreferencesKey("color_theme")
     val updatedAt = longPreferencesKey("updated_at")
+    /** Empty string = no extra currency. */
+    val extraTarget = stringPreferencesKey("target2")
+    val extraRate = doublePreferencesKey("extra_rate")
 
     /** Float rate written by older versions; read until the widget is refreshed once. */
     val legacyRate = floatPreferencesKey("rate")
@@ -45,6 +51,8 @@ fun Preferences.toWidgetData() = WidgetData(
     sourceCurrency = this[WidgetStateKeys.source] ?: "USD",
     targetCurrency = this[WidgetStateKeys.target] ?: "ILS",
     rate = this[WidgetStateKeys.rate] ?: this[WidgetStateKeys.legacyRate]?.toDouble() ?: 1.0,
+    extraTargetCurrency = this[WidgetStateKeys.extraTarget]?.takeIf { it.isNotEmpty() },
+    extraRate = this[WidgetStateKeys.extraRate] ?: 1.0,
     themeMode = this[WidgetStateKeys.themeMode] ?: "system",
     colorTheme = this[WidgetStateKeys.colorTheme] ?: "sage",
     updatedAt = this[WidgetStateKeys.updatedAt] ?: 0L,
@@ -58,6 +66,8 @@ private suspend fun writeWidgetState(context: Context, ids: List<GlanceId>, data
                 this[WidgetStateKeys.source] = data.sourceCurrency
                 this[WidgetStateKeys.target] = data.targetCurrency
                 this[WidgetStateKeys.rate] = data.rate
+                this[WidgetStateKeys.extraTarget] = data.extraTargetCurrency.orEmpty()
+                this[WidgetStateKeys.extraRate] = data.extraRate
                 this[WidgetStateKeys.themeMode] = data.themeMode
                 this[WidgetStateKeys.colorTheme] = data.colorTheme
                 this[WidgetStateKeys.updatedAt] = data.updatedAt
@@ -73,14 +83,18 @@ suspend fun updateWidgets(context: Context) {
 
         val sourceId = repository.getSourceCurrency()
         val targetId = repository.getTargetCurrency()
+        val extraId = repository.getExtraTargetCurrency()
         val sourceRate = repository.getRate(sourceId) ?: 1.0
         val targetRate = repository.getRate(targetId) ?: 1.0
+        val extraRate = extraId?.let { repository.getRate(it) } ?: 1.0
 
         val data = WidgetData(
             amount = repository.getAmount(),
             sourceCurrency = sourceId,
             targetCurrency = targetId,
             rate = targetRate / sourceRate,
+            extraTargetCurrency = extraId,
+            extraRate = extraRate / sourceRate,
             themeMode = repository.themeMode.value,
             colorTheme = repository.colorTheme.value,
             updatedAt = repository.getLastUpdateTimestamp(),
