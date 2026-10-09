@@ -11,19 +11,31 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
 import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import com.example.data.CurrencySlot
 import com.example.ui.CalculatorScreen
+import com.example.ui.LocalAppLocale
 import com.example.ui.MainViewModel
 import com.example.ui.theme.MyApplicationTheme
 import com.example.ui.theme.isDarkTheme
+import com.example.utils.AppLanguage
 
 
 class MainActivity : ComponentActivity() {
+    /** Language this activity instance was created with; a different choice in Settings recreates it. */
+    private var appliedLanguage: String = AppLanguage.DEFAULT
+
+    override fun attachBaseContext(newBase: Context) {
+        appliedLanguage = AppLanguage.stored(newBase)
+        super.attachBaseContext(AppLanguage.wrap(newBase, appliedLanguage))
+    }
+
     private val viewModel: MainViewModel by viewModels {
         object : ViewModelProvider.Factory {
             override fun <T : ViewModel> create(modelClass: Class<T>): T {
@@ -43,6 +55,10 @@ class MainActivity : ComponentActivity() {
         setContent {
             val themeMode by viewModel.themeMode.collectAsState()
             val colorThemeStr by viewModel.colorTheme.collectAsState()
+            val language by viewModel.language.collectAsState()
+            LaunchedEffect(language) {
+                if (language != appliedLanguage) recreate()
+            }
             val darkTheme = isDarkTheme(themeMode, isSystemInDarkTheme())
 
             // Status/navigation bar icons follow the in-app theme, not only the system one.
@@ -56,11 +72,13 @@ class MainActivity : ComponentActivity() {
                 onDispose {}
             }
 
-            MyApplicationTheme(
-                themeMode = themeMode,
-                colorThemeStr = colorThemeStr
-            ) {
-                CalculatorScreen(viewModel)
+            CompositionLocalProvider(LocalAppLocale provides resources.configuration.locales[0]) {
+                MyApplicationTheme(
+                    themeMode = themeMode,
+                    colorThemeStr = colorThemeStr
+                ) {
+                    CalculatorScreen(viewModel)
+                }
             }
         }
     }

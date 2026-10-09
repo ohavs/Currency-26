@@ -1,7 +1,6 @@
 package com.example.widget
 
 import android.content.Context
-import android.view.View
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -28,6 +27,7 @@ import androidx.glance.text.TextStyle
 import androidx.glance.unit.ColorProvider
 import com.example.MainActivity
 import com.example.data.CurrencySlot
+import com.example.utils.AppLanguage
 import com.example.utils.formatAmount
 import com.example.utils.formatAmountInput
 import com.example.utils.formatRate
@@ -49,8 +49,8 @@ class SmallCurrencyWidget : GlanceAppWidget() {
         val size = LocalSize.current
         val colors = WidgetColors(data.themeMode, data.colorTheme)
         val compact = size.height < 90.dp
-        // RemoteViews mirrors rows in RTL locales; used to keep the currency pills on the right.
-        val isRtl = context.resources.configuration.layoutDirection == View.LAYOUT_DIRECTION_RTL
+        // Pills on the reading side of the app language; the launcher mirrors rows when the device is RTL.
+        val pillFirst = AppLanguage.isRtl(data.language) == AppLanguage.isLauncherRtl()
         val amount = data.amount.toDoubleOrNull() ?: 0.0
         // A third line only when the widget is tall enough to stay readable.
         val extra = data.extraTargetCurrency?.takeIf { size.height >= 110.dp }
@@ -73,7 +73,7 @@ class SmallCurrencyWidget : GlanceAppWidget() {
                 pillBackground = colors.cardSoft,
                 colors = colors,
                 compact = compact,
-                isRtl = isRtl
+                pillFirst = pillFirst
             )
             Spacer(GlanceModifier.height(gap))
             CurrencyLine(
@@ -84,7 +84,7 @@ class SmallCurrencyWidget : GlanceAppWidget() {
                 pillBackground = colors.highlightSoft,
                 colors = colors,
                 compact = compact,
-                isRtl = isRtl
+                pillFirst = pillFirst
             )
             if (extra != null) {
                 Spacer(GlanceModifier.height(gap))
@@ -96,7 +96,7 @@ class SmallCurrencyWidget : GlanceAppWidget() {
                     pillBackground = colors.highlight,
                     colors = colors,
                     compact = compact,
-                    isRtl = isRtl
+                    pillFirst = pillFirst
                 )
             }
             if (size.height >= (if (extra != null) 190.dp else 150.dp)) {
@@ -111,7 +111,7 @@ class SmallCurrencyWidget : GlanceAppWidget() {
         }
     }
 
-    /** One currency row: amount on the left, flag/code pill (opens the currency picker) on the right. */
+    /** One currency row: amount on one side, flag/code pill (opens the currency picker) on the reading side. */
     @Composable
     private fun CurrencyLine(
         code: String,
@@ -121,7 +121,7 @@ class SmallCurrencyWidget : GlanceAppWidget() {
         pillBackground: ColorProvider,
         colors: WidgetColors,
         compact: Boolean,
-        isRtl: Boolean,
+        pillFirst: Boolean,
     ) {
         // In the smallest size the cards would not fit, so only the pills keep a background.
         val rowModifier = if (compact) {
@@ -130,7 +130,7 @@ class SmallCurrencyWidget : GlanceAppWidget() {
             GlanceModifier.fillMaxWidth().background(background).cornerRadius(16.dp).padding(5.dp)
         }
         Row(modifier = rowModifier, verticalAlignment = Alignment.CenterVertically) {
-            if (isRtl) {
+            if (pillFirst) {
                 CurrencyPill(code, slot, pillBackground, colors, compact)
                 Spacer(GlanceModifier.defaultWeight())
                 AmountText(amount, colors, compact)

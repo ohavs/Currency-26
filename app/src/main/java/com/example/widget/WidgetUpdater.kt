@@ -12,6 +12,7 @@ import androidx.glance.appwidget.state.updateAppWidgetState
 import androidx.glance.appwidget.updateAll
 import androidx.glance.state.PreferencesGlanceStateDefinition
 import com.example.CurrencyApp
+import com.example.utils.AppLanguage
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
@@ -28,6 +29,8 @@ data class WidgetData(
     val themeMode: String,
     val colorTheme: String,
     val updatedAt: Long,
+    /** App language ("he", "en", "es" or "system"): widget texts and which side the currencies sit on. */
+    val language: String,
 )
 
 object WidgetStateKeys {
@@ -41,6 +44,7 @@ object WidgetStateKeys {
     /** Empty string = no extra currency. */
     val extraTarget = stringPreferencesKey("target2")
     val extraRate = doublePreferencesKey("extra_rate")
+    val language = stringPreferencesKey("language")
 
     /** Float rate written by older versions; read until the widget is refreshed once. */
     val legacyRate = floatPreferencesKey("rate")
@@ -56,6 +60,7 @@ fun Preferences.toWidgetData() = WidgetData(
     themeMode = this[WidgetStateKeys.themeMode] ?: "system",
     colorTheme = this[WidgetStateKeys.colorTheme] ?: "sage",
     updatedAt = this[WidgetStateKeys.updatedAt] ?: 0L,
+    language = this[WidgetStateKeys.language] ?: AppLanguage.DEFAULT,
 )
 
 private suspend fun writeWidgetState(context: Context, ids: List<GlanceId>, data: WidgetData) {
@@ -71,6 +76,7 @@ private suspend fun writeWidgetState(context: Context, ids: List<GlanceId>, data
                 this[WidgetStateKeys.themeMode] = data.themeMode
                 this[WidgetStateKeys.colorTheme] = data.colorTheme
                 this[WidgetStateKeys.updatedAt] = data.updatedAt
+                this[WidgetStateKeys.language] = data.language
             }
         }
     }
@@ -98,6 +104,7 @@ suspend fun updateWidgets(context: Context) {
             themeMode = repository.themeMode.value,
             colorTheme = repository.colorTheme.value,
             updatedAt = repository.getLastUpdateTimestamp(),
+            language = repository.language.value,
         )
 
         val manager = GlanceAppWidgetManager(appContext)

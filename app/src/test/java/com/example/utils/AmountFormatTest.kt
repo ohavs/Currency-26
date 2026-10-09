@@ -63,4 +63,16 @@ class AmountFormatTest {
     assertEquals("0.27229", formatRate(0.27229))
     assertEquals("0.000271", formatRate(0.000271))
   }
+
+  @Test
+  fun `update time uses the given day words`() {
+    val now = java.util.Calendar.getInstance().apply { set(2026, 9, 9, 18, 0) }.timeInMillis
+    val todayAt = java.util.Calendar.getInstance().apply { set(2026, 9, 9, 15, 28) }.timeInMillis
+    val yesterdayAt = java.util.Calendar.getInstance().apply { set(2026, 9, 8, 9, 5) }.timeInMillis
+    val older = java.util.Calendar.getInstance().apply { set(2026, 0, 20, 7, 30) }.timeInMillis
+    assertEquals("today 15:28", formatUpdatedAt(todayAt, "today %1\$s", "yesterday %1\$s", now))
+    assertEquals("ayer 09:05", formatUpdatedAt(yesterdayAt, "hoy %1\$s", "ayer %1\$s", now))
+    assertEquals("20.01 07:30", formatUpdatedAt(older, "today %1\$s", "yesterday %1\$s", now))
+    assertEquals(null, formatUpdatedAt(0L, "today %1\$s", "yesterday %1\$s", now))
+  }
 }

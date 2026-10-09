@@ -1,6 +1,7 @@
 package com.example.ui
 
 import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
@@ -33,10 +34,14 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.Backspace
 import androidx.compose.material.icons.rounded.Add
 import androidx.compose.material.icons.rounded.Close
+import androidx.compose.material.icons.rounded.DeleteOutline
+import androidx.compose.material.icons.rounded.Edit
 import androidx.compose.material.icons.rounded.Refresh
 import androidx.compose.material.icons.rounded.SwapVert
 import androidx.compose.material.icons.rounded.SystemUpdate
 import androidx.compose.material.icons.rounded.Tune
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -64,6 +69,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.platform.LocalLayoutDirection
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
@@ -75,6 +81,7 @@ import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.zIndex
+import com.example.R
 import com.example.data.CurrencySlot
 import com.example.ui.theme.AmountTextStyle
 import com.example.ui.theme.LocalPalette
@@ -82,8 +89,9 @@ import com.example.utils.formatAmount
 import com.example.utils.formatAmountInput
 import com.example.utils.formatRate
 import com.example.utils.formatUpdatedAt
-import com.example.utils.getCountryName
+import com.example.utils.countryName
 import com.example.utils.getCurrencyInfo
+import kotlin.math.abs
 
 private enum class AppScreen { Calculator, Settings, Picker }
 
@@ -95,6 +103,7 @@ fun CalculatorScreen(viewModel: MainViewModel) {
     val autoUpdate by viewModel.autoUpdate.collectAsState()
     val appUpdate by viewModel.appUpdate.collectAsState()
     val checkAppUpdates by viewModel.checkAppUpdates.collectAsState()
+    val language by viewModel.language.collectAsState()
     val palette = LocalPalette.current
 
     val screen = when {
@@ -103,61 +112,63 @@ fun CalculatorScreen(viewModel: MainViewModel) {
         else -> AppScreen.Calculator
     }
 
-    CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Rtl) {
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .background(palette.background)
-        ) {
-            AnimatedContent(
-                targetState = screen,
-                transitionSpec = { fadeIn(tween(220)) togetherWith fadeOut(tween(150)) },
-                label = "screen"
-            ) { target ->
-                when (target) {
-                    AppScreen.Calculator -> CalculatorContent(
-                        state = state,
-                        onSwap = viewModel::swapCurrencies,
-                        onSwapSlots = viewModel::swapSlots,
-                        onCurrencyClick = viewModel::openCurrencySelector,
-                        onKeypad = viewModel::onKeypadPress,
-                        onOpenSettings = viewModel::openSettings,
-                        onRefresh = viewModel::refreshRates,
-                        appUpdate = appUpdate,
-                        onStartAppUpdate = viewModel::startAppUpdate,
-                        onDismissAppUpdate = viewModel::dismissUpdateBanner,
-                    )
-                    AppScreen.Settings -> SettingsScreen(
-                        themeMode = themeMode,
-                        colorTheme = colorTheme,
-                        autoUpdate = autoUpdate,
-                        lastUpdateTimestamp = state.lastUpdateTimestamp,
-                        isRefreshing = state.isRefreshing,
-                        lastRefreshFailed = state.lastRefreshFailed,
-                        canPinWidget = viewModel.canPinWidget,
-                        onClose = viewModel::closeSettings,
-                        onThemeModeChange = viewModel::setThemeMode,
-                        onColorThemeChange = viewModel::setColorTheme,
-                        onAutoUpdateEnabledChange = viewModel::setAutoUpdateEnabled,
-                        onIntervalChange = viewModel::setAutoUpdateInterval,
-                        onWifiOnlyChange = viewModel::setAutoUpdateWifiOnly,
-                        onRefreshOnOpenChange = viewModel::setRefreshOnOpen,
-                        onRefreshNow = viewModel::refreshRates,
-                        onAddWidget = viewModel::addWidgetToHomeScreen,
-                        appUpdate = appUpdate,
-                        checkAppUpdates = checkAppUpdates,
-                        onCheckAppUpdatesChange = viewModel::setCheckAppUpdates,
-                        onCheckForAppUpdate = viewModel::checkForAppUpdate,
-                        onStartAppUpdate = viewModel::startAppUpdate,
-                    )
-                    AppScreen.Picker -> CurrencySelector(
-                        state = state,
-                        onClose = viewModel::closeCurrencySelector,
-                        onSelect = viewModel::selectCurrency,
-                        onSearch = viewModel::updateSearchQuery,
-                        onRemove = viewModel::removeExtraTarget
-                    )
-                }
+    // Layout direction comes from the app language (RTL for Hebrew, LTR for English/Spanish).
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(palette.background)
+    ) {
+        AnimatedContent(
+            targetState = screen,
+            transitionSpec = { fadeIn(tween(220)) togetherWith fadeOut(tween(150)) },
+            label = "screen"
+        ) { target ->
+            when (target) {
+                AppScreen.Calculator -> CalculatorContent(
+                    state = state,
+                    onSwap = viewModel::swapCurrencies,
+                    onSwapSlots = viewModel::swapSlots,
+                    onCurrencyClick = viewModel::openCurrencySelector,
+                    onKeypad = viewModel::onKeypadPress,
+                    onOpenSettings = viewModel::openSettings,
+                    onRefresh = viewModel::refreshRates,
+                    appUpdate = appUpdate,
+                    onStartAppUpdate = viewModel::startAppUpdate,
+                    onDismissAppUpdate = viewModel::dismissUpdateBanner,
+                    onRemoveExtra = viewModel::removeExtraTarget,
+                )
+                AppScreen.Settings -> SettingsScreen(
+                    themeMode = themeMode,
+                    colorTheme = colorTheme,
+                    autoUpdate = autoUpdate,
+                    lastUpdateTimestamp = state.lastUpdateTimestamp,
+                    isRefreshing = state.isRefreshing,
+                    lastRefreshFailed = state.lastRefreshFailed,
+                    canPinWidget = viewModel.canPinWidget,
+                    onClose = viewModel::closeSettings,
+                    onThemeModeChange = viewModel::setThemeMode,
+                    onColorThemeChange = viewModel::setColorTheme,
+                    onAutoUpdateEnabledChange = viewModel::setAutoUpdateEnabled,
+                    onIntervalChange = viewModel::setAutoUpdateInterval,
+                    onWifiOnlyChange = viewModel::setAutoUpdateWifiOnly,
+                    onRefreshOnOpenChange = viewModel::setRefreshOnOpen,
+                    onRefreshNow = viewModel::refreshRates,
+                    onAddWidget = viewModel::addWidgetToHomeScreen,
+                    appUpdate = appUpdate,
+                    checkAppUpdates = checkAppUpdates,
+                    onCheckAppUpdatesChange = viewModel::setCheckAppUpdates,
+                    onCheckForAppUpdate = viewModel::checkForAppUpdate,
+                    onStartAppUpdate = viewModel::startAppUpdate,
+                    language = language,
+                    onLanguageChange = viewModel::setLanguage,
+                )
+                AppScreen.Picker -> CurrencySelector(
+                    state = state,
+                    onClose = viewModel::closeCurrencySelector,
+                    onSelect = viewModel::selectCurrency,
+                    onSearch = viewModel::updateSearchQuery,
+                    onRemove = viewModel::removeExtraTarget
+                )
             }
         }
     }
@@ -176,13 +187,18 @@ fun CalculatorContent(
     onStartAppUpdate: () -> Unit = {},
     onDismissAppUpdate: () -> Unit = {},
     onSwapSlots: (CurrencySlot, CurrencySlot) -> Unit = { _, _ -> },
+    onRemoveExtra: () -> Unit = {},
 ) {
-    val updatedAt = formatUpdatedAt(state.lastUpdateTimestamp)
+    val updatedAt = formatUpdatedAt(
+        state.lastUpdateTimestamp,
+        todayFormat = stringResource(R.string.today_at),
+        yesterdayFormat = stringResource(R.string.yesterday_at)
+    )
     val subtitle = when {
-        state.isRefreshing -> "מעדכן שערים…"
-        state.lastRefreshFailed && updatedAt != null -> "אין חיבור · עודכן $updatedAt"
-        state.lastRefreshFailed -> "אין חיבור לאינטרנט"
-        updatedAt != null -> "עודכן $updatedAt"
+        state.isRefreshing -> stringResource(R.string.refreshing_rates)
+        state.lastRefreshFailed && updatedAt != null -> stringResource(R.string.offline_updated_at, updatedAt)
+        state.lastRefreshFailed -> stringResource(R.string.offline)
+        updatedAt != null -> stringResource(R.string.updated_at, updatedAt)
         else -> null
     }
 
@@ -197,8 +213,10 @@ fun CalculatorContent(
             title = "1 ${state.sourceCurrency} = ${formatRate(state.rate)} ${state.targetCurrency}",
             titleStyle = MaterialTheme.typography.titleMedium.copy(textDirection = TextDirection.Ltr),
             subtitle = subtitle,
-            navigation = { RoundIconButton(Icons.Rounded.Tune, "הגדרות", onOpenSettings) },
-            action = { RoundIconButton(Icons.Rounded.Refresh, "עדכון שערים", onRefresh, loading = state.isRefreshing) }
+            navigation = { RoundIconButton(Icons.Rounded.Tune, stringResource(R.string.settings), onOpenSettings) },
+            action = {
+                RoundIconButton(Icons.Rounded.Refresh, stringResource(R.string.refresh_rates), onRefresh, loading = state.isRefreshing)
+            }
         )
 
         val release = appUpdate?.available
@@ -228,7 +246,8 @@ fun CalculatorContent(
             entries = entries,
             onSwap = onSwap,
             onCurrencyClick = onCurrencyClick,
-            onSwapSlots = onSwapSlots
+            onSwapSlots = onSwapSlots,
+            onRemoveExtra = onRemoveExtra
         )
 
         if (extraCode != null) {
@@ -271,7 +290,7 @@ private fun UpdateBanner(versionName: String, progress: Float?, onUpdate: () -> 
         Icon(Icons.Rounded.SystemUpdate, contentDescription = null, tint = palette.onAccent, modifier = Modifier.size(20.dp))
         Spacer(Modifier.width(10.dp))
         Text(
-            text = "גרסה $versionName זמינה",
+            text = stringResource(R.string.update_available, versionName),
             style = MaterialTheme.typography.labelLarge,
             color = palette.onAccent,
             maxLines = 1,
@@ -287,14 +306,14 @@ private fun UpdateBanner(versionName: String, progress: Float?, onUpdate: () -> 
             contentAlignment = Alignment.Center
         ) {
             Text(
-                text = if (progress != null) "${(progress * 100).toInt()}%" else "עדכון",
+                text = if (progress != null) "${(progress * 100).toInt()}%" else stringResource(R.string.update_action),
                 style = MaterialTheme.typography.labelLarge,
                 color = palette.accent
             )
         }
         Icon(
             Icons.Rounded.Close,
-            contentDescription = "סגירה",
+            contentDescription = stringResource(R.string.close),
             tint = palette.onAccent,
             modifier = Modifier
                 .padding(start = 4.dp)
@@ -320,7 +339,8 @@ private data class StackEntry(
 
 /**
  * The currency rows, one per slot, with the swap button in the gap under the source.
- * Long-press a row and drag it onto another one to swap the two currencies.
+ * Long-press a row and drag it onto another one to swap the two currencies. The extra currency can also be
+ * dragged onto a trash zone, or long-pressed and released for a small menu (change / remove).
  */
 @Composable
 private fun CurrencyStack(
@@ -328,21 +348,50 @@ private fun CurrencyStack(
     onSwap: () -> Unit,
     onCurrencyClick: (CurrencySlot) -> Unit,
     onSwapSlots: (CurrencySlot, CurrencySlot) -> Unit,
+    onRemoveExtra: () -> Unit,
 ) {
     val palette = LocalPalette.current
     val haptics = LocalHapticFeedback.current
     var turns by remember { mutableIntStateOf(0) }
     val rotation by animateFloatAsState(turns * 180f, label = "swap")
 
-    // Drag-to-swap: the lifted row, how far it moved, and the row it currently hovers over.
+    // Drag-to-swap: the lifted row, how far it moved, and the row (or trash zone) it currently hovers over.
     var dragging by remember { mutableStateOf<CurrencySlot?>(null) }
     var dragOffset by remember { mutableFloatStateOf(0f) }
+    var dragDistance by remember { mutableFloatStateOf(0f) }
     var hover by remember { mutableStateOf<CurrencySlot?>(null) }
+    var overTrash by remember { mutableStateOf(false) }
+    var menuSlot by remember { mutableStateOf<CurrencySlot?>(null) }
     val bounds = remember { mutableStateMapOf<CurrencySlot, Rect>() }
     val visibleSlots by rememberUpdatedState(entries.map { it.slot })
     val currentOnSwapSlots by rememberUpdatedState(onSwapSlots)
+    val currentOnRemoveExtra by rememberUpdatedState(onRemoveExtra)
+    // The trash zone appears right under the rows (over the keypad) while the extra currency is dragged.
+    val trashTop = RowHeight * entries.size + RowGap * (entries.size - 1) + 10.dp
+    val currentTrashTop by rememberUpdatedState(trashTop)
 
-    Box(modifier = Modifier.fillMaxWidth()) {
+    fun endDrag() {
+        dragging = null
+        dragOffset = 0f
+        dragDistance = 0f
+        hover = null
+        overTrash = false
+    }
+
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .zIndex(if (dragging != null) 1f else 0f)
+    ) {
+        // Drawn before the rows so the lifted row stays on top of it.
+        if (dragging == CurrencySlot.EXTRA_TARGET) {
+            TrashZone(
+                active = overTrash,
+                modifier = Modifier
+                    .align(Alignment.TopCenter)
+                    .offset(y = trashTop)
+            )
+        }
         Column(verticalArrangement = Arrangement.spacedBy(RowGap)) {
             entries.forEach { entry ->
                 val slot = entry.slot
@@ -350,19 +399,14 @@ private fun CurrencyStack(
                 val isHover = hover == slot
                 val scale by animateFloatAsState(
                     targetValue = when {
+                        isDragged && overTrash -> 0.92f
                         isDragged -> 1.03f
                         isHover -> 0.97f
                         else -> 1f
                     },
                     label = "rowScale"
                 )
-                CurrencyRow(
-                    code = entry.code,
-                    amount = entry.amount,
-                    cardColor = entry.cardColor,
-                    badgeColor = entry.badgeColor,
-                    highlighted = isHover,
-                    onClick = { onCurrencyClick(slot) },
+                Box(
                     modifier = Modifier
                         .onGloballyPositioned { bounds[slot] = it.boundsInParent() }
                         .zIndex(if (isDragged) 1f else 0f)
@@ -370,6 +414,7 @@ private fun CurrencyStack(
                             translationY = if (isDragged) dragOffset else 0f
                             scaleX = scale
                             scaleY = scale
+                            alpha = if (isDragged && overTrash) 0.7f else 1f
                             shadowElevation = if (isDragged) 16.dp.toPx() else 0f
                             shape = RowShape
                         }
@@ -378,36 +423,71 @@ private fun CurrencyStack(
                                 onDragStart = {
                                     dragging = slot
                                     dragOffset = 0f
+                                    dragDistance = 0f
                                     hover = null
+                                    overTrash = false
                                     haptics.performHapticFeedback(HapticFeedbackType.LongPress)
                                 },
                                 onDrag = { change, amount ->
                                     change.consume()
                                     dragOffset += amount.y
+                                    dragDistance += abs(amount.y)
                                     val centerY = (bounds[slot]?.center?.y ?: 0f) + dragOffset
-                                    val over = visibleSlots.firstOrNull { other ->
+                                    val trash = slot == CurrencySlot.EXTRA_TARGET && centerY >= currentTrashTop.toPx()
+                                    val over = if (trash) null else visibleSlots.firstOrNull { other ->
                                         other != slot && bounds[other]?.let { centerY in it.top..it.bottom } == true
                                     }
-                                    if (over != hover) {
+                                    if (over != hover || trash != overTrash) {
+                                        if (over != null || trash) haptics.performHapticFeedback(HapticFeedbackType.TextHandleMove)
                                         hover = over
-                                        if (over != null) haptics.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+                                        overTrash = trash
                                     }
                                 },
                                 onDragEnd = {
                                     val target = hover
-                                    dragging = null
-                                    dragOffset = 0f
-                                    hover = null
-                                    if (target != null) currentOnSwapSlots(slot, target)
+                                    val remove = overTrash
+                                    val barelyMoved = dragDistance < 12.dp.toPx()
+                                    endDrag()
+                                    when {
+                                        remove -> currentOnRemoveExtra()
+                                        target != null -> currentOnSwapSlots(slot, target)
+                                        // Long-press and release on the extra currency: offer change / remove.
+                                        barelyMoved && slot == CurrencySlot.EXTRA_TARGET -> menuSlot = slot
+                                    }
                                 },
-                                onDragCancel = {
-                                    dragging = null
-                                    dragOffset = 0f
-                                    hover = null
+                                onDragCancel = { endDrag() }
+                            )
+                        }
+                ) {
+                    CurrencyRow(
+                        code = entry.code,
+                        amount = entry.amount,
+                        cardColor = entry.cardColor,
+                        badgeColor = entry.badgeColor,
+                        highlighted = isHover,
+                        onClick = { onCurrencyClick(slot) }
+                    )
+                    if (slot == CurrencySlot.EXTRA_TARGET) {
+                        DropdownMenu(expanded = menuSlot == slot, onDismissRequest = { menuSlot = null }) {
+                            DropdownMenuItem(
+                                text = { Text(stringResource(R.string.change_currency)) },
+                                leadingIcon = { Icon(Icons.Rounded.Edit, contentDescription = null) },
+                                onClick = {
+                                    menuSlot = null
+                                    onCurrencyClick(slot)
+                                }
+                            )
+                            DropdownMenuItem(
+                                text = { Text(stringResource(R.string.remove_currency)) },
+                                leadingIcon = { Icon(Icons.Rounded.DeleteOutline, contentDescription = null) },
+                                onClick = {
+                                    menuSlot = null
+                                    onRemoveExtra()
                                 }
                             )
                         }
-                )
+                    }
+                }
             }
         }
         // Background-colored ring makes the button look cut into the first two cards.
@@ -422,7 +502,7 @@ private fun CurrencyStack(
                     .padding(4.dp)
                     .clip(RoundedCornerShape(15.dp))
                     .background(palette.accent)
-                    .clickable(role = Role.Button, onClickLabel = "החלפת מטבעות") {
+                    .clickable(role = Role.Button, onClickLabel = stringResource(R.string.swap_currencies)) {
                         turns++
                         onSwap()
                     },
@@ -430,12 +510,38 @@ private fun CurrencyStack(
             ) {
                 Icon(
                     Icons.Rounded.SwapVert,
-                    contentDescription = "החלפת מטבעות",
+                    contentDescription = stringResource(R.string.swap_currencies),
                     tint = palette.onAccent,
                     modifier = Modifier.rotate(rotation)
                 )
             }
         }
+    }
+}
+
+/** Drop target for removing the extra currency. */
+@Composable
+private fun TrashZone(active: Boolean, modifier: Modifier = Modifier) {
+    val palette = LocalPalette.current
+    val background by animateColorAsState(if (active) palette.accent else palette.card, label = "trash")
+    val content = if (active) palette.onAccent else palette.ink
+    Row(
+        modifier = modifier
+            .fillMaxWidth()
+            .height(56.dp)
+            .clip(RowShape)
+            .background(background)
+            .border(1.5.dp, palette.accent.copy(alpha = 0.4f), RowShape),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.Center
+    ) {
+        Icon(Icons.Rounded.DeleteOutline, contentDescription = null, tint = content)
+        Spacer(Modifier.width(8.dp))
+        Text(
+            text = stringResource(if (active) R.string.release_to_remove else R.string.drag_to_remove),
+            style = MaterialTheme.typography.labelLarge,
+            color = content
+        )
     }
 }
 
@@ -464,14 +570,14 @@ private fun CurrencyRow(
         Row(
             modifier = Modifier
                 .clip(RoundedCornerShape(20.dp))
-                .clickable(role = Role.Button, onClickLabel = "החלפת מטבע", onClick = onClick)
+                .clickable(role = Role.Button, onClickLabel = stringResource(R.string.change_currency), onClick = onClick)
                 .padding(horizontal = 8.dp, vertical = 8.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
             FlagBadge(getCurrencyInfo(code).flag, background = badgeColor, size = 40.dp)
             Spacer(Modifier.width(10.dp))
             Text(
-                text = getCountryName(code),
+                text = countryName(code, LocalAppLocale.current),
                 style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.SemiBold),
                 color = palette.ink,
                 maxLines = 1,
@@ -484,8 +590,8 @@ private fun CurrencyRow(
             text = amount,
             style = AmountTextStyle.copy(fontSize = 32.sp),
             color = palette.ink,
-            // Amount on the far side from the currency, like the original layout.
-            textAlign = TextAlign.Left,
+            // Amount on the far side from the currency (left in Hebrew, right in English/Spanish).
+            textAlign = if (LocalLayoutDirection.current == LayoutDirection.Rtl) TextAlign.Left else TextAlign.Right,
             modifier = Modifier.weight(1f)
         )
     }
@@ -509,7 +615,7 @@ private fun AddCurrencyButton(onClick: () -> Unit) {
         ) {
             Icon(Icons.Rounded.Add, contentDescription = null, tint = palette.inkMuted, modifier = Modifier.size(18.dp))
             Spacer(Modifier.width(6.dp))
-            Text("הוספת מטבע נוסף", style = MaterialTheme.typography.labelLarge, color = palette.inkMuted)
+            Text(stringResource(R.string.add_currency), style = MaterialTheme.typography.labelLarge, color = palette.inkMuted)
         }
     }
 }
@@ -590,7 +696,7 @@ private fun Keypad(onKey: (String) -> Unit, modifier: Modifier = Modifier) {
                         .fillMaxHeight(),
                     onClick = { press("⌫") }
                 ) {
-                    Icon(Icons.AutoMirrored.Rounded.Backspace, contentDescription = "מחיקה", tint = palette.ink)
+                    Icon(Icons.AutoMirrored.Rounded.Backspace, contentDescription = stringResource(R.string.backspace), tint = palette.ink)
                 }
             }
             digitRows.forEach { row ->

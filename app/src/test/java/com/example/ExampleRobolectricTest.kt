@@ -14,9 +14,22 @@ import org.robolectric.annotation.Config
 class ExampleRobolectricTest {
 
   @Test
-  fun `read string from context`() {
+  fun `english is the default for untranslated languages`() {
     val context = ApplicationProvider.getApplicationContext<Context>()
-    val appName = context.getString(R.string.app_name)
-    assertEquals("ממיר מטבעות", appName)
+    assertEquals("Currency Converter", context.getString(R.string.app_name))
+  }
+
+  @Test
+  @Config(qualifiers = "iw")
+  fun `hebrew strings`() {
+    val context = ApplicationProvider.getApplicationContext<Context>()
+    assertEquals("ממיר מטבעות", context.getString(R.string.app_name))
+  }
+
+  @Test
+  @Config(qualifiers = "es")
+  fun `spanish strings`() {
+    val context = ApplicationProvider.getApplicationContext<Context>()
+    assertEquals("Conversor de divisas", context.getString(R.string.app_name))
   }
 }

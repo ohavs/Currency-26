@@ -1,8 +1,8 @@
 package com.example.widget
 
 import android.content.Context
-import android.view.View
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
@@ -29,10 +29,13 @@ import androidx.glance.state.GlanceStateDefinition
 import androidx.glance.state.PreferencesGlanceStateDefinition
 import androidx.glance.text.FontWeight
 import androidx.glance.text.Text
+import androidx.glance.text.TextAlign
 import androidx.glance.text.TextStyle
 import androidx.glance.unit.ColorProvider
 import com.example.MainActivity
+import com.example.R
 import com.example.data.CurrencySlot
+import com.example.utils.AppLanguage
 import com.example.utils.applyKeypadKey
 import com.example.utils.formatAmount
 import com.example.utils.formatAmountInput
@@ -59,8 +62,17 @@ class LargeCurrencyWidget : GlanceAppWidget() {
         // An extra currency row costs keypad height, so the size tiers kick in earlier.
         val tiny = size.height < (if (hasExtra) 290.dp else 250.dp)
         val compact = size.height < (if (hasExtra) 380.dp else 330.dp)
-        // RemoteViews mirrors rows in RTL locales; used to keep currencies on the right and the keypad in 7-8-9 order.
-        val isRtl = context.resources.configuration.layoutDirection == View.LAYOUT_DIRECTION_RTL
+        // Currencies sit on the side the app language reads from (right for Hebrew, left for English/Spanish).
+        // The launcher mirrors rows when the *device* is RTL, so the emitted order accounts for both.
+        val appRtl = AppLanguage.isRtl(data.language)
+        val launcherRtl = AppLanguage.isLauncherRtl()
+        val pillFirst = appRtl == launcherRtl
+        val localized = remember(data.language) { AppLanguage.wrap(context, data.language) }
+        val updatedLabel = formatUpdatedAt(
+            data.updatedAt,
+            todayFormat = localized.getString(R.string.today_at),
+            yesterdayFormat = localized.getString(R.string.yesterday_at)
+        )?.let { localized.getString(R.string.updated_at, it) }
 
         val gap = if (tiny) 4.dp else 6.dp
         val amount = data.amount.toDoubleOrNull() ?: 0.0
@@ -81,11 +93,11 @@ class LargeCurrencyWidget : GlanceAppWidget() {
                 pillBackground = colors.cardSoft,
                 colors = colors,
                 tiny = tiny,
-                isRtl = isRtl,
+                pillFirst = pillFirst,
                 amountSize = amountSize
             )
             Spacer(GlanceModifier.height(gap))
-            RateRow(data = data, colors = colors, tiny = tiny, isRtl = isRtl)
+            RateRow(data = data, colors = colors, tiny = tiny, pillFirst = pillFirst, appRtl = appRtl, updatedLabel = updatedLabel)
             Spacer(GlanceModifier.height(gap))
             CurrencyCard(
                 code = data.targetCurrency,
@@ -95,7 +107,7 @@ class LargeCurrencyWidget : GlanceAppWidget() {
                 pillBackground = colors.highlightSoft,
                 colors = colors,
                 tiny = tiny,
-                isRtl = isRtl,
+                pillFirst = pillFirst,
                 amountSize = amountSize
             )
             val extra = data.extraTargetCurrency
@@ -109,14 +121,14 @@ class LargeCurrencyWidget : GlanceAppWidget() {
                     pillBackground = colors.highlight,
                     colors = colors,
                     tiny = tiny,
-                    isRtl = isRtl,
+                    pillFirst = pillFirst,
                     amountSize = amountSize
                 )
             }
             Spacer(GlanceModifier.height(gap + 4.dp))
             Keypad(
                 colors = colors,
-                isRtl = isRtl,
+                mirrored = launcherRtl,
                 gap = gap,
                 fontSize = if (tiny) 15.sp else if (compact) 19.sp else 24.sp,
                 modifier = GlanceModifier.fillMaxWidth().defaultWeight()
@@ -134,7 +146,7 @@ class LargeCurrencyWidget : GlanceAppWidget() {
         pillBackground: ColorProvider,
         colors: WidgetColors,
         tiny: Boolean,
-        isRtl: Boolean,
+        pillFirst: Boolean,
         amountSize: TextUnit,
     ) {
         Row(
@@ -145,8 +157,7 @@ class LargeCurrencyWidget : GlanceAppWidget() {
                 .padding(if (tiny) 5.dp else 8.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            // Row children are mirrored in RTL, so the order is flipped to keep the pill on the right.
-            if (isRtl) {
+            if (pillFirst) {
                 CurrencyPill(code, slot, pillBackground, colors, tiny)
                 Spacer(GlanceModifier.defaultWeight())
                 AmountText(amount, colors, amountSize)
@@ -188,16 +199,16 @@ class LargeCurrencyWidget : GlanceAppWidget() {
         )
     }
 
-    /** Live rate (tap opens the app) with the swap button on the right, under the currency pills. */
+    /** Live rate (tap opens the app) with the swap button on the currency-pill side. */
     @Composable
-    private fun RateRow(data: WidgetData, colors: WidgetColors, tiny: Boolean, isRtl: Boolean) {
+    private fun RateRow(data: WidgetData, colors: WidgetColors, tiny: Boolean, pillFirst: Boolean, appRtl: Boolean, updatedLabel: String?) {
         Row(modifier = GlanceModifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
-            if (isRtl) {
+            if (pillFirst) {
                 SwapButton(colors, tiny)
                 Spacer(GlanceModifier.width(6.dp))
-                RateBox(data, colors, tiny, GlanceModifier.defaultWeight())
+                RateBox(data, colors, tiny, appRtl, updatedLabel, GlanceModifier.defaultWeight())
             } else {
-                RateBox(data, colors, tiny, GlanceModifier.defaultWeight())
+                RateBox(data, colors, tiny, appRtl, updatedLabel, GlanceModifier.defaultWeight())
                 Spacer(GlanceModifier.width(6.dp))
                 SwapButton(colors, tiny)
             }
@@ -205,9 +216,17 @@ class LargeCurrencyWidget : GlanceAppWidget() {
     }
 
     @Composable
-    private fun RateBox(data: WidgetData, colors: WidgetColors, tiny: Boolean, modifier: GlanceModifier) {
+    private fun RateBox(
+        data: WidgetData,
+        colors: WidgetColors,
+        tiny: Boolean,
+        appRtl: Boolean,
+        updatedLabel: String?,
+        modifier: GlanceModifier,
+    ) {
         val context = LocalContext.current
-        val updatedAt = formatUpdatedAt(data.updatedAt)
+        // Text starts on the reading side of the app language, whatever the launcher direction.
+        val align = if (appRtl) TextAlign.Right else TextAlign.Left
         Column(
             modifier = modifier
                 .height(if (tiny) 34.dp else 44.dp)
@@ -219,14 +238,21 @@ class LargeCurrencyWidget : GlanceAppWidget() {
         ) {
             Text(
                 ltr("1 ${data.sourceCurrency} = ${formatRate(data.rate)} ${data.targetCurrency}"),
-                style = TextStyle(color = colors.ink, fontSize = if (tiny) 12.sp else 13.sp, fontWeight = FontWeight.Medium),
-                maxLines = 1
+                style = TextStyle(
+                    color = colors.ink,
+                    fontSize = if (tiny) 12.sp else 13.sp,
+                    fontWeight = FontWeight.Medium,
+                    textAlign = align
+                ),
+                maxLines = 1,
+                modifier = GlanceModifier.fillMaxWidth()
             )
-            if (!tiny && updatedAt != null) {
+            if (!tiny && updatedLabel != null) {
                 Text(
-                    "עודכן $updatedAt",
-                    style = TextStyle(color = colors.inkMuted, fontSize = 10.sp),
-                    maxLines = 1
+                    updatedLabel,
+                    style = TextStyle(color = colors.inkMuted, fontSize = 10.sp, textAlign = align),
+                    maxLines = 1,
+                    modifier = GlanceModifier.fillMaxWidth()
                 )
             }
         }
@@ -247,7 +273,7 @@ class LargeCurrencyWidget : GlanceAppWidget() {
     }
 
     @Composable
-    private fun Keypad(colors: WidgetColors, isRtl: Boolean, gap: Dp, fontSize: TextUnit, modifier: GlanceModifier) {
+    private fun Keypad(colors: WidgetColors, mirrored: Boolean, gap: Dp, fontSize: TextUnit, modifier: GlanceModifier) {
         val rows = listOf(
             listOf("7", "8", "9"),
             listOf("4", "5", "6"),
@@ -258,7 +284,8 @@ class LargeCurrencyWidget : GlanceAppWidget() {
             rows.forEachIndexed { rowIndex, row ->
                 if (rowIndex > 0) Spacer(GlanceModifier.height(gap))
                 Row(modifier = GlanceModifier.fillMaxWidth().defaultWeight()) {
-                    val ordered = if (isRtl) row.reversed() else row
+                    // Keep 7-8-9 left-to-right even when the launcher mirrors rows.
+                    val ordered = if (mirrored) row.reversed() else row
                     ordered.forEachIndexed { index, key ->
                         if (index > 0) Spacer(GlanceModifier.width(gap))
                         KeyButton(key, colors, fontSize)

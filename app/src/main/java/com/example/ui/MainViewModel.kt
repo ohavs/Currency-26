@@ -89,6 +89,7 @@ class MainViewModel(
     val colorTheme = repository.colorTheme
     val autoUpdate: StateFlow<AutoUpdateSettings> = repository.autoUpdate
     val checkAppUpdates: StateFlow<Boolean> = repository.checkAppUpdates
+    val language: StateFlow<String> = repository.language
 
     private val _appUpdate = MutableStateFlow(AppUpdateState(installedVersion = BuildConfig.VERSION_NAME))
     val appUpdate: StateFlow<AppUpdateState> = _appUpdate.asStateFlow()
@@ -213,6 +214,12 @@ class MainViewModel(
 
     fun setThemeMode(mode: String) {
         repository.setThemeMode(mode)
+        notifyWidgets()
+    }
+
+    fun setLanguage(language: String) {
+        if (language == repository.language.value) return
+        repository.setLanguage(language)
         notifyWidgets()
     }
 
