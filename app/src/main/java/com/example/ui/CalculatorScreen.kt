@@ -59,8 +59,14 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.draw.rotate
+import androidx.compose.ui.geometry.CornerRadius
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Rect
+import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.graphics.PathEffect
+import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.boundsInParent
@@ -89,7 +95,7 @@ import com.example.utils.formatAmount
 import com.example.utils.formatAmountInput
 import com.example.utils.formatRate
 import com.example.utils.formatUpdatedAt
-import com.example.utils.countryName
+import com.example.utils.currencyName
 import com.example.utils.getCurrencyInfo
 import kotlin.math.abs
 
@@ -239,7 +245,7 @@ fun CalculatorContent(
             add(StackEntry(CurrencySlot.SOURCE, state.sourceCurrency, formatAmountInput(state.sourceAmountRaw), palette.card, palette.cardSoft))
             add(StackEntry(CurrencySlot.TARGET, state.targetCurrency, formatAmount(state.targetAmount), palette.highlight, palette.highlightSoft))
             if (extraCode != null && extraAmount != null) {
-                add(StackEntry(CurrencySlot.EXTRA_TARGET, extraCode, formatAmount(extraAmount), palette.highlightSoft, palette.highlight))
+                add(StackEntry(CurrencySlot.EXTRA_TARGET, extraCode, formatAmount(extraAmount), palette.background, palette.cardSoft, removable = true))
             }
         }
         CurrencyStack(
@@ -335,6 +341,8 @@ private data class StackEntry(
     val amount: String,
     val cardColor: Color,
     val badgeColor: Color,
+    /** The optional extra currency: drawn as a light dashed card with its own remove button. */
+    val removable: Boolean = false,
 )
 
 /**
@@ -465,7 +473,8 @@ private fun CurrencyStack(
                         cardColor = entry.cardColor,
                         badgeColor = entry.badgeColor,
                         highlighted = isHover,
-                        onClick = { onCurrencyClick(slot) }
+                        onClick = { onCurrencyClick(slot) },
+                        onRemove = if (entry.removable) onRemoveExtra else null
                     )
                     if (slot == CurrencySlot.EXTRA_TARGET) {
                         DropdownMenu(expanded = menuSlot == slot, onDismissRequest = { menuSlot = null }) {
@@ -555,16 +564,20 @@ private fun CurrencyRow(
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
     highlighted: Boolean = false,
+    /** Set for the optional extra currency: shows a dashed "temporary" outline and a small remove button. */
+    onRemove: (() -> Unit)? = null,
 ) {
     val palette = LocalPalette.current
+    val info = getCurrencyInfo(code)
     Row(
         modifier = modifier
             .fillMaxWidth()
             .height(RowHeight)
             .clip(RowShape)
             .background(cardColor)
+            .then(if (onRemove != null) Modifier.dashedBorder(palette.inkMuted.copy(alpha = 0.5f)) else Modifier)
             .then(if (highlighted) Modifier.border(2.dp, palette.accent, RowShape) else Modifier)
-            .padding(start = 6.dp, end = 18.dp),
+            .padding(start = 6.dp, end = if (onRemove != null) 8.dp else 18.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
         Row(
@@ -574,16 +587,25 @@ private fun CurrencyRow(
                 .padding(horizontal = 8.dp, vertical = 8.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            FlagBadge(getCurrencyInfo(code).flag, background = badgeColor, size = 40.dp)
+            FlagBadge(info.flag, background = badgeColor, size = 40.dp)
             Spacer(Modifier.width(10.dp))
             Text(
-                text = countryName(code, LocalAppLocale.current),
+                text = currencyName(code, LocalAppLocale.current),
                 style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.SemiBold),
                 color = palette.ink,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
-                modifier = Modifier.widthIn(max = 130.dp)
+                modifier = Modifier.widthIn(max = 150.dp)
             )
+            if (info.symbol.isNotEmpty()) {
+                Spacer(Modifier.width(6.dp))
+                Text(
+                    text = info.symbol,
+                    style = MaterialTheme.typography.titleMedium,
+                    color = palette.inkMuted,
+                    maxLines = 1
+                )
+            }
         }
         Spacer(Modifier.width(12.dp))
         AutoSizeText(
@@ -594,7 +616,37 @@ private fun CurrencyRow(
             textAlign = if (LocalLayoutDirection.current == LayoutDirection.Rtl) TextAlign.Left else TextAlign.Right,
             modifier = Modifier.weight(1f)
         )
+        if (onRemove != null) {
+            Spacer(Modifier.width(6.dp))
+            Box(
+                modifier = Modifier
+                    .size(28.dp)
+                    .clip(CircleShape)
+                    .background(palette.cardSoft)
+                    .clickable(role = Role.Button, onClickLabel = stringResource(R.string.remove_currency), onClick = onRemove),
+                contentAlignment = Alignment.Center
+            ) {
+                Icon(
+                    Icons.Rounded.Close,
+                    contentDescription = stringResource(R.string.remove_currency),
+                    tint = palette.inkMuted,
+                    modifier = Modifier.size(16.dp)
+                )
+            }
+        }
     }
+}
+
+/** Dashed rounded outline marking the optional (temporary) extra currency. */
+private fun Modifier.dashedBorder(color: Color) = drawBehind {
+    val stroke = 1.5.dp.toPx()
+    drawRoundRect(
+        color = color,
+        topLeft = Offset(stroke / 2, stroke / 2),
+        size = Size(size.width - stroke, size.height - stroke),
+        cornerRadius = CornerRadius(26.dp.toPx() - stroke / 2),
+        style = Stroke(width = stroke, pathEffect = PathEffect.dashPathEffect(floatArrayOf(7.dp.toPx(), 5.dp.toPx())))
+    )
 }
 
 /** Light "+ add currency" link under the pair; a second target currency is optional. */

@@ -15,7 +15,7 @@ fun getCurrencyInfo(code: String): CurrencyInfo {
         "🌍"
     }
     
-    val symbol = try { java.util.Currency.getInstance(code).symbol } catch (e: Exception) { "" }
+    val symbol = nativeSymbol(code)
     val dynamicHebrewName = try { 
         val currency = java.util.Currency.getInstance(code)
         val name = currency.getDisplayName(java.util.Locale("he", "IL"))
@@ -38,6 +38,21 @@ fun getCountryName(code: String): String {
         ""
     }
     return if (name.isNotBlank() && !name.equals(region, ignoreCase = true)) name else getCurrencyInfo(code).hebrewName
+}
+
+private val nativeSymbolCache = java.util.concurrent.ConcurrentHashMap<String, String>()
+
+/** The symbol as written in the currency's home country (HUF -> "Ft"); "" when it has none besides its code. */
+private fun nativeSymbol(code: String): String = nativeSymbolCache.getOrPut(code.uppercase()) {
+    try {
+        val currency = java.util.Currency.getInstance(code.uppercase())
+        val region = code.take(2).uppercase()
+        val home = java.util.Locale.getAvailableLocales().firstOrNull { it.country == region }
+        val symbol = if (home != null) currency.getSymbol(home) else currency.symbol
+        if (symbol.equals(code, ignoreCase = true)) "" else symbol
+    } catch (e: Exception) {
+        ""
+    }
 }
 
 private fun java.util.Locale.isHebrew() = language == "he" || language == "iw"
