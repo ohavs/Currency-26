@@ -10,6 +10,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -21,6 +22,7 @@ import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawingPadding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -51,6 +53,8 @@ import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.rememberTextMeasurer
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDirection
 import androidx.compose.ui.text.style.TextOverflow
@@ -170,8 +174,10 @@ fun CalculatorContent(
             .safeDrawingPadding()
             .padding(horizontal = 16.dp)
     ) {
+        // The header carries the live rate instead of an app title - more useful and saves a row.
         AppTopBar(
-            title = "המרת מטבע",
+            title = "1 ${state.sourceCurrency} = ${formatRate(state.rate)} ${state.targetCurrency}",
+            titleStyle = MaterialTheme.typography.titleMedium.copy(textDirection = TextDirection.Ltr),
             subtitle = subtitle,
             navigation = { RoundIconButton(Icons.Rounded.Tune, "הגדרות", onOpenSettings) },
             action = { RoundIconButton(Icons.Rounded.Refresh, "עדכון שערים", onRefresh, loading = state.isRefreshing) }
@@ -188,31 +194,15 @@ fun CalculatorContent(
             Spacer(Modifier.height(8.dp))
         }
 
-        Spacer(Modifier.height(6.dp))
+        Spacer(Modifier.height(4.dp))
 
-        CurrencyBlock(
-            code = state.sourceCurrency,
-            caption = "ממטבע",
-            amount = formatAmountInput(state.sourceAmountRaw),
-            highlighted = false,
-            onClick = { onCurrencyClick(true) }
-        )
-
-        Spacer(Modifier.height(8.dp))
-
-        SwapRow(
-            rateText = "1 ${state.sourceCurrency} = ${formatRate(state.rate)} ${state.targetCurrency}",
-            onSwap = onSwap
-        )
-
-        Spacer(Modifier.height(8.dp))
-
-        CurrencyBlock(
-            code = state.targetCurrency,
-            caption = "למטבע",
-            amount = formatAmount(state.targetAmount),
-            highlighted = true,
-            onClick = { onCurrencyClick(false) }
+        CurrencyPair(
+            sourceCode = state.sourceCurrency,
+            sourceAmount = formatAmountInput(state.sourceAmountRaw),
+            targetCode = state.targetCurrency,
+            targetAmount = formatAmount(state.targetAmount),
+            onSwap = onSwap,
+            onCurrencyClick = onCurrencyClick
         )
 
         Spacer(Modifier.height(14.dp))
@@ -227,7 +217,7 @@ fun CalculatorContent(
                 onKey = onKeypad,
                 modifier = Modifier
                     .fillMaxWidth()
-                    .heightIn(max = 360.dp)
+                    .heightIn(max = 420.dp)
                     .fillMaxHeight()
             )
         }
@@ -286,104 +276,46 @@ private fun UpdateBanner(versionName: String, progress: Float?, onUpdate: () -> 
     }
 }
 
-/** Currency header card stacked on top of its amount card (reference: "USD" over "1250"). */
+/** Source and target cards, one row each, with the swap button sitting in the gap between them. */
 @Composable
-private fun CurrencyBlock(
-    code: String,
-    caption: String,
-    amount: String,
-    highlighted: Boolean,
-    onClick: () -> Unit,
+private fun CurrencyPair(
+    sourceCode: String,
+    sourceAmount: String,
+    targetCode: String,
+    targetAmount: String,
+    onSwap: () -> Unit,
+    onCurrencyClick: (Boolean) -> Unit,
 ) {
-    val palette = LocalPalette.current
-    val info = getCurrencyInfo(code)
-    val headerColor = if (highlighted) palette.highlight else palette.card
-    val bodyColor = if (highlighted) palette.highlightSoft else palette.cardSoft
-
-    Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .clip(RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp, bottomStart = 10.dp, bottomEnd = 10.dp))
-                .background(headerColor)
-                .clickable(role = Role.Button, onClickLabel = "בחירת מטבע", onClick = onClick)
-                .padding(horizontal = 14.dp, vertical = 10.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            FlagBadge(info.flag, background = bodyColor)
-            Spacer(Modifier.width(10.dp))
-            Text(code, style = CurrencyCodeTextStyle, color = palette.ink)
-            Icon(
-                Icons.Rounded.KeyboardArrowDown,
-                contentDescription = null,
-                tint = palette.inkMuted,
-                modifier = Modifier.size(22.dp)
-            )
-            Spacer(Modifier.weight(1f))
-            Column(horizontalAlignment = Alignment.End, modifier = Modifier.padding(start = 12.dp)) {
-                Text(caption, style = MaterialTheme.typography.labelMedium, color = palette.inkMuted)
-                Text(
-                    text = info.hebrewName,
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = palette.ink,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis
-                )
-            }
-        }
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .clip(RoundedCornerShape(topStart = 10.dp, topEnd = 10.dp, bottomStart = 24.dp, bottomEnd = 24.dp))
-                .background(bodyColor)
-                .padding(horizontal = 20.dp, vertical = 12.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Text(
-                text = amount,
-                style = AmountTextStyle.copy(fontSize = amountFontSize(amount)),
-                color = palette.ink,
-                // Right edge = reading start in Hebrew, lined up with the currency code above.
-                textAlign = TextAlign.Right,
-                maxLines = 1,
-                softWrap = false,
-                overflow = TextOverflow.Ellipsis,
-                modifier = Modifier.weight(1f)
-            )
-            Text(
-                text = info.symbol,
-                style = MaterialTheme.typography.titleMedium.copy(textDirection = TextDirection.Ltr),
-                color = palette.inkMuted,
-                maxLines = 1,
-                modifier = Modifier.padding(start = 12.dp)
-            )
-        }
-    }
-}
-
-private fun amountFontSize(text: String) = when {
-    text.length <= 9 -> 34.sp
-    text.length <= 12 -> 29.sp
-    text.length <= 15 -> 24.sp
-    else -> 20.sp
-}
-
-/** Small square swap button next to the live rate pill (reference: "⇅  $1=€0.919137"). */
-@Composable
-private fun SwapRow(rateText: String, onSwap: () -> Unit) {
     val palette = LocalPalette.current
     var turns by remember { mutableIntStateOf(0) }
     val rotation by animateFloatAsState(turns * 180f, label = "swap")
 
-    Row(
-        modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.spacedBy(8.dp),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
+    Box(modifier = Modifier.fillMaxWidth()) {
+        Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
+            CurrencyRow(
+                code = sourceCode,
+                amount = sourceAmount,
+                cardColor = palette.card,
+                chipColor = palette.cardSoft,
+                onClick = { onCurrencyClick(true) }
+            )
+            CurrencyRow(
+                code = targetCode,
+                amount = targetAmount,
+                cardColor = palette.highlight,
+                chipColor = palette.highlightSoft,
+                onClick = { onCurrencyClick(false) }
+            )
+        }
+        // Background-colored ring makes the button look cut into both cards.
         Box(
             modifier = Modifier
-                .size(52.dp)
-                .clip(RoundedCornerShape(18.dp))
+                .align(Alignment.Center)
+                .size(50.dp)
+                .clip(RoundedCornerShape(19.dp))
+                .background(palette.background)
+                .padding(4.dp)
+                .clip(RoundedCornerShape(15.dp))
                 .background(palette.accent)
                 .clickable(role = Role.Button, onClickLabel = "החלפת מטבעות") {
                     turns++
@@ -398,23 +330,101 @@ private fun SwapRow(rateText: String, onSwap: () -> Unit) {
                 modifier = Modifier.rotate(rotation)
             )
         }
-        Box(
+    }
+}
+
+/** One currency in a single row: tappable currency chip on one side, the amount on the other. */
+@Composable
+private fun CurrencyRow(
+    code: String,
+    amount: String,
+    cardColor: Color,
+    chipColor: Color,
+    onClick: () -> Unit,
+) {
+    val palette = LocalPalette.current
+    val info = getCurrencyInfo(code)
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(84.dp)
+            .clip(RoundedCornerShape(26.dp))
+            .background(cardColor)
+            .padding(start = 10.dp, end = 18.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Row(
             modifier = Modifier
-                .weight(1f)
-                .height(52.dp)
-                .clip(RoundedCornerShape(18.dp))
-                .background(palette.card)
-                .padding(horizontal = 18.dp),
-            contentAlignment = Alignment.CenterStart
+                .clip(RoundedCornerShape(20.dp))
+                .background(chipColor)
+                .clickable(role = Role.Button, onClickLabel = "בחירת מטבע", onClick = onClick)
+                .padding(start = 6.dp, end = 6.dp, top = 6.dp, bottom = 6.dp),
+            verticalAlignment = Alignment.CenterVertically
         ) {
-            Text(
-                text = rateText,
-                style = MaterialTheme.typography.titleSmall.copy(textDirection = TextDirection.Ltr),
-                color = palette.ink,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis
+            FlagBadge(info.flag, background = cardColor, size = 38.dp)
+            Spacer(Modifier.width(8.dp))
+            Column {
+                Text(code, style = CurrencyCodeTextStyle.copy(fontSize = 19.sp, lineHeight = 22.sp), color = palette.ink)
+                Text(
+                    text = info.hebrewName,
+                    style = MaterialTheme.typography.labelSmall,
+                    color = palette.inkMuted,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                    modifier = Modifier.widthIn(max = 92.dp)
+                )
+            }
+            Icon(
+                Icons.Rounded.KeyboardArrowDown,
+                contentDescription = null,
+                tint = palette.inkMuted,
+                modifier = Modifier.size(20.dp)
             )
         }
+        Spacer(Modifier.width(12.dp))
+        AutoSizeText(
+            text = amount,
+            style = AmountTextStyle.copy(fontSize = 32.sp),
+            color = palette.ink,
+            // Amount on the far side from the chip, like the original layout.
+            textAlign = TextAlign.Left,
+            modifier = Modifier.weight(1f)
+        )
+    }
+}
+
+/** Single-line text that shrinks its font (down to [minFontSize]) instead of cutting long amounts. */
+@Composable
+private fun AutoSizeText(
+    text: String,
+    style: TextStyle,
+    color: Color,
+    textAlign: TextAlign,
+    modifier: Modifier = Modifier,
+    minFontSize: Float = 16f,
+) {
+    BoxWithConstraints(modifier = modifier) {
+        val measurer = rememberTextMeasurer()
+        val maxWidth = constraints.maxWidth
+        val fontSize = remember(text, maxWidth, style) {
+            var size = style.fontSize.value
+            while (size > minFontSize &&
+                measurer.measure(text, style.copy(fontSize = size.sp), maxLines = 1, softWrap = false).size.width > maxWidth
+            ) {
+                size -= 1f
+            }
+            size.sp
+        }
+        Text(
+            text = text,
+            style = style.copy(fontSize = fontSize),
+            color = color,
+            textAlign = textAlign,
+            maxLines = 1,
+            softWrap = false,
+            overflow = TextOverflow.Ellipsis,
+            modifier = Modifier.fillMaxWidth()
+        )
     }
 }
 

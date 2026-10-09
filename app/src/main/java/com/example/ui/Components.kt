@@ -27,6 +27,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
@@ -42,6 +43,7 @@ fun AppTopBar(
     subtitle: String? = null,
     navigation: (@Composable () -> Unit)? = null,
     action: (@Composable () -> Unit)? = null,
+    titleStyle: TextStyle = MaterialTheme.typography.titleLarge,
 ) {
     val palette = LocalPalette.current
     Box(
@@ -60,9 +62,10 @@ fun AppTopBar(
         ) {
             Text(
                 text = title,
-                style = MaterialTheme.typography.titleLarge,
+                style = titleStyle,
                 color = palette.ink,
-                maxLines = 1
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
             )
             if (subtitle != null) {
                 Text(
