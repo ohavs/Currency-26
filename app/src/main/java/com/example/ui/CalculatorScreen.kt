@@ -22,12 +22,15 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawingPadding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.Backspace
+import androidx.compose.material.icons.rounded.Close
 import androidx.compose.material.icons.rounded.KeyboardArrowDown
 import androidx.compose.material.icons.rounded.Refresh
 import androidx.compose.material.icons.rounded.SwapVert
+import androidx.compose.material.icons.rounded.SystemUpdate
 import androidx.compose.material.icons.rounded.Tune
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -71,6 +74,8 @@ fun CalculatorScreen(viewModel: MainViewModel) {
     val themeMode by viewModel.themeMode.collectAsState()
     val colorTheme by viewModel.colorTheme.collectAsState()
     val autoUpdate by viewModel.autoUpdate.collectAsState()
+    val appUpdate by viewModel.appUpdate.collectAsState()
+    val checkAppUpdates by viewModel.checkAppUpdates.collectAsState()
     val palette = LocalPalette.current
 
     val screen = when {
@@ -98,6 +103,9 @@ fun CalculatorScreen(viewModel: MainViewModel) {
                         onKeypad = viewModel::onKeypadPress,
                         onOpenSettings = viewModel::openSettings,
                         onRefresh = viewModel::refreshRates,
+                        appUpdate = appUpdate,
+                        onStartAppUpdate = viewModel::startAppUpdate,
+                        onDismissAppUpdate = viewModel::dismissUpdateBanner,
                     )
                     AppScreen.Settings -> SettingsScreen(
                         themeMode = themeMode,
@@ -116,6 +124,11 @@ fun CalculatorScreen(viewModel: MainViewModel) {
                         onRefreshOnOpenChange = viewModel::setRefreshOnOpen,
                         onRefreshNow = viewModel::refreshRates,
                         onAddWidget = viewModel::addWidgetToHomeScreen,
+                        appUpdate = appUpdate,
+                        checkAppUpdates = checkAppUpdates,
+                        onCheckAppUpdatesChange = viewModel::setCheckAppUpdates,
+                        onCheckForAppUpdate = viewModel::checkForAppUpdate,
+                        onStartAppUpdate = viewModel::startAppUpdate,
                     )
                     AppScreen.Picker -> CurrencySelector(
                         state = state,
@@ -138,6 +151,9 @@ fun CalculatorContent(
     onOpenSettings: () -> Unit,
     onRefresh: () -> Unit,
     modifier: Modifier = Modifier,
+    appUpdate: AppUpdateState? = null,
+    onStartAppUpdate: () -> Unit = {},
+    onDismissAppUpdate: () -> Unit = {},
 ) {
     val updatedAt = formatUpdatedAt(state.lastUpdateTimestamp)
     val subtitle = when {
@@ -160,6 +176,17 @@ fun CalculatorContent(
             navigation = { RoundIconButton(Icons.Rounded.Tune, "הגדרות", onOpenSettings) },
             action = { RoundIconButton(Icons.Rounded.Refresh, "עדכון שערים", onRefresh, loading = state.isRefreshing) }
         )
+
+        val release = appUpdate?.available
+        if (appUpdate != null && release != null && !appUpdate.bannerDismissed) {
+            UpdateBanner(
+                versionName = release.versionName,
+                progress = appUpdate.downloadProgress,
+                onUpdate = onStartAppUpdate,
+                onDismiss = onDismissAppUpdate
+            )
+            Spacer(Modifier.height(8.dp))
+        }
 
         Spacer(Modifier.height(6.dp))
 
@@ -206,6 +233,56 @@ fun CalculatorContent(
         }
 
         Spacer(Modifier.height(12.dp))
+    }
+}
+
+/** "A new version is available" strip above the calculator. */
+@Composable
+private fun UpdateBanner(versionName: String, progress: Float?, onUpdate: () -> Unit, onDismiss: () -> Unit) {
+    val palette = LocalPalette.current
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(22.dp))
+            .background(palette.accent)
+            .padding(start = 16.dp, end = 6.dp, top = 6.dp, bottom = 6.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Icon(Icons.Rounded.SystemUpdate, contentDescription = null, tint = palette.onAccent, modifier = Modifier.size(20.dp))
+        Spacer(Modifier.width(10.dp))
+        Text(
+            text = "גרסה $versionName זמינה",
+            style = MaterialTheme.typography.labelLarge,
+            color = palette.onAccent,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis,
+            modifier = Modifier.weight(1f)
+        )
+        Box(
+            modifier = Modifier
+                .clip(RoundedCornerShape(16.dp))
+                .background(palette.onAccent)
+                .clickable(enabled = progress == null, role = Role.Button, onClick = onUpdate)
+                .padding(horizontal = 14.dp, vertical = 8.dp),
+            contentAlignment = Alignment.Center
+        ) {
+            Text(
+                text = if (progress != null) "${(progress * 100).toInt()}%" else "עדכון",
+                style = MaterialTheme.typography.labelLarge,
+                color = palette.accent
+            )
+        }
+        Icon(
+            Icons.Rounded.Close,
+            contentDescription = "סגירה",
+            tint = palette.onAccent,
+            modifier = Modifier
+                .padding(start = 4.dp)
+                .clip(CircleShape)
+                .clickable(role = Role.Button, onClick = onDismiss)
+                .padding(8.dp)
+                .size(18.dp)
+        )
     }
 }
 

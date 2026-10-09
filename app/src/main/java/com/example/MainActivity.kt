@@ -26,8 +26,9 @@ class MainActivity : ComponentActivity() {
     private val viewModel: MainViewModel by viewModels {
         object : ViewModelProvider.Factory {
             override fun <T : ViewModel> create(modelClass: Class<T>): T {
+                val app = application as CurrencyApp
                 @Suppress("UNCHECKED_CAST")
-                return MainViewModel((application as CurrencyApp).repository) as T
+                return MainViewModel(app.repository, app.appUpdater) as T
             }
         }
     }

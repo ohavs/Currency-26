@@ -10,17 +10,18 @@ android {
   compileSdk { version = release(36) { minorApiLevel = 1 } }
 
   defaultConfig {
-    applicationId = "com.aistudio.currencyconverter.lkhjqw"
+    applicationId = "com.ohav.currency"
     minSdk = 24
     targetSdk = 36
-    versionCode = 4
-    versionName = "4.0"
+    // CI passes these for every published release; local builds use the defaults.
+    versionCode = providers.gradleProperty("appVersionCode").orNull?.toInt() ?: 5
+    versionName = providers.gradleProperty("appVersionName").orNull ?: "5.0.0-dev"
 
     testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
   }
 
   signingConfigs {
-    // Release signing is optional: without the upload key the release APK is simply built unsigned.
+    // Optional private upload key; without it release builds fall back to the shared key below.
     val releaseKeystore = file(System.getenv("KEYSTORE_PATH") ?: "${rootDir}/my-upload-key.jks")
     if (releaseKeystore.exists()) {
       create("release") {
@@ -44,7 +45,8 @@ android {
       isCrunchPngs = false
       isMinifyEnabled = false
       proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
-      signingConfig = signingConfigs.findByName("release")
+      // Published releases use the shared key so the in-app updater can install them over each other.
+      signingConfig = signingConfigs.findByName("release") ?: signingConfigs.getByName("debugConfig")
     }
     debug {
       signingConfig = signingConfigs.getByName("debugConfig")
@@ -56,6 +58,7 @@ android {
   }
   buildFeatures {
     compose = true
+    buildConfig = true
   }
   testOptions { unitTests { isIncludeAndroidResources = true } }
 }

@@ -2,9 +2,14 @@ package com.example.ui
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.BuildConfig
+import com.example.data.AppRelease
 import com.example.data.AutoUpdateSettings
 import com.example.data.CurrencyRepository
+import com.example.update.AppUpdater
 import com.example.utils.applyKeypadKey
+import com.example.utils.isNewerVersion
+import java.io.File
 import com.example.widget.triggerWidgetUpdate
 import com.example.workers.RateUpdateScheduler
 import kotlinx.coroutines.flow.*
@@ -39,7 +44,27 @@ data class CalculatorState(
         get() = sourceAmount * rate
 }
 
-class MainViewModel(private val repository: CurrencyRepository) : ViewModel() {
+/** In-app update flow: check GitHub Releases -> download the APK -> hand it to the system installer. */
+data class AppUpdateState(
+    val installedVersion: String,
+    val checking: Boolean = false,
+    /** Checked at least once this session (to tell "up to date" from "unknown"). */
+    val checked: Boolean = false,
+    /** A newer release than the installed one, if any. */
+    val available: AppRelease? = null,
+    /** 0..1 while the APK is downloading. */
+    val downloadProgress: Float? = null,
+    val downloadedApk: File? = null,
+    val failed: Boolean = false,
+    /** The user was sent to allow installing updates from this app. */
+    val needsInstallPermission: Boolean = false,
+    val bannerDismissed: Boolean = false,
+)
+
+class MainViewModel(
+    private val repository: CurrencyRepository,
+    private val updater: AppUpdater,
+) : ViewModel() {
     private val _state = MutableStateFlow(CalculatorState(
         sourceCurrency = repository.getSourceCurrency(),
         targetCurrency = repository.getTargetCurrency(),
@@ -50,6 +75,10 @@ class MainViewModel(private val repository: CurrencyRepository) : ViewModel() {
     val themeMode = repository.themeMode
     val colorTheme = repository.colorTheme
     val autoUpdate: StateFlow<AutoUpdateSettings> = repository.autoUpdate
+    val checkAppUpdates: StateFlow<Boolean> = repository.checkAppUpdates
+
+    private val _appUpdate = MutableStateFlow(AppUpdateState(installedVersion = BuildConfig.VERSION_NAME))
+    val appUpdate: StateFlow<AppUpdateState> = _appUpdate.asStateFlow()
 
     val canPinWidget: Boolean
         get() {
@@ -80,6 +109,69 @@ class MainViewModel(private val repository: CurrencyRepository) : ViewModel() {
                 refreshRates()
             }
         }
+        if (repository.checkAppUpdates.value) {
+            checkForAppUpdate()
+        }
+    }
+
+    fun checkForAppUpdate() {
+        if (_appUpdate.value.checking || _appUpdate.value.downloadProgress != null) return
+        _appUpdate.update { it.copy(checking = true, failed = false) }
+        viewModelScope.launch {
+            val release = runCatching { updater.fetchLatestRelease() }
+            _appUpdate.update { current ->
+                val latest = release.getOrNull()
+                current.copy(
+                    checking = false,
+                    checked = true,
+                    failed = release.isFailure,
+                    available = latest?.takeIf { isNewerVersion(it.versionName, current.installedVersion) }
+                        ?: current.available.takeIf { release.isFailure },
+                )
+            }
+        }
+    }
+
+    /** Downloads the available release (once) and opens the system installer for it. */
+    fun startAppUpdate() {
+        val current = _appUpdate.value
+        val release = current.available ?: return
+        if (current.downloadProgress != null) return
+
+        if (!updater.canInstallPackages()) {
+            _appUpdate.update { it.copy(needsInstallPermission = true) }
+            repository.context.startActivity(updater.installPermissionIntent())
+            return
+        }
+
+        val downloaded = current.downloadedApk
+        if (downloaded != null && downloaded.exists()) {
+            repository.context.startActivity(updater.installIntent(downloaded))
+            return
+        }
+
+        _appUpdate.update { it.copy(downloadProgress = 0f, failed = false, needsInstallPermission = false) }
+        viewModelScope.launch {
+            val result = runCatching {
+                updater.download(release) { progress ->
+                    _appUpdate.update { it.copy(downloadProgress = progress) }
+                }
+            }
+            val apk = result.getOrNull()
+            _appUpdate.update { it.copy(downloadProgress = null, downloadedApk = apk, failed = apk == null) }
+            if (apk != null) {
+                repository.context.startActivity(updater.installIntent(apk))
+            }
+        }
+    }
+
+    fun dismissUpdateBanner() {
+        _appUpdate.update { it.copy(bannerDismissed = true) }
+    }
+
+    fun setCheckAppUpdates(enabled: Boolean) {
+        repository.setCheckAppUpdates(enabled)
+        if (enabled && !_appUpdate.value.checked) checkForAppUpdate()
     }
 
     private fun notifyWidgets() = triggerWidgetUpdate(repository.context)

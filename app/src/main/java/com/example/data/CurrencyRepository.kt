@@ -42,6 +42,10 @@ class CurrencyRepository(
     private val _autoUpdate = MutableStateFlow(readAutoUpdate())
     val autoUpdate: StateFlow<AutoUpdateSettings> = _autoUpdate.asStateFlow()
 
+    private val _checkAppUpdates = MutableStateFlow(prefs.getBoolean("check_app_updates", true))
+    /** Look for a new app version on GitHub every time the app opens. */
+    val checkAppUpdates: StateFlow<Boolean> = _checkAppUpdates.asStateFlow()
+
     fun getSourceCurrency(): String = prefs.getString("source", "USD") ?: "USD"
     fun getTargetCurrency(): String = prefs.getString("target", "ILS") ?: "ILS"
     fun getAmount(): String = prefs.getString("amount", "1") ?: "1"
@@ -78,6 +82,11 @@ class CurrencyRepository(
             .putBoolean("refresh_on_open", settings.refreshOnOpen)
             .apply()
         _autoUpdate.value = settings
+    }
+
+    fun setCheckAppUpdates(enabled: Boolean) {
+        prefs.edit().putBoolean("check_app_updates", enabled).apply()
+        _checkAppUpdates.value = enabled
     }
 
     /** Downloads the latest USD-based rates. Returns true when the local rates were updated. */

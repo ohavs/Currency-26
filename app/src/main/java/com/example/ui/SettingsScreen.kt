@@ -28,6 +28,7 @@ import androidx.compose.material.icons.automirrored.rounded.ArrowBack
 import androidx.compose.material.icons.rounded.Check
 import androidx.compose.material.icons.rounded.Palette
 import androidx.compose.material.icons.rounded.Refresh
+import androidx.compose.material.icons.rounded.SystemUpdate
 import androidx.compose.material.icons.rounded.Update
 import androidx.compose.material.icons.rounded.Widgets
 import androidx.compose.material3.Icon
@@ -66,6 +67,11 @@ fun SettingsScreen(
     onRefreshOnOpenChange: (Boolean) -> Unit,
     onRefreshNow: () -> Unit,
     onAddWidget: () -> Unit,
+    appUpdate: AppUpdateState,
+    checkAppUpdates: Boolean,
+    onCheckAppUpdatesChange: (Boolean) -> Unit,
+    onCheckForAppUpdate: () -> Unit,
+    onStartAppUpdate: () -> Unit,
 ) {
     BackHandler(onBack = onClose)
     val palette = LocalPalette.current
@@ -114,7 +120,64 @@ fun SettingsScreen(
                 }
             }
 
-            SettingsSection(title = "עדכונים אוטומטיים", icon = Icons.Rounded.Update) {
+            SettingsSection(title = "עדכוני אפליקציה", icon = Icons.Rounded.SystemUpdate) {
+                SwitchRow(
+                    title = "בדיקת עדכונים אוטומטית",
+                    subtitle = "בכל פתיחה בודקים אם יצאה גרסה חדשה",
+                    checked = checkAppUpdates,
+                    onCheckedChange = onCheckAppUpdatesChange
+                )
+                val available = appUpdate.available
+                val downloading = appUpdate.downloadProgress
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clip(RoundedCornerShape(18.dp))
+                        .background(palette.cardSoft)
+                        .padding(start = 16.dp, end = 8.dp, top = 8.dp, bottom = 8.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Column(modifier = Modifier.weight(1f)) {
+                        Text("גרסה מותקנת ${appUpdate.installedVersion}", style = MaterialTheme.typography.labelMedium, color = palette.inkMuted)
+                        Text(
+                            text = when {
+                                downloading != null -> "מוריד… ${(downloading * 100).toInt()}%"
+                                appUpdate.checking -> "בודק עדכונים…"
+                                available != null -> "גרסה ${available.versionName} זמינה"
+                                appUpdate.failed -> "הבדיקה נכשלה – בדקו את החיבור"
+                                appUpdate.checked -> "האפליקציה מעודכנת"
+                                else -> "עוד לא נבדק"
+                            },
+                            style = MaterialTheme.typography.bodyLarge,
+                            color = palette.ink
+                        )
+                    }
+                    if (available != null) {
+                        PillButton(
+                            text = "עדכון",
+                            icon = Icons.Rounded.SystemUpdate,
+                            loading = downloading != null,
+                            onClick = onStartAppUpdate
+                        )
+                    } else {
+                        PillButton(
+                            text = "בדיקה",
+                            icon = Icons.Rounded.Refresh,
+                            loading = appUpdate.checking,
+                            onClick = onCheckForAppUpdate
+                        )
+                    }
+                }
+                if (appUpdate.needsInstallPermission) {
+                    Text(
+                        text = "אשרו לאפליקציה להתקין עדכונים במסך שנפתח, ואז לחצו שוב על \"עדכון\".",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = palette.inkMuted
+                    )
+                }
+            }
+
+            SettingsSection(title = "עדכון שערים", icon = Icons.Rounded.Update) {
                 SwitchRow(
                     title = "עדכון שערים ברקע",
                     subtitle = "השערים והווידג'ט מתעדכנים אוטומטית גם כשהאפליקציה סגורה",
