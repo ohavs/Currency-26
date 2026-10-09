@@ -254,12 +254,35 @@ class MainViewModel(
         notifyWidgets()
     }
 
-    fun swapCurrencies() {
+    fun swapCurrencies() = swapSlots(CurrencySlot.SOURCE, CurrencySlot.TARGET)
+
+    /** Exchanges the currencies shown in two slots (swap button, or dragging one row onto another). */
+    fun swapSlots(a: CurrencySlot, b: CurrencySlot) {
+        if (a == b) return
         val current = _state.value
-        repository.setSourceCurrency(current.targetCurrency)
-        repository.setTargetCurrency(current.sourceCurrency)
+        val codeA = current.currencyIn(a) ?: return
+        val codeB = current.currencyIn(b) ?: return
+        val slots = CurrencySlot.values().associateWith { current.currencyIn(it) }.toMutableMap()
+        slots[a] = codeB
+        slots[b] = codeA
+        applySlots(slots)
+    }
+
+    /** Persists the slot assignment, updates the screen and the widgets. */
+    private fun applySlots(slots: Map<CurrencySlot, String?>) {
+        val newSource = slots.getValue(CurrencySlot.SOURCE)!!
+        val newTarget = slots.getValue(CurrencySlot.TARGET)!!
+        val newExtra = slots[CurrencySlot.EXTRA_TARGET]
+        repository.setSourceCurrency(newSource)
+        repository.setTargetCurrency(newTarget)
+        repository.setExtraTargetCurrency(newExtra)
         _state.update {
-            it.copy(sourceCurrency = current.targetCurrency, targetCurrency = current.sourceCurrency)
+            it.copy(
+                sourceCurrency = newSource,
+                targetCurrency = newTarget,
+                extraTargetCurrency = newExtra,
+                showCurrencySelector = false
+            )
         }
         notifyWidgets()
     }
@@ -306,21 +329,7 @@ class MainViewModel(
         viewModelScope.launch {
             repository.markCurrencyUsed(currencyCode)
         }
-        val newSource = slots.getValue(CurrencySlot.SOURCE)!!
-        val newTarget = slots.getValue(CurrencySlot.TARGET)!!
-        val newExtra = slots[CurrencySlot.EXTRA_TARGET]
-        repository.setSourceCurrency(newSource)
-        repository.setTargetCurrency(newTarget)
-        repository.setExtraTargetCurrency(newExtra)
-        _state.update {
-            it.copy(
-                sourceCurrency = newSource,
-                targetCurrency = newTarget,
-                extraTargetCurrency = newExtra,
-                showCurrencySelector = false
-            )
-        }
-        notifyWidgets()
+        applySlots(slots)
     }
 
     fun removeExtraTarget() {
