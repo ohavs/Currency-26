@@ -1,58 +1,97 @@
 package com.example.widget
 
 import android.content.Context
-import androidx.glance.appwidget.updateAll
+import androidx.datastore.preferences.core.Preferences
+import androidx.datastore.preferences.core.doublePreferencesKey
+import androidx.datastore.preferences.core.floatPreferencesKey
+import androidx.datastore.preferences.core.longPreferencesKey
+import androidx.datastore.preferences.core.stringPreferencesKey
+import androidx.glance.GlanceId
 import androidx.glance.appwidget.GlanceAppWidgetManager
 import androidx.glance.appwidget.state.updateAppWidgetState
+import androidx.glance.appwidget.updateAll
 import androidx.glance.state.PreferencesGlanceStateDefinition
+import com.example.CurrencyApp
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 
+/** Everything a widget needs to draw itself, stored in its Glance state. */
+data class WidgetData(
+    val amount: String,
+    val sourceCurrency: String,
+    val targetCurrency: String,
+    val rate: Double,
+    val themeMode: String,
+    val colorTheme: String,
+    val updatedAt: Long,
+)
+
+object WidgetStateKeys {
+    val amount = stringPreferencesKey("amount")
+    val source = stringPreferencesKey("source")
+    val target = stringPreferencesKey("target")
+    val rate = doublePreferencesKey("conversion_rate")
+    val themeMode = stringPreferencesKey("theme_mode")
+    val colorTheme = stringPreferencesKey("color_theme")
+    val updatedAt = longPreferencesKey("updated_at")
+
+    /** Float rate written by older versions; read until the widget is refreshed once. */
+    val legacyRate = floatPreferencesKey("rate")
+}
+
+fun Preferences.toWidgetData() = WidgetData(
+    amount = this[WidgetStateKeys.amount] ?: "1",
+    sourceCurrency = this[WidgetStateKeys.source] ?: "USD",
+    targetCurrency = this[WidgetStateKeys.target] ?: "ILS",
+    rate = this[WidgetStateKeys.rate] ?: this[WidgetStateKeys.legacyRate]?.toDouble() ?: 1.0,
+    themeMode = this[WidgetStateKeys.themeMode] ?: "system",
+    colorTheme = this[WidgetStateKeys.colorTheme] ?: "sage",
+    updatedAt = this[WidgetStateKeys.updatedAt] ?: 0L,
+)
+
+private suspend fun writeWidgetState(context: Context, ids: List<GlanceId>, data: WidgetData) {
+    ids.forEach { id ->
+        updateAppWidgetState(context, PreferencesGlanceStateDefinition, id) { prefs ->
+            prefs.toMutablePreferences().apply {
+                this[WidgetStateKeys.amount] = data.amount
+                this[WidgetStateKeys.source] = data.sourceCurrency
+                this[WidgetStateKeys.target] = data.targetCurrency
+                this[WidgetStateKeys.rate] = data.rate
+                this[WidgetStateKeys.themeMode] = data.themeMode
+                this[WidgetStateKeys.colorTheme] = data.colorTheme
+                this[WidgetStateKeys.updatedAt] = data.updatedAt
+            }
+        }
+    }
+}
+
 suspend fun updateWidgets(context: Context) {
     try {
-        val sharedPrefs = context.getSharedPreferences("currency_prefs", Context.MODE_PRIVATE)
-        val amount = sharedPrefs.getString("amount", "1") ?: "1"
-        val sourceId = sharedPrefs.getString("source", "USD") ?: "USD"
-        val targetId = sharedPrefs.getString("target", "ILS") ?: "ILS"
-        val themeMode = sharedPrefs.getString("theme_mode", "system") ?: "system"
-        val colorThemeStr = sharedPrefs.getString("color_theme", "standard") ?: "standard"
+        val appContext = context.applicationContext
+        val repository = (appContext as CurrencyApp).repository
 
-        val dao = androidx.room.Room.databaseBuilder(context, com.example.data.AppDatabase::class.java, "currency_database").build().currencyDao()
-        val sourceRate = dao.getRate(sourceId)?.rateRelativeToUSD ?: 1.0
-        val targetRate = dao.getRate(targetId)?.rateRelativeToUSD ?: 1.0
-        val conversionRate = targetRate / sourceRate
+        val sourceId = repository.getSourceCurrency()
+        val targetId = repository.getTargetCurrency()
+        val sourceRate = repository.getRate(sourceId) ?: 1.0
+        val targetRate = repository.getRate(targetId) ?: 1.0
 
-        val manager = GlanceAppWidgetManager(context)
-        
-        manager.getGlanceIds(LargeCurrencyWidget::class.java).forEach { id ->
-            updateAppWidgetState(context, PreferencesGlanceStateDefinition, id) { prefs ->
-                val mutablePrefs = prefs.toMutablePreferences()
-                mutablePrefs[LargeCurrencyWidget.amountKey] = amount
-                mutablePrefs[LargeCurrencyWidget.sourceKey] = sourceId
-                mutablePrefs[LargeCurrencyWidget.targetKey] = targetId
-                mutablePrefs[LargeCurrencyWidget.rateKey] = conversionRate.toFloat()
-                mutablePrefs[LargeCurrencyWidget.themeModeKey] = themeMode
-                mutablePrefs[LargeCurrencyWidget.colorThemeKey] = colorThemeStr
-                mutablePrefs
-            }
-        }
-        
-        manager.getGlanceIds(SmallCurrencyWidget::class.java).forEach { id ->
-            updateAppWidgetState(context, PreferencesGlanceStateDefinition, id) { prefs ->
-                val mutablePrefs = prefs.toMutablePreferences()
-                mutablePrefs[LargeCurrencyWidget.amountKey] = amount
-                mutablePrefs[LargeCurrencyWidget.sourceKey] = sourceId
-                mutablePrefs[LargeCurrencyWidget.targetKey] = targetId
-                mutablePrefs[LargeCurrencyWidget.rateKey] = conversionRate.toFloat()
-                mutablePrefs[LargeCurrencyWidget.themeModeKey] = themeMode
-                mutablePrefs[LargeCurrencyWidget.colorThemeKey] = colorThemeStr
-                mutablePrefs
-            }
-        }
+        val data = WidgetData(
+            amount = repository.getAmount(),
+            sourceCurrency = sourceId,
+            targetCurrency = targetId,
+            rate = targetRate / sourceRate,
+            themeMode = repository.themeMode.value,
+            colorTheme = repository.colorTheme.value,
+            updatedAt = repository.getLastUpdateTimestamp(),
+        )
 
-        SmallCurrencyWidget().updateAll(context)
-        LargeCurrencyWidget().updateAll(context)
+        val manager = GlanceAppWidgetManager(appContext)
+        writeWidgetState(appContext, manager.getGlanceIds(LargeCurrencyWidget::class.java), data)
+        writeWidgetState(appContext, manager.getGlanceIds(SmallCurrencyWidget::class.java), data)
+
+        SmallCurrencyWidget().updateAll(appContext)
+        LargeCurrencyWidget().updateAll(appContext)
     } catch (e: Exception) {
         e.printStackTrace()
     }

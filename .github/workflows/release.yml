@@ -1,0 +1,52 @@
+name: Release
+
+# Every push to main publishes a numbered release with the APK.
+# The app's in-app updater installs the latest one.
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: release
+  cancel-in-progress: false
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 21
+
+      - uses: gradle/actions/setup-gradle@v4
+
+      - name: Version
+        id: version
+        run: |
+          echo "code=$((500 + GITHUB_RUN_NUMBER))" >> "$GITHUB_OUTPUT"
+          echo "name=5.0.${GITHUB_RUN_NUMBER}" >> "$GITHUB_OUTPUT"
+
+      - name: Test and build release APK
+        run: >
+          ./gradlew testDebugUnitTest assembleRelease
+          -PappVersionCode=${{ steps.version.outputs.code }}
+          -PappVersionName=${{ steps.version.outputs.name }}
+
+      - name: Publish GitHub release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          VERSION: ${{ steps.version.outputs.name }}
+        run: |
+          cp app/build/outputs/apk/release/app-release.apk "currency-26-$VERSION.apk"
+          gh release create "v$VERSION" "currency-26-$VERSION.apk" \
+            --target "$GITHUB_SHA" \
+            --title "גרסה $VERSION" \
+            --generate-notes

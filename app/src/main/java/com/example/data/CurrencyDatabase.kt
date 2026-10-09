@@ -24,6 +24,9 @@ interface CurrencyDao {
     @Query("SELECT * FROM exchange_rates")
     fun getAllRates(): Flow<List<ExchangeRateEntity>>
 
+    @Query("SELECT MAX(timestamp) FROM exchange_rates")
+    suspend fun getLastUpdateTimestamp(): Long?
+
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertRates(rates: List<ExchangeRateEntity>)
 
