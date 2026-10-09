@@ -2,6 +2,7 @@ package com.example.widget
 
 import android.content.Context
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.datastore.preferences.core.Preferences
@@ -55,19 +56,29 @@ class SmallCurrencyWidget : GlanceAppWidget() {
         // A third line only when the widget is tall enough to stay readable.
         val extra = data.extraTargetCurrency?.takeIf { size.height >= 110.dp }
         val gap = if (compact) 3.dp else 6.dp
+        val showRate = size.height >= (if (extra != null) 190.dp else 150.dp)
+        // Amounts get the space: as large as the line height allows and their width fits (next to a ~64dp pill).
+        val lines = if (extra != null) 3 else 2
+        val padding = if (compact) 6.dp else 10.dp
+        val lineHeight = (size.height - padding * 2 - gap * (lines - 1) - (if (showRate) 24.dp else 0.dp)) / lines
+        val maxAmountSp = (lineHeight.value * 0.55f).coerceIn(13f, 34f)
+        val amountWidth = size.width.value - padding.value * 2 - (if (compact) 0f else 10f) - 64f
+        val sourceText = formatAmountInput(data.amount)
+        val targetText = formatAmount(amount * data.rate)
 
         Column(
             modifier = GlanceModifier
                 .fillMaxSize()
                 .background(colors.background)
                 .cornerRadius(24.dp)
-                .padding(if (compact) 6.dp else 10.dp)
+                .padding(padding)
                 .clickable(actionStartActivity(MainActivity.openAppIntent(context))),
             verticalAlignment = Alignment.CenterVertically
         ) {
             CurrencyLine(
                 code = data.sourceCurrency,
-                amount = ltr(formatAmountInput(data.amount)),
+                amount = sourceText,
+                fontSize = fitAmountSp(sourceText, amountWidth, maxAmountSp, minSp = 12f).sp,
                 slot = CurrencySlot.SOURCE,
                 background = colors.card,
                 pillBackground = colors.cardSoft,
@@ -78,7 +89,8 @@ class SmallCurrencyWidget : GlanceAppWidget() {
             Spacer(GlanceModifier.height(gap))
             CurrencyLine(
                 code = data.targetCurrency,
-                amount = ltr(formatAmount(amount * data.rate)),
+                amount = targetText,
+                fontSize = fitAmountSp(targetText, amountWidth, maxAmountSp, minSp = 12f).sp,
                 slot = CurrencySlot.TARGET,
                 background = colors.highlight,
                 pillBackground = colors.highlightSoft,
@@ -87,19 +99,22 @@ class SmallCurrencyWidget : GlanceAppWidget() {
                 pillFirst = pillFirst
             )
             if (extra != null) {
+                val extraText = formatAmount(amount * data.extraRate)
                 Spacer(GlanceModifier.height(gap))
+                // The optional currency gets the lighter card, like in the app.
                 CurrencyLine(
                     code = extra,
-                    amount = ltr(formatAmount(amount * data.extraRate)),
+                    amount = extraText,
+                    fontSize = fitAmountSp(extraText, amountWidth, maxAmountSp, minSp = 12f).sp,
                     slot = CurrencySlot.EXTRA_TARGET,
-                    background = colors.highlightSoft,
-                    pillBackground = colors.highlight,
+                    background = colors.cardSoft,
+                    pillBackground = colors.card,
                     colors = colors,
                     compact = compact,
                     pillFirst = pillFirst
                 )
             }
-            if (size.height >= (if (extra != null) 190.dp else 150.dp)) {
+            if (showRate) {
                 Spacer(GlanceModifier.height(8.dp))
                 Text(
                     ltr("1 ${data.sourceCurrency} = ${formatRate(data.rate)} ${data.targetCurrency}"),
@@ -116,6 +131,7 @@ class SmallCurrencyWidget : GlanceAppWidget() {
     private fun CurrencyLine(
         code: String,
         amount: String,
+        fontSize: TextUnit,
         slot: CurrencySlot,
         background: ColorProvider,
         pillBackground: ColorProvider,
@@ -131,20 +147,30 @@ class SmallCurrencyWidget : GlanceAppWidget() {
         }
         Row(modifier = rowModifier, verticalAlignment = Alignment.CenterVertically) {
             if (pillFirst) {
-                CurrencyPill(code, slot, pillBackground, colors, compact)
+                CurrencyPill(code, slot, pillBackground, colors, compact, flagFirst = true)
                 Spacer(GlanceModifier.defaultWeight())
-                AmountText(amount, colors, compact)
+                AmountText(amount, colors, fontSize)
             } else {
-                AmountText(amount, colors, compact)
+                AmountText(amount, colors, fontSize)
                 Spacer(GlanceModifier.defaultWeight())
-                CurrencyPill(code, slot, pillBackground, colors, compact)
+                CurrencyPill(code, slot, pillBackground, colors, compact, flagFirst = false)
             }
         }
     }
 
+    /** Flag and currency symbol (the code when the currency has no symbol). */
     @Composable
-    private fun CurrencyPill(code: String, slot: CurrencySlot, background: ColorProvider, colors: WidgetColors, compact: Boolean) {
+    private fun CurrencyPill(
+        code: String,
+        slot: CurrencySlot,
+        background: ColorProvider,
+        colors: WidgetColors,
+        compact: Boolean,
+        flagFirst: Boolean,
+    ) {
         val context = LocalContext.current
+        val info = getCurrencyInfo(code)
+        val symbol = info.symbol.ifEmpty { code }
         Row(
             modifier = GlanceModifier
                 .background(background)
@@ -153,20 +179,19 @@ class SmallCurrencyWidget : GlanceAppWidget() {
                 .clickable(actionStartActivity(MainActivity.pickCurrencyIntent(context, slot))),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Text(getCurrencyInfo(code).flag, style = TextStyle(fontSize = if (compact) 12.sp else 15.sp))
+            val flagStyle = TextStyle(fontSize = if (compact) 12.sp else 15.sp)
+            val symbolStyle = TextStyle(color = colors.ink, fontSize = if (compact) 12.sp else 14.sp, fontWeight = FontWeight.Bold)
+            Text(if (flagFirst) info.flag else symbol, style = if (flagFirst) flagStyle else symbolStyle)
             Spacer(GlanceModifier.width(4.dp))
-            Text(
-                code,
-                style = TextStyle(color = colors.ink, fontSize = if (compact) 12.sp else 14.sp, fontWeight = FontWeight.Bold)
-            )
+            Text(if (flagFirst) symbol else info.flag, style = if (flagFirst) symbolStyle else flagStyle)
         }
     }
 
     @Composable
-    private fun AmountText(amount: String, colors: WidgetColors, compact: Boolean) {
+    private fun AmountText(amount: String, colors: WidgetColors, fontSize: TextUnit) {
         Text(
-            amount,
-            style = TextStyle(color = colors.ink, fontSize = if (compact) 13.sp else 17.sp, fontWeight = FontWeight.Bold),
+            ltr(amount),
+            style = TextStyle(color = colors.ink, fontSize = fontSize, fontWeight = FontWeight.Bold),
             maxLines = 1,
             modifier = GlanceModifier.padding(horizontal = 6.dp)
         )
