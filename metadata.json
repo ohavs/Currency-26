@@ -1,6 +1,0 @@
-{
-  "name": "ממיר מטבעות",
-  "description": "המרת מטבעות מהירה וקלה עם תמיכה במצב לא מקוון ומחשבון חכם.",
-  "requestFramePermissions": [],
-  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
-}
