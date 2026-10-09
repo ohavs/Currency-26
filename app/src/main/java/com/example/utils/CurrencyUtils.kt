@@ -27,6 +27,19 @@ fun getCurrencyInfo(code: String): CurrencyInfo {
     return CurrencyInfo(code, dynamicHebrewName, flag, symbol)
 }
 
+/** Hebrew country (or region) name for a currency, e.g. USD -> "ארצות הברית". Falls back to the currency name. */
+fun getCountryName(code: String): String {
+    val predefined = currencyMap.entries.find { it.key.equals(code, ignoreCase = true) }?.value
+    predefined?.keywords?.firstOrNull()?.let { return it }
+    val region = if (code.length >= 2) code.substring(0, 2).uppercase() else return code
+    val name = try {
+        java.util.Locale.Builder().setRegion(region).build().getDisplayCountry(java.util.Locale.forLanguageTag("he"))
+    } catch (e: Exception) {
+        ""
+    }
+    return if (name.isNotBlank() && !name.equals(region, ignoreCase = true)) name else getCurrencyInfo(code).hebrewName
+}
+
 val currencyMap = mapOf(
     "USD" to CurrencyInfo("USD", "דולר אמריקאי", "🇺🇸", "$", listOf("ארצות הברית", "ארה\"ב", "דולר", "אמריקה")),
     "ILS" to CurrencyInfo("ILS", "שקל חדש", "🇮🇱", "₪", listOf("ישראל", "שקל", "שקלים", "ארץ")),

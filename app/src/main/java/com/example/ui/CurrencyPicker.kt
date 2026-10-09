@@ -27,6 +27,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.ArrowBack
 import androidx.compose.material.icons.rounded.Check
 import androidx.compose.material.icons.rounded.Close
+import androidx.compose.material.icons.rounded.DeleteOutline
 import androidx.compose.material.icons.rounded.Search
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -41,6 +42,7 @@ import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.style.TextDirection
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import com.example.data.CurrencySlot
 import com.example.ui.theme.LocalPalette
 import com.example.utils.currencyMap
 import com.example.utils.formatRate
@@ -51,16 +53,27 @@ fun CurrencySelector(
     state: CalculatorState,
     onClose: () -> Unit,
     onSelect: (String) -> Unit,
-    onSearch: (String) -> Unit
+    onSearch: (String) -> Unit,
+    onRemove: () -> Unit = {},
 ) {
     BackHandler(onBack = onClose)
     val palette = LocalPalette.current
 
-    val currentCode = if (state.selectingForSource) state.sourceCurrency else state.targetCurrency
-    val otherCode = if (state.selectingForSource) state.targetCurrency else state.sourceCurrency
+    val slot = state.pickerSlot
+    val currentCode = state.currencyIn(slot)
+    // Rates in the list are shown against the source (or, when choosing the source, against the target).
+    val otherCode = if (slot == CurrencySlot.SOURCE) state.targetCurrency else state.sourceCurrency
+    // Adding an extra currency only offers ones that are not on screen already.
+    val hidden = if (slot == CurrencySlot.EXTRA_TARGET && currentCode == null) {
+        setOf(state.sourceCurrency, state.targetCurrency)
+    } else {
+        emptySet()
+    }
 
     // Before the first download there are no rates yet - still offer the well-known currencies.
-    val allCurrencies = remember(state.rates.keys) { state.rates.keys.ifEmpty { currencyMap.keys }.sorted() }
+    val allCurrencies = remember(state.rates.keys, hidden) {
+        state.rates.keys.ifEmpty { currencyMap.keys }.filterNot { it in hidden }.sorted()
+    }
     val query = state.searchQuery.trim()
     val filtered = remember(allCurrencies, query) {
         if (query.isEmpty()) {
@@ -84,8 +97,17 @@ fun CurrencySelector(
     ) {
         AppTopBar(
             title = "בחירת מטבע",
-            subtitle = if (state.selectingForSource) "מטבע המקור" else "מטבע היעד",
-            navigation = { RoundIconButton(Icons.AutoMirrored.Rounded.ArrowBack, "חזרה", onClose) }
+            subtitle = when (slot) {
+                CurrencySlot.SOURCE -> "מטבע המקור"
+                CurrencySlot.TARGET -> "מטבע היעד"
+                CurrencySlot.EXTRA_TARGET -> "מטבע נוסף"
+            },
+            navigation = { RoundIconButton(Icons.AutoMirrored.Rounded.ArrowBack, "חזרה", onClose) },
+            action = if (slot == CurrencySlot.EXTRA_TARGET && currentCode != null) {
+                { RoundIconButton(Icons.Rounded.DeleteOutline, "הסרת המטבע הנוסף", onRemove) }
+            } else {
+                null
+            }
         )
 
         SearchField(query = state.searchQuery, onQueryChange = onSearch)

@@ -28,8 +28,8 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.Backspace
+import androidx.compose.material.icons.rounded.Add
 import androidx.compose.material.icons.rounded.Close
-import androidx.compose.material.icons.rounded.KeyboardArrowDown
 import androidx.compose.material.icons.rounded.Refresh
 import androidx.compose.material.icons.rounded.SwapVert
 import androidx.compose.material.icons.rounded.SystemUpdate
@@ -54,6 +54,7 @@ import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.rememberTextMeasurer
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDirection
@@ -61,13 +62,14 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.data.CurrencySlot
 import com.example.ui.theme.AmountTextStyle
-import com.example.ui.theme.CurrencyCodeTextStyle
 import com.example.ui.theme.LocalPalette
 import com.example.utils.formatAmount
 import com.example.utils.formatAmountInput
 import com.example.utils.formatRate
 import com.example.utils.formatUpdatedAt
+import com.example.utils.getCountryName
 import com.example.utils.getCurrencyInfo
 
 private enum class AppScreen { Calculator, Settings, Picker }
@@ -138,7 +140,8 @@ fun CalculatorScreen(viewModel: MainViewModel) {
                         state = state,
                         onClose = viewModel::closeCurrencySelector,
                         onSelect = viewModel::selectCurrency,
-                        onSearch = viewModel::updateSearchQuery
+                        onSearch = viewModel::updateSearchQuery,
+                        onRemove = viewModel::removeExtraTarget
                     )
                 }
             }
@@ -150,7 +153,7 @@ fun CalculatorScreen(viewModel: MainViewModel) {
 fun CalculatorContent(
     state: CalculatorState,
     onSwap: () -> Unit,
-    onCurrencyClick: (Boolean) -> Unit,
+    onCurrencyClick: (CurrencySlot) -> Unit,
     onKeypad: (String) -> Unit,
     onOpenSettings: () -> Unit,
     onRefresh: () -> Unit,
@@ -205,7 +208,21 @@ fun CalculatorContent(
             onCurrencyClick = onCurrencyClick
         )
 
-        Spacer(Modifier.height(14.dp))
+        val extraCode = state.extraTargetCurrency
+        val extraAmount = state.extraTargetAmount
+        if (extraCode != null && extraAmount != null) {
+            Spacer(Modifier.height(6.dp))
+            CurrencyRow(
+                code = extraCode,
+                amount = formatAmount(extraAmount),
+                cardColor = LocalPalette.current.highlightSoft,
+                badgeColor = LocalPalette.current.highlight,
+                onClick = { onCurrencyClick(CurrencySlot.EXTRA_TARGET) }
+            )
+            Spacer(Modifier.height(14.dp))
+        } else {
+            AddCurrencyButton(onClick = { onCurrencyClick(CurrencySlot.EXTRA_TARGET) })
+        }
 
         Box(
             modifier = Modifier
@@ -284,7 +301,7 @@ private fun CurrencyPair(
     targetCode: String,
     targetAmount: String,
     onSwap: () -> Unit,
-    onCurrencyClick: (Boolean) -> Unit,
+    onCurrencyClick: (CurrencySlot) -> Unit,
 ) {
     val palette = LocalPalette.current
     var turns by remember { mutableIntStateOf(0) }
@@ -296,15 +313,15 @@ private fun CurrencyPair(
                 code = sourceCode,
                 amount = sourceAmount,
                 cardColor = palette.card,
-                chipColor = palette.cardSoft,
-                onClick = { onCurrencyClick(true) }
+                badgeColor = palette.cardSoft,
+                onClick = { onCurrencyClick(CurrencySlot.SOURCE) }
             )
             CurrencyRow(
                 code = targetCode,
                 amount = targetAmount,
                 cardColor = palette.highlight,
-                chipColor = palette.highlightSoft,
-                onClick = { onCurrencyClick(false) }
+                badgeColor = palette.highlightSoft,
+                onClick = { onCurrencyClick(CurrencySlot.TARGET) }
             )
         }
         // Background-colored ring makes the button look cut into both cards.
@@ -333,52 +350,41 @@ private fun CurrencyPair(
     }
 }
 
-/** One currency in a single row: tappable currency chip on one side, the amount on the other. */
+/** One currency in a single row: flag and country name (tap to change) on one side, the amount on the other. */
 @Composable
 private fun CurrencyRow(
     code: String,
     amount: String,
     cardColor: Color,
-    chipColor: Color,
+    badgeColor: Color,
     onClick: () -> Unit,
 ) {
     val palette = LocalPalette.current
-    val info = getCurrencyInfo(code)
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .height(84.dp)
+            .height(80.dp)
             .clip(RoundedCornerShape(26.dp))
             .background(cardColor)
-            .padding(start = 10.dp, end = 18.dp),
+            .padding(start = 6.dp, end = 18.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
         Row(
             modifier = Modifier
                 .clip(RoundedCornerShape(20.dp))
-                .background(chipColor)
-                .clickable(role = Role.Button, onClickLabel = "בחירת מטבע", onClick = onClick)
-                .padding(start = 6.dp, end = 6.dp, top = 6.dp, bottom = 6.dp),
+                .clickable(role = Role.Button, onClickLabel = "החלפת מטבע", onClick = onClick)
+                .padding(horizontal = 8.dp, vertical = 8.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            FlagBadge(info.flag, background = cardColor, size = 38.dp)
-            Spacer(Modifier.width(8.dp))
-            Column {
-                Text(code, style = CurrencyCodeTextStyle.copy(fontSize = 19.sp, lineHeight = 22.sp), color = palette.ink)
-                Text(
-                    text = info.hebrewName,
-                    style = MaterialTheme.typography.labelSmall,
-                    color = palette.inkMuted,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis,
-                    modifier = Modifier.widthIn(max = 92.dp)
-                )
-            }
-            Icon(
-                Icons.Rounded.KeyboardArrowDown,
-                contentDescription = null,
-                tint = palette.inkMuted,
-                modifier = Modifier.size(20.dp)
+            FlagBadge(getCurrencyInfo(code).flag, background = badgeColor, size = 40.dp)
+            Spacer(Modifier.width(10.dp))
+            Text(
+                text = getCountryName(code),
+                style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.SemiBold),
+                color = palette.ink,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+                modifier = Modifier.widthIn(max = 130.dp)
             )
         }
         Spacer(Modifier.width(12.dp))
@@ -386,10 +392,33 @@ private fun CurrencyRow(
             text = amount,
             style = AmountTextStyle.copy(fontSize = 32.sp),
             color = palette.ink,
-            // Amount on the far side from the chip, like the original layout.
+            // Amount on the far side from the currency, like the original layout.
             textAlign = TextAlign.Left,
             modifier = Modifier.weight(1f)
         )
+    }
+}
+
+/** Light "+ add currency" link under the pair; a second target currency is optional. */
+@Composable
+private fun AddCurrencyButton(onClick: () -> Unit) {
+    val palette = LocalPalette.current
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 4.dp)
+    ) {
+        Row(
+            modifier = Modifier
+                .clip(CircleShape)
+                .clickable(role = Role.Button, onClick = onClick)
+                .padding(horizontal = 12.dp, vertical = 8.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Icon(Icons.Rounded.Add, contentDescription = null, tint = palette.inkMuted, modifier = Modifier.size(18.dp))
+            Spacer(Modifier.width(6.dp))
+            Text("הוספת מטבע נוסף", style = MaterialTheme.typography.labelLarge, color = palette.inkMuted)
+        }
     }
 }
 
@@ -445,57 +474,51 @@ private fun Keypad(onKey: (String) -> Unit, modifier: Modifier = Modifier) {
 
     // Numbers keep the familiar left-to-right keypad order inside the RTL app.
     CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Ltr) {
-        Row(modifier = modifier, horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-            Column(
+        Column(modifier = modifier, verticalArrangement = Arrangement.spacedBy(10.dp)) {
+            // Clear and backspace share one slim row, so the digits get the full width.
+            Row(
                 modifier = Modifier
-                    .weight(3f)
-                    .fillMaxHeight(),
-                verticalArrangement = Arrangement.spacedBy(10.dp)
+                    .weight(0.62f)
+                    .fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(10.dp)
             ) {
-                digitRows.forEach { row ->
-                    Row(
-                        modifier = Modifier
-                            .weight(1f)
-                            .fillMaxWidth(),
-                        horizontalArrangement = Arrangement.spacedBy(10.dp)
-                    ) {
-                        row.forEach { key ->
-                            KeyButton(
-                                color = palette.cardSoft,
-                                modifier = Modifier
-                                    .weight(1f)
-                                    .fillMaxHeight(),
-                                onClick = { press(key) }
-                            ) {
-                                Text(key, style = MaterialTheme.typography.headlineSmall.copy(fontSize = 26.sp), color = palette.ink)
-                            }
-                        }
-                    }
-                }
-            }
-            Column(
-                modifier = Modifier
-                    .weight(1f)
-                    .fillMaxHeight(),
-                verticalArrangement = Arrangement.spacedBy(10.dp)
-            ) {
-                KeyButton(
-                    color = palette.card,
-                    modifier = Modifier
-                        .weight(1f)
-                        .fillMaxWidth(),
-                    onClick = { press("⌫") }
-                ) {
-                    Icon(Icons.AutoMirrored.Rounded.Backspace, contentDescription = "מחיקה", tint = palette.ink)
-                }
                 KeyButton(
                     color = palette.accent,
                     modifier = Modifier
                         .weight(1f)
-                        .fillMaxWidth(),
+                        .fillMaxHeight(),
                     onClick = { press("C") }
                 ) {
-                    Text("C", style = MaterialTheme.typography.headlineSmall.copy(fontSize = 26.sp), color = palette.onAccent)
+                    Text("C", style = MaterialTheme.typography.titleLarge, color = palette.onAccent)
+                }
+                KeyButton(
+                    color = palette.highlight,
+                    modifier = Modifier
+                        .weight(1f)
+                        .fillMaxHeight(),
+                    onClick = { press("⌫") }
+                ) {
+                    Icon(Icons.AutoMirrored.Rounded.Backspace, contentDescription = "מחיקה", tint = palette.ink)
+                }
+            }
+            digitRows.forEach { row ->
+                Row(
+                    modifier = Modifier
+                        .weight(1f)
+                        .fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(10.dp)
+                ) {
+                    row.forEach { key ->
+                        KeyButton(
+                            color = palette.cardSoft,
+                            modifier = Modifier
+                                .weight(1f)
+                                .fillMaxHeight(),
+                            onClick = { press(key) }
+                        ) {
+                            Text(key, style = MaterialTheme.typography.headlineSmall.copy(fontSize = 26.sp), color = palette.ink)
+                        }
+                    }
                 }
             }
         }
