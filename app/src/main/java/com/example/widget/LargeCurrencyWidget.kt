@@ -94,12 +94,11 @@ class LargeCurrencyWidget : GlanceAppWidget() {
                 symbol = symbol,
                 amount = text,
                 fontSize = fitAmountSp(text, width, layout.maxAmountSp, symbol = symbol),
-                flagSize = layout.flagSp.sp,
+                layout = layout,
                 slot = slot,
                 background = background,
                 colors = colors,
                 locale = locale,
-                showName = layout.showNames,
                 pillFirst = pillFirst,
                 launcherRtl = launcherRtl,
                 removable = removable,
@@ -121,7 +120,7 @@ class LargeCurrencyWidget : GlanceAppWidget() {
                     Spacer(GlanceModifier.height(gap))
                     card(data.targetCurrency, targetText, CurrencySlot.TARGET, colors.highlight, false, GlanceModifier.fillMaxWidth().defaultWeight())
                 }
-                SwapButton(colors)
+                SwapButton(colors, layout.swapSizeDp)
             }
             if (extra != null) {
                 Spacer(GlanceModifier.height(gap))
@@ -160,12 +159,11 @@ class LargeCurrencyWidget : GlanceAppWidget() {
         symbol: String,
         amount: String,
         fontSize: Float,
-        flagSize: TextUnit,
+        layout: LargeWidgetLayout,
         slot: CurrencySlot,
         background: ColorProvider,
         colors: WidgetColors,
         locale: Locale,
-        showName: Boolean,
         pillFirst: Boolean,
         launcherRtl: Boolean,
         removable: Boolean,
@@ -176,11 +174,11 @@ class LargeCurrencyWidget : GlanceAppWidget() {
             modifier = modifier
                 .background(background)
                 .cornerRadius(20.dp)
-                .padding(horizontal = 12.dp)
+                .padding(horizontal = LargeWidgetLayout.CARD_PADDING.dp)
                 .clickable(actionStartActivity(MainActivity.pickCurrencyIntent(context, slot))),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            val label: @Composable () -> Unit = { CurrencyLabel(code, flagSize, colors, locale, showName) }
+            val label: @Composable () -> Unit = { CurrencyLabel(code, layout, colors, locale) }
             val symbolText: @Composable () -> Unit = {
                 Text(
                     ltr(symbol),
@@ -208,16 +206,21 @@ class LargeCurrencyWidget : GlanceAppWidget() {
         }
     }
 
-    /** The flag on its own (no background), with the currency name underneath when there is room. */
+    /** A big flag on its own (no background), with the currency name underneath when there is room. */
     @Composable
-    private fun CurrencyLabel(code: String, flagSize: TextUnit, colors: WidgetColors, locale: Locale, showName: Boolean) {
-        Column(horizontalAlignment = Alignment.CenterHorizontally) {
-            Text(getCurrencyInfo(code).flag, style = TextStyle(fontSize = flagSize))
-            if (showName) {
+    private fun CurrencyLabel(code: String, layout: LargeWidgetLayout, colors: WidgetColors, locale: Locale) {
+        Column(
+            modifier = GlanceModifier.width(layout.labelWidthDp.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Text(getCurrencyInfo(code).flag, style = TextStyle(fontSize = layout.flagSp.sp))
+            if (layout.showNames) {
+                val name = currencyName(code, locale)
                 Text(
-                    shortName(currencyName(code, locale), max = 12),
-                    style = TextStyle(color = colors.inkMuted, fontSize = 11.sp, fontWeight = FontWeight.Medium, textAlign = TextAlign.Center),
-                    maxLines = 1
+                    if (layout.nameLines > 1) shortName(name, max = 24) else shortName(name, max = 13),
+                    style = TextStyle(color = colors.ink, fontSize = layout.nameSp.sp, fontWeight = FontWeight.Medium, textAlign = TextAlign.Center),
+                    maxLines = layout.nameLines,
+                    modifier = GlanceModifier.fillMaxWidth()
                 )
             }
         }
@@ -285,12 +288,12 @@ class LargeCurrencyWidget : GlanceAppWidget() {
 
     /** Accent button in a background-colored ring, so it looks cut into the two cards around it. */
     @Composable
-    private fun SwapButton(colors: WidgetColors) {
+    private fun SwapButton(colors: WidgetColors, size: Float) {
         Box(
             modifier = GlanceModifier
-                .size(40.dp)
+                .size(size.dp)
                 .background(colors.background)
-                .cornerRadius(15.dp)
+                .cornerRadius((size * 0.375f).dp)
                 .clickable(actionRunCallback<SwapAction>())
                 .padding(4.dp),
             contentAlignment = Alignment.Center
@@ -299,10 +302,10 @@ class LargeCurrencyWidget : GlanceAppWidget() {
                 modifier = GlanceModifier
                     .fillMaxSize()
                     .background(colors.accent)
-                    .cornerRadius(12.dp),
+                    .cornerRadius((size * 0.3f).dp),
                 contentAlignment = Alignment.Center
             ) {
-                Text("⇅", style = TextStyle(color = colors.onAccent, fontSize = 17.sp, fontWeight = FontWeight.Bold))
+                Text("⇅", style = TextStyle(color = colors.onAccent, fontSize = (size * 0.42f).sp, fontWeight = FontWeight.Bold))
             }
         }
     }

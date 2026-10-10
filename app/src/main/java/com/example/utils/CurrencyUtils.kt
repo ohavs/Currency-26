@@ -54,7 +54,10 @@ private fun nativeSymbol(code: String): String = nativeSymbolCache.getOrPut(code
     try {
         val currency = java.util.Currency.getInstance(code.uppercase())
         val region = code.take(2).uppercase()
-        val home = java.util.Locale.getAvailableLocales().firstOrNull { it.country == region }
+        // Prefer the country's own language: newer Android versions also ship "en_HU" and the like,
+        // where the symbol is just the code.
+        val homes = java.util.Locale.getAvailableLocales().filter { it.country == region && it.variant.isEmpty() }
+        val home = homes.firstOrNull { it.language != "en" } ?: homes.firstOrNull()
         val symbol = if (home != null) currency.getSymbol(home) else currency.symbol
         if (symbol.equals(code, ignoreCase = true)) "" else symbol
     } catch (e: Exception) {

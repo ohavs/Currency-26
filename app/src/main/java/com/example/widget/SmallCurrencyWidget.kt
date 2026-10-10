@@ -59,12 +59,13 @@ class SmallCurrencyWidget : GlanceAppWidget() {
         val extra = data.extraTargetCurrency?.takeIf { size.height >= 110.dp }
         val gap = if (compact) 3.dp else 6.dp
         val showRate = size.height >= (if (extra != null) 190.dp else 150.dp)
-        // Amounts get the space: as large as the line height allows and their width fits (next to a ~36dp flag).
+        // Amounts get the space: as large as the line height allows and their width fits next to the flag.
         val lines = if (extra != null) 3 else 2
         val padding = if (compact) 6.dp else 10.dp
         val lineHeight = (size.height - padding * 2 - gap * (lines - 1) - (if (showRate) 24.dp else 0.dp)) / lines
         val maxAmountSp = (lineHeight.value * 0.55f).coerceIn(13f, 34f)
-        val amountWidth = size.width.value - padding.value * 2 - (if (compact) 0f else 10f) - 36f - 12f
+        val flagSp = if (compact) 15f else (lineHeight.value * 0.45f).coerceIn(17f, 30f)
+        val amountWidth = size.width.value - padding.value * 2 - (if (compact) 0f else 10f) - (flagSp * 1.3f + 8f) - 12f
         val sourceText = formatAmountInput(data.amount)
         val targetText = formatAmount(amount * data.rate)
 
@@ -85,6 +86,7 @@ class SmallCurrencyWidget : GlanceAppWidget() {
                 background = colors.card,
                 colors = colors,
                 compact = compact,
+                flagSp = flagSp,
                 pillFirst = pillFirst,
                 launcherRtl = launcherRtl
             )
@@ -97,6 +99,7 @@ class SmallCurrencyWidget : GlanceAppWidget() {
                 background = colors.highlight,
                 colors = colors,
                 compact = compact,
+                flagSp = flagSp,
                 pillFirst = pillFirst,
                 launcherRtl = launcherRtl
             )
@@ -112,6 +115,7 @@ class SmallCurrencyWidget : GlanceAppWidget() {
                     background = colors.cardSoft,
                     colors = colors,
                     compact = compact,
+                    flagSp = flagSp,
                     pillFirst = pillFirst,
                     launcherRtl = launcherRtl
                 )
@@ -138,6 +142,7 @@ class SmallCurrencyWidget : GlanceAppWidget() {
         background: ColorProvider,
         colors: WidgetColors,
         compact: Boolean,
+        flagSp: Float,
         pillFirst: Boolean,
         launcherRtl: Boolean,
     ) {
@@ -153,7 +158,7 @@ class SmallCurrencyWidget : GlanceAppWidget() {
             val flag: @Composable () -> Unit = {
                 Text(
                     getCurrencyInfo(code).flag,
-                    style = TextStyle(fontSize = if (compact) 15.sp else 19.sp),
+                    style = TextStyle(fontSize = flagSp.sp),
                     modifier = GlanceModifier
                         .clickable(actionStartActivity(MainActivity.pickCurrencyIntent(context, slot)))
                         .padding(horizontal = 4.dp, vertical = 2.dp)

@@ -179,6 +179,14 @@ class MainViewModel(
         }
     }
 
+    private val _legacyAppInstalled = MutableStateFlow(false)
+    /** The old AI Studio build is still installed next to this app (checked on every resume). */
+    val legacyAppInstalled: StateFlow<Boolean> = _legacyAppInstalled.asStateFlow()
+
+    fun setLegacyAppInstalled(installed: Boolean) {
+        _legacyAppInstalled.value = installed
+    }
+
     fun dismissUpdateBanner() {
         _appUpdate.update { it.copy(bannerDismissed = true) }
     }

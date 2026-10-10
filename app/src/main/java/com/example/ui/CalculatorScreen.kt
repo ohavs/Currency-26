@@ -109,7 +109,7 @@ import kotlin.math.abs
 private enum class AppScreen { Calculator, Settings, Picker }
 
 @Composable
-fun CalculatorScreen(viewModel: MainViewModel) {
+fun CalculatorScreen(viewModel: MainViewModel, onRemoveLegacyApp: () -> Unit = {}) {
     val state by viewModel.state.collectAsState()
     val themeMode by viewModel.themeMode.collectAsState()
     val colorTheme by viewModel.colorTheme.collectAsState()
@@ -117,6 +117,7 @@ fun CalculatorScreen(viewModel: MainViewModel) {
     val appUpdate by viewModel.appUpdate.collectAsState()
     val checkAppUpdates by viewModel.checkAppUpdates.collectAsState()
     val language by viewModel.language.collectAsState()
+    val legacyAppInstalled by viewModel.legacyAppInstalled.collectAsState()
     val palette = LocalPalette.current
 
     val screen = when {
@@ -149,6 +150,8 @@ fun CalculatorScreen(viewModel: MainViewModel) {
                     onStartAppUpdate = viewModel::startAppUpdate,
                     onDismissAppUpdate = viewModel::dismissUpdateBanner,
                     onRemoveExtra = viewModel::removeExtraTarget,
+                    legacyAppInstalled = legacyAppInstalled,
+                    onRemoveLegacyApp = onRemoveLegacyApp,
                 )
                 AppScreen.Settings -> SettingsScreen(
                     themeMode = themeMode,
@@ -201,6 +204,8 @@ fun CalculatorContent(
     onDismissAppUpdate: () -> Unit = {},
     onSwapSlots: (CurrencySlot, CurrencySlot) -> Unit = { _, _ -> },
     onRemoveExtra: () -> Unit = {},
+    legacyAppInstalled: Boolean = false,
+    onRemoveLegacyApp: () -> Unit = {},
 ) {
     val updatedAt = formatUpdatedAt(
         state.lastUpdateTimestamp,
@@ -240,6 +245,10 @@ fun CalculatorContent(
                 onUpdate = onStartAppUpdate,
                 onDismiss = onDismissAppUpdate
             )
+            Spacer(Modifier.height(8.dp))
+        }
+        if (legacyAppInstalled) {
+            LegacyAppBanner(onRemove = onRemoveLegacyApp)
             Spacer(Modifier.height(8.dp))
         }
 
@@ -335,6 +344,42 @@ private fun UpdateBanner(versionName: String, progress: Float?, onUpdate: () -> 
                 .padding(8.dp)
                 .size(18.dp)
         )
+    }
+}
+
+/** The old AI Studio build is still installed (its widget has the old design): offer to uninstall it. */
+@Composable
+private fun LegacyAppBanner(onRemove: () -> Unit) {
+    val palette = LocalPalette.current
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(22.dp))
+            .background(palette.card)
+            .padding(start = 16.dp, end = 6.dp, top = 6.dp, bottom = 6.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Icon(Icons.Rounded.DeleteOutline, contentDescription = null, tint = palette.ink, modifier = Modifier.size(20.dp))
+        Spacer(Modifier.width(10.dp))
+        Text(
+            text = stringResource(R.string.legacy_app_installed),
+            style = MaterialTheme.typography.labelLarge,
+            color = palette.ink,
+            maxLines = 2,
+            overflow = TextOverflow.Ellipsis,
+            modifier = Modifier.weight(1f)
+        )
+        Spacer(Modifier.width(8.dp))
+        Box(
+            modifier = Modifier
+                .clip(RoundedCornerShape(16.dp))
+                .background(palette.accent)
+                .clickable(role = Role.Button, onClick = onRemove)
+                .padding(horizontal = 14.dp, vertical = 8.dp),
+            contentAlignment = Alignment.Center
+        ) {
+            Text(stringResource(R.string.legacy_app_remove), style = MaterialTheme.typography.labelLarge, color = palette.onAccent)
+        }
     }
 }
 

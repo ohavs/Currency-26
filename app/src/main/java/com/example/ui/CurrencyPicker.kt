@@ -33,6 +33,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -46,11 +47,13 @@ import androidx.compose.ui.unit.dp
 import com.example.R
 import com.example.data.CurrencySlot
 import com.example.ui.theme.LocalPalette
+import com.example.utils.CurrencySearch
 import com.example.utils.currencyMap
 import com.example.utils.formatRate
-import com.example.utils.countryName
 import com.example.utils.currencyName
 import com.example.utils.getCurrencyInfo
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 
 @Composable
 fun CurrencySelector(
@@ -75,25 +78,14 @@ fun CurrencySelector(
     }
 
     // Before the first download there are no rates yet - still offer the well-known currencies.
-    val locale = LocalAppLocale.current
     val allCurrencies = remember(state.rates.keys, hidden) {
         state.rates.keys.ifEmpty { currencyMap.keys }.filterNot { it in hidden }.sorted()
     }
     val query = state.searchQuery.trim()
-    val filtered = remember(allCurrencies, query, locale) {
-        if (query.isEmpty()) {
-            allCurrencies
-        } else {
-            allCurrencies.filter {
-                val info = getCurrencyInfo(it)
-                // Match the code, the names in the UI language, and the Hebrew names/keywords.
-                it.contains(query, ignoreCase = true) ||
-                    currencyName(it, locale).contains(query, ignoreCase = true) ||
-                    countryName(it, locale).contains(query, ignoreCase = true) ||
-                    info.hebrewName.contains(query, ignoreCase = true) ||
-                    info.keywords.any { keyword -> keyword.contains(query, ignoreCase = true) }
-            }
-        }
+    // Code, symbol, currency and country names in every app language - best matches first.
+    val filtered = remember(allCurrencies, query) { CurrencySearch.search(allCurrencies, query) }
+    LaunchedEffect(allCurrencies) {
+        withContext(Dispatchers.Default) { CurrencySearch.warmUp(allCurrencies) }
     }
     val recents = state.recentCurrencies.filter { it in allCurrencies }.take(8)
 
