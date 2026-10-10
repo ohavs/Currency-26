@@ -13,6 +13,8 @@
     <string name="update_available">גרסה %1$s זמינה</string>
     <string name="update_action">עדכון</string>
     <string name="close">סגירה</string>
+    <string name="legacy_app_installed">גרסה ישנה של האפליקציה עדיין מותקנת</string>
+    <string name="legacy_app_remove">הסרה</string>
     <string name="swap_currencies">החלפת מטבעות</string>
     <string name="change_currency">החלפת מטבע</string>
     <string name="add_currency">הוספת מטבע נוסף</string>
@@ -29,7 +31,7 @@
     <string name="recently_used">בשימוש לאחרונה</string>
     <string name="all_currencies">כל המטבעות</string>
     <string name="no_results">לא נמצאו מטבעות עבור \"%1$s\"</string>
-    <string name="search_hint">חיפוש לפי מדינה, שם או קוד</string>
+    <string name="search_hint">חיפוש מטבע, מדינה, סמל או קוד</string>
     <string name="clear_search">ניקוי חיפוש</string>
     <string name="selected">נבחר</string>
     <string name="appearance">מראה</string>

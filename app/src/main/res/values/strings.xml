@@ -13,6 +13,8 @@
     <string name="update_available">Version %1$s available</string>
     <string name="update_action">Update</string>
     <string name="close">Close</string>
+    <string name="legacy_app_installed">An old version of the app is still installed</string>
+    <string name="legacy_app_remove">Remove</string>
     <string name="swap_currencies">Swap currencies</string>
     <string name="change_currency">Change currency</string>
     <string name="add_currency">Add another currency</string>
@@ -29,7 +31,7 @@
     <string name="recently_used">Recently used</string>
     <string name="all_currencies">All currencies</string>
     <string name="no_results">No currencies match \"%1$s\"</string>
-    <string name="search_hint">Search by country, name or code</string>
+    <string name="search_hint">Search currency, country, symbol or code</string>
     <string name="clear_search">Clear search</string>
     <string name="selected">Selected</string>
     <string name="appearance">Appearance</string>

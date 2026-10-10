@@ -25,6 +25,7 @@ import com.example.ui.MainViewModel
 import com.example.ui.theme.MyApplicationTheme
 import com.example.ui.theme.isDarkTheme
 import com.example.utils.AppLanguage
+import com.example.update.LegacyApp
 
 
 class MainActivity : ComponentActivity() {
@@ -77,7 +78,7 @@ class MainActivity : ComponentActivity() {
                     themeMode = themeMode,
                     colorThemeStr = colorThemeStr
                 ) {
-                    CalculatorScreen(viewModel)
+                    CalculatorScreen(viewModel, onRemoveLegacyApp = { runCatching { startActivity(LegacyApp.uninstallIntent()) } })
                 }
             }
         }
@@ -92,6 +93,7 @@ class MainActivity : ComponentActivity() {
     override fun onResume() {
         super.onResume()
         viewModel.reloadSelection()
+        viewModel.setLegacyAppInstalled(LegacyApp.isInstalled(this))
     }
 
     private fun handleWidgetIntent(intent: Intent?) {
