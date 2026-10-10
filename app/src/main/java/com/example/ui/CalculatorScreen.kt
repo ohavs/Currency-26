@@ -77,7 +77,11 @@ import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.rememberTextMeasurer
 import androidx.compose.ui.text.style.TextAlign
@@ -85,18 +89,21 @@ import androidx.compose.ui.text.style.TextDirection
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.em
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.zIndex
 import com.example.R
 import com.example.data.CurrencySlot
 import com.example.ui.theme.AmountTextStyle
 import com.example.ui.theme.LocalPalette
+import com.example.utils.amountSymbol
 import com.example.utils.formatAmount
 import com.example.utils.formatAmountInput
 import com.example.utils.formatRate
 import com.example.utils.formatUpdatedAt
 import com.example.utils.currencyName
 import com.example.utils.getCurrencyInfo
+import com.example.utils.symbolLeads
 import kotlin.math.abs
 
 private enum class AppScreen { Calculator, Settings, Picker }
@@ -242,10 +249,10 @@ fun CalculatorContent(
         val extraCode = state.extraTargetCurrency
         val extraAmount = state.extraTargetAmount
         val entries = buildList {
-            add(StackEntry(CurrencySlot.SOURCE, state.sourceCurrency, formatAmountInput(state.sourceAmountRaw), palette.card, palette.cardSoft))
-            add(StackEntry(CurrencySlot.TARGET, state.targetCurrency, formatAmount(state.targetAmount), palette.highlight, palette.highlightSoft))
+            add(StackEntry(CurrencySlot.SOURCE, state.sourceCurrency, formatAmountInput(state.sourceAmountRaw), palette.card))
+            add(StackEntry(CurrencySlot.TARGET, state.targetCurrency, formatAmount(state.targetAmount), palette.highlight))
             if (extraCode != null && extraAmount != null) {
-                add(StackEntry(CurrencySlot.EXTRA_TARGET, extraCode, formatAmount(extraAmount), palette.background, palette.cardSoft, removable = true))
+                add(StackEntry(CurrencySlot.EXTRA_TARGET, extraCode, formatAmount(extraAmount), palette.background, removable = true))
             }
         }
         CurrencyStack(
@@ -340,7 +347,6 @@ private data class StackEntry(
     val code: String,
     val amount: String,
     val cardColor: Color,
-    val badgeColor: Color,
     /** The optional extra currency: drawn as a light dashed card with its own remove button. */
     val removable: Boolean = false,
 )
@@ -471,7 +477,6 @@ private fun CurrencyStack(
                         code = entry.code,
                         amount = entry.amount,
                         cardColor = entry.cardColor,
-                        badgeColor = entry.badgeColor,
                         highlighted = isHover,
                         onClick = { onCurrencyClick(slot) },
                         onRemove = if (entry.removable) onRemoveExtra else null
@@ -554,13 +559,12 @@ private fun TrashZone(active: Boolean, modifier: Modifier = Modifier) {
     }
 }
 
-/** One currency in a single row: flag and country name (tap to change) on one side, the amount on the other. */
+/** One currency in a single row: flag and currency name (tap to change) on one side, symbol and amount on the other. */
 @Composable
 private fun CurrencyRow(
     code: String,
     amount: String,
     cardColor: Color,
-    badgeColor: Color,
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
     highlighted: Boolean = false,
@@ -587,29 +591,21 @@ private fun CurrencyRow(
                 .padding(horizontal = 8.dp, vertical = 8.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            FlagBadge(info.flag, background = badgeColor, size = 40.dp)
+            Text(text = info.flag, fontSize = 30.sp)
             Spacer(Modifier.width(10.dp))
             Text(
                 text = currencyName(code, LocalAppLocale.current),
-                style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.SemiBold),
+                style = MaterialTheme.typography.titleMedium.copy(fontSize = 18.sp, lineHeight = 21.sp, fontWeight = FontWeight.SemiBold),
                 color = palette.ink,
-                maxLines = 1,
+                // Long names ("Israeli New Shekel") wrap to a second line instead of being cut.
+                maxLines = 2,
                 overflow = TextOverflow.Ellipsis,
                 modifier = Modifier.widthIn(max = 150.dp)
             )
-            if (info.symbol.isNotEmpty()) {
-                Spacer(Modifier.width(6.dp))
-                Text(
-                    text = info.symbol,
-                    style = MaterialTheme.typography.titleMedium,
-                    color = palette.inkMuted,
-                    maxLines = 1
-                )
-            }
         }
         Spacer(Modifier.width(12.dp))
         AutoSizeText(
-            text = amount,
+            text = amountWithSymbol(amount, amountSymbol(code), palette.accent),
             style = AmountTextStyle.copy(fontSize = 32.sp),
             color = palette.ink,
             // Amount on the far side from the currency (left in Hebrew, right in English/Spanish).
@@ -634,6 +630,18 @@ private fun CurrencyRow(
                 )
             }
         }
+    }
+}
+
+/** The amount with its currency symbol beside it ("$ 1,250", "1,250 Ft"): smaller and in the accent color. */
+private fun amountWithSymbol(amount: String, symbol: String, symbolColor: Color): AnnotatedString = buildAnnotatedString {
+    val symbolStyle = SpanStyle(color = symbolColor, fontSize = 0.7.em, fontWeight = FontWeight.SemiBold)
+    if (symbolLeads(symbol)) {
+        withStyle(symbolStyle) { append(symbol); append(' ') }
+        append(amount)
+    } else {
+        append(amount)
+        withStyle(symbolStyle) { append(' '); append(symbol) }
     }
 }
 
@@ -675,12 +683,12 @@ private fun AddCurrencyButton(onClick: () -> Unit) {
 /** Single-line text that shrinks its font (down to [minFontSize]) instead of cutting long amounts. */
 @Composable
 private fun AutoSizeText(
-    text: String,
+    text: AnnotatedString,
     style: TextStyle,
     color: Color,
     textAlign: TextAlign,
     modifier: Modifier = Modifier,
-    minFontSize: Float = 16f,
+    minFontSize: Float = 12f,
 ) {
     BoxWithConstraints(modifier = modifier) {
         val measurer = rememberTextMeasurer()

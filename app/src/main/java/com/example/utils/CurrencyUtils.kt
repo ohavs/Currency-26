@@ -40,6 +40,13 @@ fun getCountryName(code: String): String {
     return if (name.isNotBlank() && !name.equals(region, ignoreCase = true)) name else getCurrencyInfo(code).hebrewName
 }
 
+/** What is written next to an amount: the currency symbol, or its code when it has none. */
+fun amountSymbol(code: String): String = getCurrencyInfo(code).symbol.ifEmpty { code.uppercase() }
+
+/** Sign-like symbols go before the number ("$ 1,250", "₪ 1,250"); lettered ones after it ("1,250 Ft", "1,250 CHF"). */
+fun symbolLeads(symbol: String): Boolean =
+    symbol.any { Character.getType(it) == Character.CURRENCY_SYMBOL.toInt() } || symbol.none { it.isLetter() }
+
 private val nativeSymbolCache = java.util.concurrent.ConcurrentHashMap<String, String>()
 
 /** The symbol as written in the currency's home country (HUF -> "Ft"); "" when it has none besides its code. */
