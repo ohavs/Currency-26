@@ -43,8 +43,9 @@ internal data class LargeWidgetLayout(
     val cardHeightDp: Float,
     val maxAmountSp: Float,
     val flagSp: Float,
-    /** The swap button between the source and target cards. */
-    val swapSizeDp: Float,
+    /** The swap button between the source and target cards: a wide pill, half again as wide as it is tall. */
+    val swapHeightDp: Float,
+    val swapWidthDp: Float,
     val showNames: Boolean,
     val nameSp: Float,
     val nameLines: Int,
@@ -85,6 +86,10 @@ internal fun largeWidgetLayout(widthDp: Float, heightDp: Float, hasExtra: Boolea
     val flagSp = (cardHeight * 0.34f).coerceIn(18f, 46f)
     val showNames = cardHeight >= 52f
     val nameSp = (cardHeight * 0.12f).coerceIn(11f, 16f)
+    val maxAmountSp = (cardHeight * 0.55f).coerceIn(16f, 64f)
+    // The swap button cuts into both cards; in short cards it stays low enough to clear the digits (~0.75em tall).
+    val swapHeight = minOf((cardHeight * 0.4f).coerceIn(44f, 58f), cardHeight - maxAmountSp * 0.75f + gap - 2f)
+        .coerceAtLeast(32f)
     val labelWidth = if (showNames) maxOf(flagSp * 1.35f, nameSp * 6f) else flagSp * 1.35f
     return LargeWidgetLayout(
         showKeypad = showKeypad,
@@ -92,9 +97,10 @@ internal fun largeWidgetLayout(widthDp: Float, heightDp: Float, hasExtra: Boolea
         keyFontSp = (keyRow * 0.4f).coerceIn(14f, 34f),
         showRate = showRate,
         cardHeightDp = cardHeight,
-        maxAmountSp = (cardHeight * 0.55f).coerceIn(16f, 64f),
+        maxAmountSp = maxAmountSp,
         flagSp = flagSp,
-        swapSizeDp = (cardHeight * 0.36f).coerceIn(40f, 52f),
+        swapHeightDp = swapHeight,
+        swapWidthDp = swapHeight * 1.5f,
         showNames = showNames,
         nameSp = nameSp,
         nameLines = if (cardHeight >= 100f) 2 else 1,

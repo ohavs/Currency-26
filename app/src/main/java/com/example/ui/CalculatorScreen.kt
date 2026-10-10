@@ -554,12 +554,12 @@ private fun CurrencyStack(
             Box(
                 modifier = Modifier
                     .align(Alignment.TopCenter)
-                    .offset(y = RowHeight + RowGap / 2 - 25.dp)
-                    .size(50.dp)
-                    .clip(RoundedCornerShape(19.dp))
+                    .offset(y = RowHeight + RowGap / 2 - 28.dp)
+                    .size(width = 76.dp, height = 56.dp)
+                    .clip(RoundedCornerShape(21.dp))
                     .background(palette.background)
                     .padding(4.dp)
-                    .clip(RoundedCornerShape(15.dp))
+                    .clip(RoundedCornerShape(17.dp))
                     .background(palette.accent)
                     .clickable(role = Role.Button, onClickLabel = stringResource(R.string.swap_currencies)) {
                         turns++
@@ -571,7 +571,7 @@ private fun CurrencyStack(
                     Icons.Rounded.SwapVert,
                     contentDescription = stringResource(R.string.swap_currencies),
                     tint = palette.onAccent,
-                    modifier = Modifier.rotate(rotation)
+                    modifier = Modifier.size(28.dp).rotate(rotation)
                 )
             }
         }
