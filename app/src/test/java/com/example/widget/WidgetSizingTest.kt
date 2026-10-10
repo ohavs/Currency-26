@@ -24,8 +24,42 @@ class WidgetSizingTest {
   }
 
   @Test
+  fun `the symbol beside the amount shares the width`() {
+    val plain = fitAmountSp("120,337.50", availableWidthDp = 200f, maxSp = 46f)
+    val withSymbol = fitAmountSp("120,337.50", availableWidthDp = 200f, maxSp = 46f, symbol = "₪")
+    assertTrue(withSymbol < plain)
+    assertTrue(withSymbol * (10 * 0.62f + (0.62f + 0.3f) * SymbolScale) <= 200f + 0.01f)
+  }
+
+  @Test
   fun `long names are shortened`() {
     assertEquals("שקל חדש", shortName("שקל חדש"))
     assertEquals("דירהם (איחוד…", shortName("דירהם (איחוד האמירויות)"))
+  }
+
+  @Test
+  fun `a 4x4 widget gets a roomy keypad and a rate line`() {
+    val layout = largeWidgetLayout(300f, 380f, hasExtra = false)
+    assertTrue(layout.showKeypad && layout.showRate && layout.showNames)
+    assertTrue(layout.keyRowDp >= 40f)
+    assertTrue(layout.keyFontSp >= 20f)
+    assertTrue(layout.maxAmountSp in 28f..40f)
+  }
+
+  @Test
+  fun `cards never shrink below 40dp while the keypad is shown`() {
+    for (height in 230..400 step 10) {
+      for (extra in listOf(false, true)) {
+        val layout = largeWidgetLayout(300f, height.toFloat(), extra)
+        if (layout.keyRowDp > 22f) assertTrue("$height $extra", layout.cardHeightDp >= 40f - 0.01f)
+      }
+    }
+  }
+
+  @Test
+  fun `short widgets drop the rate line and then the keypad`() {
+    assertTrue(!largeWidgetLayout(300f, 260f, hasExtra = false).showRate)
+    val tiny = largeWidgetLayout(300f, 160f, hasExtra = false)
+    assertTrue(!tiny.showKeypad && tiny.cardHeightDp > 50f)
   }
 }

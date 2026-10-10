@@ -2,7 +2,6 @@ package com.example.widget
 
 import android.content.Context
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.datastore.preferences.core.Preferences
@@ -29,10 +28,12 @@ import androidx.glance.unit.ColorProvider
 import com.example.MainActivity
 import com.example.data.CurrencySlot
 import com.example.utils.AppLanguage
+import com.example.utils.amountSymbol
 import com.example.utils.formatAmount
 import com.example.utils.formatAmountInput
 import com.example.utils.formatRate
 import com.example.utils.getCurrencyInfo
+import com.example.utils.symbolLeads
 
 class SmallCurrencyWidget : GlanceAppWidget() {
     override val stateDefinition: GlanceStateDefinition<*> = PreferencesGlanceStateDefinition
@@ -50,19 +51,20 @@ class SmallCurrencyWidget : GlanceAppWidget() {
         val size = LocalSize.current
         val colors = WidgetColors(data.themeMode, data.colorTheme)
         val compact = size.height < 90.dp
-        // Pills on the reading side of the app language; the launcher mirrors rows when the device is RTL.
-        val pillFirst = AppLanguage.isRtl(data.language) == AppLanguage.isLauncherRtl()
+        // Flags on the reading side of the app language; the launcher mirrors rows when the device is RTL.
+        val launcherRtl = AppLanguage.isLauncherRtl()
+        val pillFirst = AppLanguage.isRtl(data.language) == launcherRtl
         val amount = data.amount.toDoubleOrNull() ?: 0.0
         // A third line only when the widget is tall enough to stay readable.
         val extra = data.extraTargetCurrency?.takeIf { size.height >= 110.dp }
         val gap = if (compact) 3.dp else 6.dp
         val showRate = size.height >= (if (extra != null) 190.dp else 150.dp)
-        // Amounts get the space: as large as the line height allows and their width fits (next to a ~64dp pill).
+        // Amounts get the space: as large as the line height allows and their width fits (next to a ~36dp flag).
         val lines = if (extra != null) 3 else 2
         val padding = if (compact) 6.dp else 10.dp
         val lineHeight = (size.height - padding * 2 - gap * (lines - 1) - (if (showRate) 24.dp else 0.dp)) / lines
         val maxAmountSp = (lineHeight.value * 0.55f).coerceIn(13f, 34f)
-        val amountWidth = size.width.value - padding.value * 2 - (if (compact) 0f else 10f) - 64f
+        val amountWidth = size.width.value - padding.value * 2 - (if (compact) 0f else 10f) - 36f - 12f
         val sourceText = formatAmountInput(data.amount)
         val targetText = formatAmount(amount * data.rate)
 
@@ -78,25 +80,25 @@ class SmallCurrencyWidget : GlanceAppWidget() {
             CurrencyLine(
                 code = data.sourceCurrency,
                 amount = sourceText,
-                fontSize = fitAmountSp(sourceText, amountWidth, maxAmountSp, minSp = 12f).sp,
+                fontSize = fitAmountSp(sourceText, amountWidth, maxAmountSp, minSp = 12f, symbol = amountSymbol(data.sourceCurrency)),
                 slot = CurrencySlot.SOURCE,
                 background = colors.card,
-                pillBackground = colors.cardSoft,
                 colors = colors,
                 compact = compact,
-                pillFirst = pillFirst
+                pillFirst = pillFirst,
+                launcherRtl = launcherRtl
             )
             Spacer(GlanceModifier.height(gap))
             CurrencyLine(
                 code = data.targetCurrency,
                 amount = targetText,
-                fontSize = fitAmountSp(targetText, amountWidth, maxAmountSp, minSp = 12f).sp,
+                fontSize = fitAmountSp(targetText, amountWidth, maxAmountSp, minSp = 12f, symbol = amountSymbol(data.targetCurrency)),
                 slot = CurrencySlot.TARGET,
                 background = colors.highlight,
-                pillBackground = colors.highlightSoft,
                 colors = colors,
                 compact = compact,
-                pillFirst = pillFirst
+                pillFirst = pillFirst,
+                launcherRtl = launcherRtl
             )
             if (extra != null) {
                 val extraText = formatAmount(amount * data.extraRate)
@@ -105,13 +107,13 @@ class SmallCurrencyWidget : GlanceAppWidget() {
                 CurrencyLine(
                     code = extra,
                     amount = extraText,
-                    fontSize = fitAmountSp(extraText, amountWidth, maxAmountSp, minSp = 12f).sp,
+                    fontSize = fitAmountSp(extraText, amountWidth, maxAmountSp, minSp = 12f, symbol = amountSymbol(extra)),
                     slot = CurrencySlot.EXTRA_TARGET,
                     background = colors.cardSoft,
-                    pillBackground = colors.card,
                     colors = colors,
                     compact = compact,
-                    pillFirst = pillFirst
+                    pillFirst = pillFirst,
+                    launcherRtl = launcherRtl
                 )
             }
             if (showRate) {
@@ -126,74 +128,59 @@ class SmallCurrencyWidget : GlanceAppWidget() {
         }
     }
 
-    /** One currency row: amount on one side, flag/code pill (opens the currency picker) on the reading side. */
+    /** One currency row: the flag (opens the currency picker) on the reading side, symbol and amount on the other. */
     @Composable
     private fun CurrencyLine(
         code: String,
         amount: String,
-        fontSize: TextUnit,
+        fontSize: Float,
         slot: CurrencySlot,
         background: ColorProvider,
-        pillBackground: ColorProvider,
         colors: WidgetColors,
         compact: Boolean,
         pillFirst: Boolean,
+        launcherRtl: Boolean,
     ) {
-        // In the smallest size the cards would not fit, so only the pills keep a background.
+        val context = LocalContext.current
+        val symbol = amountSymbol(code)
+        // In the smallest size the cards would not fit, so the lines go without a background.
         val rowModifier = if (compact) {
             GlanceModifier.fillMaxWidth()
         } else {
             GlanceModifier.fillMaxWidth().background(background).cornerRadius(16.dp).padding(5.dp)
         }
         Row(modifier = rowModifier, verticalAlignment = Alignment.CenterVertically) {
-            if (pillFirst) {
-                CurrencyPill(code, slot, pillBackground, colors, compact, flagFirst = true)
-                Spacer(GlanceModifier.defaultWeight())
-                AmountText(amount, colors, fontSize)
-            } else {
-                AmountText(amount, colors, fontSize)
-                Spacer(GlanceModifier.defaultWeight())
-                CurrencyPill(code, slot, pillBackground, colors, compact, flagFirst = false)
+            val flag: @Composable () -> Unit = {
+                Text(
+                    getCurrencyInfo(code).flag,
+                    style = TextStyle(fontSize = if (compact) 15.sp else 19.sp),
+                    modifier = GlanceModifier
+                        .clickable(actionStartActivity(MainActivity.pickCurrencyIntent(context, slot)))
+                        .padding(horizontal = 4.dp, vertical = 2.dp)
+                )
             }
+            val symbolText: @Composable () -> Unit = {
+                Text(
+                    ltr(symbol),
+                    style = TextStyle(color = colors.accent, fontSize = (fontSize * SymbolScale).sp, fontWeight = FontWeight.Medium),
+                    maxLines = 1
+                )
+            }
+            val amountText: @Composable () -> Unit = {
+                Text(
+                    ltr(amount),
+                    style = TextStyle(color = colors.ink, fontSize = fontSize.sp, fontWeight = FontWeight.Bold),
+                    maxLines = 1
+                )
+            }
+            val small: @Composable () -> Unit = { Spacer(GlanceModifier.width(3.dp)) }
+            val edge: @Composable () -> Unit = { Spacer(GlanceModifier.width(6.dp)) }
+            val flexible: @Composable () -> Unit = { Spacer(GlanceModifier.defaultWeight()) }
+            // Symbol and amount always read left to right on screen ("$ 1,250", "1,250 Ft"); RTL launchers mirror rows.
+            val onScreen = if (symbolLeads(symbol)) listOf(symbolText, small, amountText) else listOf(amountText, small, symbolText)
+            val amountGroup = if (launcherRtl) onScreen.reversed() else onScreen
+            val items = if (pillFirst) listOf(flag, flexible) + amountGroup + edge else listOf(edge) + amountGroup + listOf(flexible, flag)
+            items.forEach { it() }
         }
-    }
-
-    /** Flag and currency symbol (the code when the currency has no symbol). */
-    @Composable
-    private fun CurrencyPill(
-        code: String,
-        slot: CurrencySlot,
-        background: ColorProvider,
-        colors: WidgetColors,
-        compact: Boolean,
-        flagFirst: Boolean,
-    ) {
-        val context = LocalContext.current
-        val info = getCurrencyInfo(code)
-        val symbol = info.symbol.ifEmpty { code }
-        Row(
-            modifier = GlanceModifier
-                .background(background)
-                .cornerRadius(12.dp)
-                .padding(horizontal = 8.dp, vertical = if (compact) 2.dp else 5.dp)
-                .clickable(actionStartActivity(MainActivity.pickCurrencyIntent(context, slot))),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            val flagStyle = TextStyle(fontSize = if (compact) 12.sp else 15.sp)
-            val symbolStyle = TextStyle(color = colors.ink, fontSize = if (compact) 12.sp else 14.sp, fontWeight = FontWeight.Bold)
-            Text(if (flagFirst) info.flag else symbol, style = if (flagFirst) flagStyle else symbolStyle)
-            Spacer(GlanceModifier.width(4.dp))
-            Text(if (flagFirst) symbol else info.flag, style = if (flagFirst) symbolStyle else flagStyle)
-        }
-    }
-
-    @Composable
-    private fun AmountText(amount: String, colors: WidgetColors, fontSize: TextUnit) {
-        Text(
-            ltr(amount),
-            style = TextStyle(color = colors.ink, fontSize = fontSize, fontWeight = FontWeight.Bold),
-            maxLines = 1,
-            modifier = GlanceModifier.padding(horizontal = 6.dp)
-        )
     }
 }

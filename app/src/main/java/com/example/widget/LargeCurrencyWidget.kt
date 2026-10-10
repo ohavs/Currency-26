@@ -37,6 +37,7 @@ import com.example.MainActivity
 import com.example.R
 import com.example.data.CurrencySlot
 import com.example.utils.AppLanguage
+import com.example.utils.amountSymbol
 import com.example.utils.applyKeypadKey
 import com.example.utils.currencyName
 import com.example.utils.formatAmount
@@ -44,6 +45,7 @@ import com.example.utils.formatAmountInput
 import com.example.utils.formatRate
 import com.example.utils.formatUpdatedAt
 import com.example.utils.getCurrencyInfo
+import com.example.utils.symbolLeads
 import java.util.Locale
 
 class LargeCurrencyWidget : GlanceAppWidget() {
@@ -69,31 +71,41 @@ class LargeCurrencyWidget : GlanceAppWidget() {
         val pillFirst = appRtl == launcherRtl
         val locale = AppLanguage.locale(data.language)
         val localized = remember(data.language) { AppLanguage.wrap(context, data.language) }
-        val updatedLabel = formatUpdatedAt(
+        val updatedTime = formatUpdatedAt(
             data.updatedAt,
             todayFormat = localized.getString(R.string.today_at),
             yesterdayFormat = localized.getString(R.string.yesterday_at)
-        )?.let { localized.getString(R.string.updated_at, it) }
+        )
 
-        // The keypad keeps a normal, bounded size; all remaining height goes to the amounts.
-        val padding = 12.dp
-        val gap = 6.dp
-        val keyRow = (size.height.value * 0.085f).coerceIn(28f, 50f).dp
-        val keypadHeight = keyRow * 4 + gap * 3
-        val showRate = size.height >= 260.dp
-        val rateHeight = 36.dp
-        val cardCount = if (extra != null) 3 else 2
-        val displayHeight = size.height - padding * 2 - keypadHeight - 8.dp
-        val fixedInDisplay = (if (showRate) rateHeight + gap * 2 else gap) + (if (extra != null) gap else 0.dp)
-        val cardHeight = (displayHeight - fixedInDisplay) / cardCount
-        val maxAmountSp = (cardHeight.value * 0.5f).coerceIn(16f, 46f)
-        val showNames = cardHeight >= 54.dp
-        // Width left for an amount next to the currency pill (~92dp) inside the card padding.
-        val amountWidth = size.width.value - padding.value * 2 - 28f - 92f
+        val layout = largeWidgetLayout(size.width.value, size.height.value, hasExtra = extra != null)
+        val padding = LargeWidgetLayout.PADDING.dp
+        val gap = LargeWidgetLayout.GAP.dp
 
         val amount = data.amount.toDoubleOrNull() ?: 0.0
         val sourceText = formatAmountInput(data.amount)
         val targetText = formatAmount(amount * data.rate)
+
+        @Composable
+        fun card(code: String, text: String, slot: CurrencySlot, background: ColorProvider, removable: Boolean, modifier: GlanceModifier) {
+            val symbol = amountSymbol(code)
+            val width = if (removable) layout.amountWidthDp - 32f else layout.amountWidthDp
+            CurrencyCard(
+                code = code,
+                symbol = symbol,
+                amount = text,
+                fontSize = fitAmountSp(text, width, layout.maxAmountSp, symbol = symbol),
+                flagSize = layout.flagSp.sp,
+                slot = slot,
+                background = background,
+                colors = colors,
+                locale = locale,
+                showName = layout.showNames,
+                pillFirst = pillFirst,
+                launcherRtl = launcherRtl,
+                removable = removable,
+                modifier = modifier
+            )
+        }
 
         Column(
             modifier = GlanceModifier
@@ -102,166 +114,113 @@ class LargeCurrencyWidget : GlanceAppWidget() {
                 .cornerRadius(28.dp)
                 .padding(padding)
         ) {
-            Column(modifier = GlanceModifier.fillMaxWidth().defaultWeight()) {
-                CurrencyCard(
-                    code = data.sourceCurrency,
-                    amount = sourceText,
-                    fontSize = fitAmountSp(sourceText, amountWidth, maxAmountSp).sp,
-                    slot = CurrencySlot.SOURCE,
-                    background = colors.card,
-                    pillBackground = colors.cardSoft,
-                    colors = colors,
-                    locale = locale,
-                    showName = showNames,
-                    pillFirst = pillFirst,
-                    removable = false,
-                    modifier = GlanceModifier.fillMaxWidth().defaultWeight()
-                )
-                Spacer(GlanceModifier.height(gap))
-                if (showRate) {
-                    RateRow(data, colors, rateHeight, pillFirst, appRtl, updatedLabel)
+            // Source and target with the swap button alone in the middle, cut into both cards (as in the app).
+            Box(modifier = GlanceModifier.fillMaxWidth().defaultWeight(), contentAlignment = Alignment.Center) {
+                Column(modifier = GlanceModifier.fillMaxSize()) {
+                    card(data.sourceCurrency, sourceText, CurrencySlot.SOURCE, colors.card, false, GlanceModifier.fillMaxWidth().defaultWeight())
                     Spacer(GlanceModifier.height(gap))
+                    card(data.targetCurrency, targetText, CurrencySlot.TARGET, colors.highlight, false, GlanceModifier.fillMaxWidth().defaultWeight())
                 }
-                CurrencyCard(
-                    code = data.targetCurrency,
-                    amount = targetText,
-                    fontSize = fitAmountSp(targetText, amountWidth, maxAmountSp).sp,
-                    slot = CurrencySlot.TARGET,
-                    background = colors.highlight,
-                    pillBackground = colors.highlightSoft,
-                    colors = colors,
-                    locale = locale,
-                    showName = showNames,
-                    pillFirst = pillFirst,
-                    removable = false,
-                    modifier = GlanceModifier.fillMaxWidth().defaultWeight()
-                )
-                if (extra != null) {
-                    val extraText = formatAmount(amount * data.extraRate)
-                    Spacer(GlanceModifier.height(gap))
-                    // The optional currency: lighter card plus a remove button, matching the app.
-                    CurrencyCard(
-                        code = extra,
-                        amount = extraText,
-                        fontSize = fitAmountSp(extraText, amountWidth - 30f, maxAmountSp).sp,
-                        slot = CurrencySlot.EXTRA_TARGET,
-                        background = colors.cardSoft,
-                        pillBackground = colors.card,
-                        colors = colors,
-                        locale = locale,
-                        showName = showNames,
-                        pillFirst = pillFirst,
-                        removable = true,
-                        modifier = GlanceModifier.fillMaxWidth().defaultWeight()
-                    )
-                }
+                SwapButton(colors)
             }
-            Spacer(GlanceModifier.height(8.dp))
-            Keypad(
-                colors = colors,
-                mirrored = launcherRtl,
-                gap = gap,
-                rowHeight = keyRow,
-                fontSize = (keyRow.value * 0.42f).coerceIn(15f, 21f).sp,
-                modifier = GlanceModifier.fillMaxWidth()
-            )
+            if (extra != null) {
+                Spacer(GlanceModifier.height(gap))
+                // The optional currency: lighter card plus a remove button, matching the app.
+                card(extra, formatAmount(amount * data.extraRate), CurrencySlot.EXTRA_TARGET, colors.cardSoft, true, GlanceModifier.fillMaxWidth().height(layout.cardHeightDp.dp))
+            }
+            if (layout.showKeypad) {
+                Spacer(GlanceModifier.height(LargeWidgetLayout.KEYPAD_SPACING.dp))
+                Keypad(
+                    colors = colors,
+                    mirrored = launcherRtl,
+                    gap = gap,
+                    rowHeight = layout.keyRowDp.dp,
+                    fontSize = layout.keyFontSp.sp,
+                    modifier = GlanceModifier.fillMaxWidth()
+                )
+            }
+            if (layout.showRate) {
+                RateLine(
+                    data = data,
+                    colors = colors,
+                    updatedTime = updatedTime,
+                    updatedLabel = localized.getString(R.string.updated_at, updatedTime.orEmpty()),
+                    pillFirst = pillFirst,
+                    height = LargeWidgetLayout.RATE_HEIGHT.dp,
+                    widthDp = size.width.value - LargeWidgetLayout.PADDING * 2
+                )
+            }
         }
     }
 
-    /** Amount (large) on one side, the currency pill on the reading side; tapping the pill opens the picker. */
+    /** Flag and name (on the reading side) and the amount with its symbol; tapping the card opens the picker. */
     @Composable
     private fun CurrencyCard(
         code: String,
+        symbol: String,
         amount: String,
-        fontSize: TextUnit,
+        fontSize: Float,
+        flagSize: TextUnit,
         slot: CurrencySlot,
         background: ColorProvider,
-        pillBackground: ColorProvider,
         colors: WidgetColors,
         locale: Locale,
         showName: Boolean,
         pillFirst: Boolean,
+        launcherRtl: Boolean,
         removable: Boolean,
         modifier: GlanceModifier,
     ) {
+        val context = LocalContext.current
         Row(
             modifier = modifier
                 .background(background)
                 .cornerRadius(20.dp)
-                .padding(horizontal = 12.dp),
+                .padding(horizontal = 12.dp)
+                .clickable(actionStartActivity(MainActivity.pickCurrencyIntent(context, slot))),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            // Row children are mirrored by RTL launchers, so the whole order flips with pillFirst.
-            if (pillFirst) {
-                CurrencyPill(code, slot, pillBackground, colors, locale, showName, flagFirst = true)
-                Spacer(GlanceModifier.defaultWeight())
-                AmountText(amount, colors, fontSize)
-                if (removable) {
-                    Spacer(GlanceModifier.width(6.dp))
-                    RemoveButton(colors)
-                }
-            } else {
-                if (removable) {
-                    RemoveButton(colors)
-                    Spacer(GlanceModifier.width(6.dp))
-                }
-                AmountText(amount, colors, fontSize)
-                Spacer(GlanceModifier.defaultWeight())
-                CurrencyPill(code, slot, pillBackground, colors, locale, showName, flagFirst = false)
+            val label: @Composable () -> Unit = { CurrencyLabel(code, flagSize, colors, locale, showName) }
+            val symbolText: @Composable () -> Unit = {
+                Text(
+                    ltr(symbol),
+                    style = TextStyle(color = colors.accent, fontSize = (fontSize * SymbolScale).sp, fontWeight = FontWeight.Medium),
+                    maxLines = 1
+                )
             }
+            val amountText: @Composable () -> Unit = {
+                Text(
+                    ltr(amount),
+                    style = TextStyle(color = colors.ink, fontSize = fontSize.sp, fontWeight = FontWeight.Bold),
+                    maxLines = 1
+                )
+            }
+            val small: @Composable () -> Unit = { Spacer(GlanceModifier.width(4.dp)) }
+            val flexible: @Composable () -> Unit = { Spacer(GlanceModifier.defaultWeight()) }
+            val remove: @Composable () -> Unit = { RemoveButton(colors) }
+            // Symbol and amount always read left to right on screen ("$ 1,250", "1,250 Ft"); RTL launchers mirror rows.
+            val onScreen = if (symbolLeads(symbol)) listOf(symbolText, small, amountText) else listOf(amountText, small, symbolText)
+            val amountGroup = if (launcherRtl) onScreen.reversed() else onScreen
+            val tail = if (removable) listOf(small, remove) else emptyList()
+            // Row children are mirrored by RTL launchers, so the whole order flips with pillFirst.
+            val items = if (pillFirst) listOf(label, flexible) + amountGroup + tail else tail.reversed() + amountGroup + listOf(flexible, label)
+            items.forEach { it() }
         }
     }
 
-    /** Flag and symbol, with the currency name underneath when there is room. */
+    /** The flag on its own (no background), with the currency name underneath when there is room. */
     @Composable
-    private fun CurrencyPill(
-        code: String,
-        slot: CurrencySlot,
-        background: ColorProvider,
-        colors: WidgetColors,
-        locale: Locale,
-        showName: Boolean,
-        flagFirst: Boolean,
-    ) {
-        val context = LocalContext.current
-        val info = getCurrencyInfo(code)
-        val symbol = info.symbol.ifEmpty { code }
-        Column(
-            modifier = GlanceModifier
-                .background(background)
-                .cornerRadius(14.dp)
-                .padding(horizontal = 10.dp, vertical = 5.dp)
-                .clickable(actionStartActivity(MainActivity.pickCurrencyIntent(context, slot))),
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                if (flagFirst) {
-                    Text(info.flag, style = TextStyle(fontSize = 18.sp))
-                    Spacer(GlanceModifier.width(5.dp))
-                    Text(symbol, style = TextStyle(color = colors.ink, fontSize = 16.sp, fontWeight = FontWeight.Bold))
-                } else {
-                    Text(symbol, style = TextStyle(color = colors.ink, fontSize = 16.sp, fontWeight = FontWeight.Bold))
-                    Spacer(GlanceModifier.width(5.dp))
-                    Text(info.flag, style = TextStyle(fontSize = 18.sp))
-                }
-            }
+    private fun CurrencyLabel(code: String, flagSize: TextUnit, colors: WidgetColors, locale: Locale, showName: Boolean) {
+        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+            Text(getCurrencyInfo(code).flag, style = TextStyle(fontSize = flagSize))
             if (showName) {
                 Text(
-                    shortName(currencyName(code, locale)),
-                    style = TextStyle(color = colors.inkMuted, fontSize = 11.sp, textAlign = TextAlign.Center),
+                    shortName(currencyName(code, locale), max = 12),
+                    style = TextStyle(color = colors.inkMuted, fontSize = 11.sp, fontWeight = FontWeight.Medium, textAlign = TextAlign.Center),
                     maxLines = 1
                 )
             }
         }
-    }
-
-    @Composable
-    private fun AmountText(amount: String, colors: WidgetColors, fontSize: TextUnit) {
-        Text(
-            ltr(amount),
-            style = TextStyle(color = colors.ink, fontSize = fontSize, fontWeight = FontWeight.Bold),
-            maxLines = 1
-        )
     }
 
     @Composable
@@ -278,78 +237,73 @@ class LargeCurrencyWidget : GlanceAppWidget() {
         }
     }
 
-    /** Live rate (tap opens the app) with the swap button on the currency-pill side. */
+    /** Small line at the very bottom: the live rate and when it was updated; tapping it opens the app. */
     @Composable
-    private fun RateRow(
+    private fun RateLine(
         data: WidgetData,
         colors: WidgetColors,
-        height: Dp,
+        updatedTime: String?,
+        updatedLabel: String,
         pillFirst: Boolean,
-        appRtl: Boolean,
-        updatedLabel: String?,
-    ) {
-        Row(modifier = GlanceModifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
-            if (pillFirst) {
-                SwapButton(colors, height)
-                Spacer(GlanceModifier.width(6.dp))
-                RateBox(data, colors, height, appRtl, updatedLabel, GlanceModifier.defaultWeight())
-            } else {
-                RateBox(data, colors, height, appRtl, updatedLabel, GlanceModifier.defaultWeight())
-                Spacer(GlanceModifier.width(6.dp))
-                SwapButton(colors, height)
-            }
-        }
-    }
-
-    @Composable
-    private fun RateBox(
-        data: WidgetData,
-        colors: WidgetColors,
         height: Dp,
-        appRtl: Boolean,
-        updatedLabel: String?,
-        modifier: GlanceModifier,
+        widthDp: Float,
     ) {
         val context = LocalContext.current
-        // Text starts on the reading side of the app language, whatever the launcher direction.
-        val align = if (appRtl) TextAlign.Right else TextAlign.Left
-        Column(
-            modifier = modifier
+        val rate = "1 ${data.sourceCurrency} = ${formatRate(data.rate)} ${data.targetCurrency}"
+        // Drop the "updated" wording, then the time, when the line would not fit on one row (~0.55em per char at 11sp).
+        val fits = { text: String -> (rate.length + 3 + text.length) * 11f * 0.55f <= widthDp }
+        val updated = when {
+            updatedTime == null -> null
+            fits(updatedLabel) -> updatedLabel
+            fits(updatedTime) -> updatedTime
+            else -> null
+        }
+        Row(
+            modifier = GlanceModifier
+                .fillMaxWidth()
                 .height(height)
-                .background(colors.cardSoft)
-                .cornerRadius(12.dp)
-                .padding(horizontal = 12.dp)
                 .clickable(actionStartActivity(MainActivity.openAppIntent(context))),
-            verticalAlignment = Alignment.CenterVertically
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalAlignment = Alignment.Bottom
         ) {
-            Text(
-                ltr("1 ${data.sourceCurrency} = ${formatRate(data.rate)} ${data.targetCurrency}"),
-                style = TextStyle(color = colors.ink, fontSize = 12.sp, fontWeight = FontWeight.Medium, textAlign = align),
-                maxLines = 1,
-                modifier = GlanceModifier.fillMaxWidth()
-            )
-            if (updatedLabel != null) {
-                Text(
-                    updatedLabel,
-                    style = TextStyle(color = colors.inkMuted, fontSize = 10.sp, textAlign = align),
-                    maxLines = 1,
-                    modifier = GlanceModifier.fillMaxWidth()
-                )
+            val rateText: @Composable () -> Unit = {
+                Text(ltr(rate), style = TextStyle(color = colors.inkMuted, fontSize = 11.sp, fontWeight = FontWeight.Medium), maxLines = 1)
+            }
+            // The rate comes first in reading order, the update time after it.
+            if (updated == null) {
+                rateText()
+            } else {
+                val updatedText: @Composable () -> Unit = {
+                    Text(updated, style = TextStyle(color = colors.inkMuted, fontSize = 11.sp), maxLines = 1)
+                }
+                if (pillFirst) rateText() else updatedText()
+                Text("  ·  ", style = TextStyle(color = colors.inkMuted, fontSize = 11.sp), maxLines = 1)
+                if (pillFirst) updatedText() else rateText()
             }
         }
     }
 
+    /** Accent button in a background-colored ring, so it looks cut into the two cards around it. */
     @Composable
-    private fun SwapButton(colors: WidgetColors, size: Dp) {
+    private fun SwapButton(colors: WidgetColors) {
         Box(
             modifier = GlanceModifier
-                .size(size)
-                .background(colors.accent)
-                .cornerRadius(12.dp)
-                .clickable(actionRunCallback<SwapAction>()),
+                .size(40.dp)
+                .background(colors.background)
+                .cornerRadius(15.dp)
+                .clickable(actionRunCallback<SwapAction>())
+                .padding(4.dp),
             contentAlignment = Alignment.Center
         ) {
-            Text("⇅", style = TextStyle(color = colors.onAccent, fontSize = 18.sp, fontWeight = FontWeight.Bold))
+            Box(
+                modifier = GlanceModifier
+                    .fillMaxSize()
+                    .background(colors.accent)
+                    .cornerRadius(12.dp),
+                contentAlignment = Alignment.Center
+            ) {
+                Text("⇅", style = TextStyle(color = colors.onAccent, fontSize = 17.sp, fontWeight = FontWeight.Bold))
+            }
         }
     }
 
@@ -395,7 +349,7 @@ class LargeCurrencyWidget : GlanceAppWidget() {
                 .defaultWeight()
                 .fillMaxHeight()
                 .background(background)
-                .cornerRadius(14.dp)
+                .cornerRadius(16.dp)
                 .clickable(actionRunCallback<KeypadAction>(actionParametersOf(KeypadAction.KeyParam to key))),
             contentAlignment = Alignment.Center
         ) {
