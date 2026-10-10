@@ -62,6 +62,27 @@ class WidgetSizingTest {
   }
 
   @Test
+  fun `the swap button is wider than tall and grows a little with the cards`() {
+    val small = largeWidgetLayout(300f, 380f, hasExtra = false)
+    val tall = largeWidgetLayout(400f, 700f, hasExtra = false)
+    assertTrue(small.swapHeightDp >= 40f && small.swapWidthDp > small.swapHeightDp)
+    assertTrue(tall.swapHeightDp in small.swapHeightDp..58f)
+  }
+
+  @Test
+  fun `the swap button never reaches the digits of the cards around it`() {
+    for (height in 230..800 step 10) {
+      for (extra in listOf(false, true)) {
+        val l = largeWidgetLayout(300f, height.toFloat(), extra)
+        if (!l.showKeypad || l.swapHeightDp <= 32f) continue
+        val intoCard = l.swapHeightDp / 2 - LargeWidgetLayout.GAP / 2
+        val belowDigits = (l.cardHeightDp - l.maxAmountSp * 0.75f) / 2
+        assertTrue("$height $extra", intoCard <= belowDigits)
+      }
+    }
+  }
+
+  @Test
   fun `cards never shrink below 40dp while the keypad is shown`() {
     for (height in 230..800 step 10) {
       for (extra in listOf(false, true)) {

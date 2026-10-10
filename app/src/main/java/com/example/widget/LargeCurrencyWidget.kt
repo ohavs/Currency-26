@@ -120,7 +120,7 @@ class LargeCurrencyWidget : GlanceAppWidget() {
                     Spacer(GlanceModifier.height(gap))
                     card(data.targetCurrency, targetText, CurrencySlot.TARGET, colors.highlight, false, GlanceModifier.fillMaxWidth().defaultWeight())
                 }
-                SwapButton(colors, layout.swapSizeDp)
+                SwapButton(colors, layout.swapWidthDp, layout.swapHeightDp)
             }
             if (extra != null) {
                 Spacer(GlanceModifier.height(gap))
@@ -288,12 +288,12 @@ class LargeCurrencyWidget : GlanceAppWidget() {
 
     /** Accent button in a background-colored ring, so it looks cut into the two cards around it. */
     @Composable
-    private fun SwapButton(colors: WidgetColors, size: Float) {
+    private fun SwapButton(colors: WidgetColors, width: Float, height: Float) {
         Box(
             modifier = GlanceModifier
-                .size(size.dp)
+                .size(width.dp, height.dp)
                 .background(colors.background)
-                .cornerRadius((size * 0.375f).dp)
+                .cornerRadius((height * 0.375f).dp)
                 .clickable(actionRunCallback<SwapAction>())
                 .padding(4.dp),
             contentAlignment = Alignment.Center
@@ -302,10 +302,10 @@ class LargeCurrencyWidget : GlanceAppWidget() {
                 modifier = GlanceModifier
                     .fillMaxSize()
                     .background(colors.accent)
-                    .cornerRadius((size * 0.3f).dp),
+                    .cornerRadius((height * 0.3f).dp),
                 contentAlignment = Alignment.Center
             ) {
-                Text("⇅", style = TextStyle(color = colors.onAccent, fontSize = (size * 0.42f).sp, fontWeight = FontWeight.Bold))
+                Text("⇅", style = TextStyle(color = colors.onAccent, fontSize = (height * 0.5f).sp, fontWeight = FontWeight.Bold))
             }
         }
     }
