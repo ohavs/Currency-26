@@ -196,7 +196,7 @@ class MainViewModel(
         if (enabled && !_appUpdate.value.checked) checkForAppUpdate()
     }
 
-    private fun notifyWidgets() = triggerWidgetUpdate(repository.context)
+    private fun notifyWidgets(settle: Boolean = false) = triggerWidgetUpdate(repository.context, settle)
 
     fun refreshRates() {
         if (_state.value.isRefreshing) return
@@ -222,18 +222,19 @@ class MainViewModel(
 
     fun setThemeMode(mode: String) {
         repository.setThemeMode(mode)
-        notifyWidgets()
+        notifyWidgets(settle = true)
     }
 
     fun setLanguage(language: String) {
         if (language == repository.language.value) return
         repository.setLanguage(language)
-        notifyWidgets()
+        notifyWidgets(settle = true)
     }
 
+    /** The widgets switch to the new colors right away, like the app. */
     fun setColorTheme(theme: String) {
         repository.setColorTheme(theme)
-        notifyWidgets()
+        notifyWidgets(settle = true)
     }
 
     private fun updateAutoUpdate(transform: (AutoUpdateSettings) -> AutoUpdateSettings) {

@@ -34,6 +34,10 @@
     <string name="search_hint">Search currency, country, symbol or code</string>
     <string name="clear_search">Clear search</string>
     <string name="selected">Selected</string>
+    <string name="expand_section">Expand</string>
+    <string name="collapse_section">Collapse</string>
+    <string name="background_updates_every">Background updates every %1$s</string>
+    <string name="background_updates_off">Background updates off</string>
     <string name="appearance">Appearance</string>
     <string name="display_mode">Display mode</string>
     <string name="mode_light">Light</string>

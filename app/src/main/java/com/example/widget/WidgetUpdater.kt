@@ -15,7 +15,10 @@ import com.example.CurrencyApp
 import com.example.utils.AppLanguage
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 
 /** Everything a widget needs to draw itself, stored in its Glance state. */
 data class WidgetData(
@@ -82,7 +85,15 @@ private suspend fun writeWidgetState(context: Context, ids: List<GlanceId>, data
     }
 }
 
-suspend fun updateWidgets(context: Context) {
+/**
+ * One update at a time, each reading the settings when it runs: an older, slower update (say, one waiting on
+ * the rate database) can never finish last and write a stale theme or pair over a newer one.
+ */
+private val updateLock = Mutex()
+
+suspend fun updateWidgets(context: Context) = updateLock.withLock { updateWidgetsNow(context) }
+
+private suspend fun updateWidgetsNow(context: Context) {
     try {
         val appContext = context.applicationContext
         val repository = (appContext as CurrencyApp).repository
@@ -118,9 +129,17 @@ suspend fun updateWidgets(context: Context) {
     }
 }
 
+/**
+ * Refreshes the widgets in the background. [settle] adds a second pass a moment later, for changes that must
+ * not be missed (theme, colors, language): a widget whose Glance session is just closing can drop an update.
+ */
 @OptIn(DelicateCoroutinesApi::class)
-fun triggerWidgetUpdate(context: Context) {
+fun triggerWidgetUpdate(context: Context, settle: Boolean = false) {
     GlobalScope.launch {
         updateWidgets(context)
+        if (settle) {
+            delay(1_500)
+            updateWidgets(context)
+        }
     }
 }

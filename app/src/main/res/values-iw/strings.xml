@@ -34,6 +34,10 @@
     <string name="search_hint">חיפוש מטבע, מדינה, סמל או קוד</string>
     <string name="clear_search">ניקוי חיפוש</string>
     <string name="selected">נבחר</string>
+    <string name="expand_section">הרחבה</string>
+    <string name="collapse_section">כיווץ</string>
+    <string name="background_updates_every">עדכון ברקע כל %1$s</string>
+    <string name="background_updates_off">עדכון ברקע כבוי</string>
     <string name="appearance">מראה</string>
     <string name="display_mode">מצב תצוגה</string>
     <string name="mode_light">בהיר</string>
