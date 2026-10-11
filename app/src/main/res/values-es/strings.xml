@@ -34,6 +34,10 @@
     <string name="search_hint">Buscar moneda, país, símbolo o código</string>
     <string name="clear_search">Borrar búsqueda</string>
     <string name="selected">Seleccionada</string>
+    <string name="expand_section">Expandir</string>
+    <string name="collapse_section">Contraer</string>
+    <string name="background_updates_every">Actualización automática cada %1$s</string>
+    <string name="background_updates_off">Actualización automática desactivada</string>
     <string name="appearance">Apariencia</string>
     <string name="display_mode">Modo de pantalla</string>
     <string name="mode_light">Claro</string>

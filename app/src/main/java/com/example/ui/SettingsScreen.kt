@@ -2,6 +2,18 @@ package com.example.ui
 
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.expandVertically
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.shrinkVertically
+import androidx.compose.material.icons.rounded.ExpandMore
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.draw.rotate
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -98,9 +110,15 @@ fun SettingsScreen(
                 .weight(1f)
                 .verticalScroll(rememberScrollState())
                 .padding(bottom = 24.dp),
-            verticalArrangement = Arrangement.spacedBy(14.dp)
+            verticalArrangement = Arrangement.spacedBy(10.dp)
         ) {
-            SettingsSection(title = stringResource(R.string.language), icon = Icons.Rounded.Language) {
+            // Every section starts closed: its title and a one-line summary of the current values.
+            val languageSummary = if (language == AppLanguage.SYSTEM) {
+                stringResource(R.string.language_system)
+            } else {
+                AppLanguage.OPTIONS.firstOrNull { it.first == language }?.second
+            }
+            SettingsSection(title = stringResource(R.string.language), icon = Icons.Rounded.Language, summary = languageSummary) {
                 SegmentedControl(
                     options = AppLanguage.OPTIONS + (AppLanguage.SYSTEM to stringResource(R.string.language_system)),
                     selected = language,
@@ -109,7 +127,13 @@ fun SettingsScreen(
                 )
             }
 
-            SettingsSection(title = stringResource(R.string.appearance), icon = Icons.Rounded.Palette) {
+            val modeLabel = when (themeMode) {
+                "light" -> stringResource(R.string.mode_light)
+                "dark" -> stringResource(R.string.mode_dark)
+                else -> stringResource(R.string.mode_system)
+            }
+            val themeLabel = stringResource(Palettes.option(colorTheme).labelRes)
+            SettingsSection(title = stringResource(R.string.appearance), icon = Icons.Rounded.Palette, summary = "$modeLabel · $themeLabel") {
                 SettingLabel(stringResource(R.string.display_mode))
                 SegmentedControl(
                     options = listOf(
@@ -139,7 +163,9 @@ fun SettingsScreen(
                 }
             }
 
-            SettingsSection(title = stringResource(R.string.app_updates), icon = Icons.Rounded.SystemUpdate) {
+            val updatesSummary = appUpdate.available?.let { stringResource(R.string.update_available, it.versionName) }
+                ?: stringResource(R.string.installed_version, appUpdate.installedVersion)
+            SettingsSection(title = stringResource(R.string.app_updates), icon = Icons.Rounded.SystemUpdate, summary = updatesSummary) {
                 SwitchRow(
                     title = stringResource(R.string.auto_check_updates),
                     subtitle = stringResource(R.string.auto_check_updates_desc),
@@ -196,7 +222,12 @@ fun SettingsScreen(
                 }
             }
 
-            SettingsSection(title = stringResource(R.string.rate_updates), icon = Icons.Rounded.Update) {
+            val ratesSummary = if (autoUpdate.enabled) {
+                stringResource(R.string.background_updates_every, intervalLabel(autoUpdate.intervalMinutes))
+            } else {
+                stringResource(R.string.background_updates_off)
+            }
+            SettingsSection(title = stringResource(R.string.rate_updates), icon = Icons.Rounded.Update, summary = ratesSummary) {
                 SwitchRow(
                     title = stringResource(R.string.background_updates),
                     subtitle = stringResource(R.string.background_updates_desc),
@@ -259,7 +290,7 @@ fun SettingsScreen(
                 }
             }
 
-            SettingsSection(title = stringResource(R.string.widget), icon = Icons.Rounded.Widgets) {
+            SettingsSection(title = stringResource(R.string.widget), icon = Icons.Rounded.Widgets, summary = null) {
                 Text(
                     text = stringResource(R.string.widget_desc),
                     style = MaterialTheme.typography.bodyMedium,
@@ -292,18 +323,36 @@ private fun intervalLabel(minutes: Long): String = when {
     else -> stringResource(R.string.interval_minutes, minutes.toInt())
 }
 
+/**
+ * A settings card that opens and closes by tapping its title row. Closed, it shows only the title and
+ * [summary] (the current values), so the screen stays short and calm.
+ */
 @Composable
-private fun SettingsSection(title: String, icon: ImageVector, content: @Composable ColumnScope.() -> Unit) {
+private fun SettingsSection(
+    title: String,
+    icon: ImageVector,
+    summary: String?,
+    content: @Composable ColumnScope.() -> Unit,
+) {
     val palette = LocalPalette.current
+    var expanded by rememberSaveable { mutableStateOf(false) }
+    val chevron by animateFloatAsState(if (expanded) 180f else 0f, label = "chevron")
     Column(
         modifier = Modifier
             .fillMaxWidth()
             .clip(RoundedCornerShape(28.dp))
             .background(palette.card)
-            .padding(18.dp),
-        verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
-        Row(verticalAlignment = Alignment.CenterVertically) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .clickable(
+                    role = Role.Button,
+                    onClickLabel = stringResource(if (expanded) R.string.collapse_section else R.string.expand_section)
+                ) { expanded = !expanded }
+                .padding(horizontal = 18.dp, vertical = 16.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
             Box(
                 modifier = Modifier
                     .size(36.dp)
@@ -314,9 +363,36 @@ private fun SettingsSection(title: String, icon: ImageVector, content: @Composab
                 Icon(icon, contentDescription = null, tint = palette.onAccent, modifier = Modifier.size(20.dp))
             }
             Spacer(Modifier.width(12.dp))
-            Text(title, style = MaterialTheme.typography.titleMedium, color = palette.ink)
+            Column(modifier = Modifier.weight(1f)) {
+                Text(title, style = MaterialTheme.typography.titleMedium, color = palette.ink)
+                AnimatedVisibility(visible = !expanded && summary != null) {
+                    Text(
+                        text = summary.orEmpty(),
+                        style = MaterialTheme.typography.labelMedium,
+                        color = palette.inkMuted,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
+                    )
+                }
+            }
+            Icon(
+                Icons.Rounded.ExpandMore,
+                contentDescription = null,
+                tint = palette.inkMuted,
+                modifier = Modifier.rotate(chevron)
+            )
         }
-        content()
+        AnimatedVisibility(
+            visible = expanded,
+            enter = expandVertically() + fadeIn(),
+            exit = shrinkVertically() + fadeOut()
+        ) {
+            Column(
+                modifier = Modifier.padding(start = 18.dp, end = 18.dp, bottom = 18.dp),
+                verticalArrangement = Arrangement.spacedBy(12.dp),
+                content = content
+            )
+        }
     }
 }
 
