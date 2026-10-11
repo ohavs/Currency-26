@@ -13,6 +13,7 @@ import androidx.compose.foundation.gestures.detectDragGesturesAfterLongPress
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -87,6 +88,7 @@ import androidx.compose.ui.text.rememberTextMeasurer
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDirection
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.em
@@ -411,9 +413,6 @@ private fun CurrencyStack(
 ) {
     val palette = LocalPalette.current
     val haptics = LocalHapticFeedback.current
-    var turns by remember { mutableIntStateOf(0) }
-    val rotation by animateFloatAsState(turns * 180f, label = "swap")
-
     // Drag-to-swap: the lifted row, how far it moved, and the row (or trash zone) it currently hovers over.
     var dragging by remember { mutableStateOf<CurrencySlot?>(null) }
     var dragOffset by remember { mutableFloatStateOf(0f) }
@@ -549,32 +548,47 @@ private fun CurrencyStack(
                 }
             }
         }
-        // Background-colored ring makes the button look cut into the first two cards.
+        // A swap button on each seam: source <-> target, and with an extra currency also target <-> extra.
         if (dragging == null) {
-            Box(
-                modifier = Modifier
-                    .align(Alignment.TopCenter)
-                    .offset(y = RowHeight + RowGap / 2 - 28.dp)
-                    .size(width = 76.dp, height = 56.dp)
-                    .clip(RoundedCornerShape(21.dp))
-                    .background(palette.background)
-                    .padding(4.dp)
-                    .clip(RoundedCornerShape(17.dp))
-                    .background(palette.accent)
-                    .clickable(role = Role.Button, onClickLabel = stringResource(R.string.swap_currencies)) {
-                        turns++
-                        onSwap()
-                    },
-                contentAlignment = Alignment.Center
-            ) {
-                Icon(
-                    Icons.Rounded.SwapVert,
-                    contentDescription = stringResource(R.string.swap_currencies),
-                    tint = palette.onAccent,
-                    modifier = Modifier.size(28.dp).rotate(rotation)
+            SeamSwapButton(centerY = RowHeight + RowGap / 2, onClick = onSwap)
+            if (entries.size > 2) {
+                SeamSwapButton(
+                    centerY = RowHeight * 2 + RowGap * 1.5f,
+                    onClick = { onSwapSlots(CurrencySlot.TARGET, CurrencySlot.EXTRA_TARGET) }
                 )
             }
         }
+    }
+}
+
+/** Wide accent button in a background-colored ring, so it looks cut into the two cards around [centerY]. */
+@Composable
+private fun BoxScope.SeamSwapButton(centerY: Dp, onClick: () -> Unit) {
+    val palette = LocalPalette.current
+    var turns by remember { mutableIntStateOf(0) }
+    val rotation by animateFloatAsState(turns * 180f, label = "swap")
+    Box(
+        modifier = Modifier
+            .align(Alignment.TopCenter)
+            .offset(y = centerY - 28.dp)
+            .size(width = 76.dp, height = 56.dp)
+            .clip(RoundedCornerShape(21.dp))
+            .background(palette.background)
+            .padding(4.dp)
+            .clip(RoundedCornerShape(17.dp))
+            .background(palette.accent)
+            .clickable(role = Role.Button, onClickLabel = stringResource(R.string.swap_currencies)) {
+                turns++
+                onClick()
+            },
+        contentAlignment = Alignment.Center
+    ) {
+        Icon(
+            Icons.Rounded.SwapVert,
+            contentDescription = stringResource(R.string.swap_currencies),
+            tint = palette.onAccent,
+            modifier = Modifier.size(28.dp).rotate(rotation)
+        )
     }
 }
 

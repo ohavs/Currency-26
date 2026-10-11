@@ -12,6 +12,7 @@ import androidx.glance.GlanceId
 import androidx.glance.GlanceModifier
 import androidx.glance.LocalContext
 import androidx.glance.LocalSize
+import androidx.glance.action.Action
 import androidx.glance.action.ActionParameters
 import androidx.glance.action.actionParametersOf
 import androidx.glance.action.clickable
@@ -113,19 +114,34 @@ class LargeCurrencyWidget : GlanceAppWidget() {
                 .cornerRadius(28.dp)
                 .padding(padding)
         ) {
-            // Source and target with the swap button alone in the middle, cut into both cards (as in the app).
-            Box(modifier = GlanceModifier.fillMaxWidth().defaultWeight(), contentAlignment = Alignment.Center) {
+            // The cards with a swap button on each seam, cut into the cards around it (as in the app):
+            // source <-> target, and with an extra currency also target <-> extra (no dragging in widgets).
+            Box(
+                modifier = GlanceModifier.fillMaxWidth().defaultWeight(),
+                contentAlignment = if (extra != null) Alignment.TopCenter else Alignment.Center
+            ) {
                 Column(modifier = GlanceModifier.fillMaxSize()) {
                     card(data.sourceCurrency, sourceText, CurrencySlot.SOURCE, colors.card, false, GlanceModifier.fillMaxWidth().defaultWeight())
                     Spacer(GlanceModifier.height(gap))
                     card(data.targetCurrency, targetText, CurrencySlot.TARGET, colors.highlight, false, GlanceModifier.fillMaxWidth().defaultWeight())
+                    if (extra != null) {
+                        Spacer(GlanceModifier.height(gap))
+                        // The optional currency: lighter card plus a remove button, matching the app.
+                        card(extra, formatAmount(amount * data.extraRate), CurrencySlot.EXTRA_TARGET, colors.cardSoft, true, GlanceModifier.fillMaxWidth().defaultWeight())
+                    }
                 }
-                SwapButton(colors, layout.swapWidthDp, layout.swapHeightDp)
-            }
-            if (extra != null) {
-                Spacer(GlanceModifier.height(gap))
-                // The optional currency: lighter card plus a remove button, matching the app.
-                card(extra, formatAmount(amount * data.extraRate), CurrencySlot.EXTRA_TARGET, colors.cardSoft, true, GlanceModifier.fillMaxWidth().height(layout.cardHeightDp.dp))
+                if (extra == null) {
+                    SwapButton(colors, layout.swapWidthDp, layout.swapHeightDp, actionRunCallback<SwapAction>())
+                } else {
+                    val card = layout.cardHeightDp
+                    val button = layout.swapHeightDp
+                    Column(modifier = GlanceModifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally) {
+                        Spacer(GlanceModifier.height((card + LargeWidgetLayout.GAP / 2 - button / 2).dp))
+                        SwapButton(colors, layout.swapWidthDp, button, actionRunCallback<SwapAction>())
+                        Spacer(GlanceModifier.height((card + LargeWidgetLayout.GAP - button).dp))
+                        SwapButton(colors, layout.swapWidthDp, button, actionRunCallback<SwapExtraAction>())
+                    }
+                }
             }
             if (layout.showKeypad) {
                 Spacer(GlanceModifier.height(LargeWidgetLayout.KEYPAD_SPACING.dp))
@@ -288,13 +304,13 @@ class LargeCurrencyWidget : GlanceAppWidget() {
 
     /** Accent button in a background-colored ring, so it looks cut into the two cards around it. */
     @Composable
-    private fun SwapButton(colors: WidgetColors, width: Float, height: Float) {
+    private fun SwapButton(colors: WidgetColors, width: Float, height: Float, onClick: Action) {
         Box(
             modifier = GlanceModifier
                 .size(width.dp, height.dp)
                 .background(colors.background)
                 .cornerRadius((height * 0.375f).dp)
-                .clickable(actionRunCallback<SwapAction>())
+                .clickable(onClick)
                 .padding(4.dp),
             contentAlignment = Alignment.Center
         ) {
@@ -380,6 +396,25 @@ class SwapAction : ActionCallback {
         prefs.edit()
             .putString("source", currentTarget)
             .putString("target", currentSource)
+            .apply()
+
+        updateWidgets(context)
+    }
+}
+
+/** The lower swap button: trades the target and the extra currency, so the third one can move up. */
+class SwapExtraAction : ActionCallback {
+    override suspend fun onAction(
+        context: Context,
+        glanceId: GlanceId,
+        parameters: ActionParameters
+    ) {
+        val prefs = context.getSharedPreferences("currency_prefs", Context.MODE_PRIVATE)
+        val target = prefs.getString("target", "ILS") ?: "ILS"
+        val extra = prefs.getString("target2", null) ?: return
+        prefs.edit()
+            .putString("target", extra)
+            .putString("target2", target)
             .apply()
 
         updateWidgets(context)

@@ -75,7 +75,7 @@ class WidgetSizingTest {
     for (height in 230..800 step 10) {
       for (extra in listOf(false, true)) {
         val l = largeWidgetLayout(300f, height.toFloat(), extra)
-        if (!l.showKeypad || l.swapHeightDp <= 32f) continue
+        if (!l.showKeypad || l.swapHeightDp <= 28f) continue
         val intoCard = l.swapHeightDp / 2 - LargeWidgetLayout.GAP / 2
         val belowDigits = (l.cardHeightDp - l.maxAmountSp * 0.75f) / 2
         assertTrue("$height $extra", intoCard <= belowDigits)
