@@ -66,7 +66,8 @@ class WidgetSizingTest {
     val small = largeWidgetLayout(300f, 380f, hasExtra = false)
     val tall = largeWidgetLayout(400f, 700f, hasExtra = false)
     assertTrue(small.swapHeightDp >= 40f && small.swapWidthDp > small.swapHeightDp)
-    assertTrue(tall.swapHeightDp in small.swapHeightDp..58f)
+    assertTrue(tall.swapHeightDp in 60f..72f)
+    assertTrue(tall.swapWidthDp >= 96f)
   }
 
   @Test
