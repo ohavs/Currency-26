@@ -89,7 +89,7 @@ internal fun largeWidgetLayout(widthDp: Float, heightDp: Float, hasExtra: Boolea
     val maxAmountSp = (cardHeight * 0.55f).coerceIn(16f, 64f)
     // The swap button cuts into both cards; in short cards it stays low enough to clear the digits (~0.75em tall).
     val swapHeight = minOf((cardHeight * 0.5f).coerceIn(48f, 72f), cardHeight - maxAmountSp * 0.75f + gap - 2f)
-        .coerceAtLeast(32f)
+        .coerceAtLeast(28f)
     val labelWidth = if (showNames) maxOf(flagSp * 1.35f, nameSp * 6f) else flagSp * 1.35f
     return LargeWidgetLayout(
         showKeypad = showKeypad,
