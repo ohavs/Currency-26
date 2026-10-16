@@ -812,7 +812,7 @@ private fun CurrencyName(text: String, maxWidth: Dp = 150.dp) {
 }
 
 /** The amount with its currency symbol beside it ("$ 1,250", "1,250 Ft"): smaller and in the accent color. */
-private fun amountWithSymbol(amount: String, symbol: String, symbolColor: Color): AnnotatedString = buildAnnotatedString {
+internal fun amountWithSymbol(amount: String, symbol: String, symbolColor: Color): AnnotatedString = buildAnnotatedString {
     val symbolStyle = SpanStyle(color = symbolColor, fontSize = 0.7.em, fontWeight = FontWeight.SemiBold)
     if (symbolLeads(symbol)) {
         withStyle(symbolStyle) { append(symbol); append(' ') }

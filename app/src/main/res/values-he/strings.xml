@@ -97,4 +97,14 @@
     <string name="language_suggestion">להשתמש באפליקציה בעברית?</string>
     <string name="language_suggestion_hint">הצעה לפי האזור שלך</string>
     <string name="language_suggestion_switch">החלפה</string>
+    <string name="quick_convert_label">המרת מטבע</string>
+    <string name="quick_copy">העתקה</string>
+    <string name="quick_copied">הועתק</string>
+    <string name="quick_replace">החלפה</string>
+    <string name="quick_open">פתיחה באפליקציה</string>
+    <string name="quick_total">סה״כ</string>
+    <string name="quick_no_price">לא נמצא מחיר בטקסט שסימנת</string>
+    <string name="quick_assumed">מטבע משוער</string>
+    <string name="tip_select_title">המרה מכל אפליקציה</string>
+    <string name="tip_select_body">סמנו מחיר בכל אפליקציה ובחרו \"המרת מטבע\" בתפריט (לפעמים מאחורי ⋮). התוצאה קופצת מיד, בלי לעזוב את מה שאתם עושים.</string>
 </resources>

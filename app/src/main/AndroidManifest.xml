@@ -35,6 +35,20 @@
             </intent-filter>
         </activity>
 
+        <!-- "Convert currency" in other apps' text-selection menu: a bubble over that app. -->
+        <activity
+            android:name=".QuickConvertActivity"
+            android:exported="true"
+            android:excludeFromRecents="true"
+            android:label="@string/quick_convert_label"
+            android:theme="@style/Theme.MyApplication.QuickConvert">
+            <intent-filter android:label="@string/quick_convert_label">
+                <action android:name="android.intent.action.PROCESS_TEXT" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <data android:mimeType="text/plain" />
+            </intent-filter>
+        </activity>
+
         <provider
             android:name="androidx.core.content.FileProvider"
             android:authorities="${applicationId}.updates"

@@ -97,4 +97,14 @@
     <string name="language_suggestion">使用中文界面？</string>
     <string name="language_suggestion_hint">根据你所在的地区推荐</string>
     <string name="language_suggestion_switch">切换</string>
+    <string name="quick_convert_label">货币换算</string>
+    <string name="quick_copy">复制</string>
+    <string name="quick_copied">已复制</string>
+    <string name="quick_replace">替换</string>
+    <string name="quick_open">在应用中打开</string>
+    <string name="quick_total">合计</string>
+    <string name="quick_no_price">所选文本中未找到价格</string>
+    <string name="quick_assumed">推测的货币</string>
+    <string name="tip_select_title">在任何应用中换算</string>
+    <string name="tip_select_body">在任何应用中选中价格，然后在菜单中选择\"货币换算\"（有时在 ⋮ 中）。结果立即弹出，无需离开当前应用。</string>
 </resources>

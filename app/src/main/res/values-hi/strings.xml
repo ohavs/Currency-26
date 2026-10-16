@@ -97,4 +97,14 @@
     <string name="language_suggestion">ऐप को हिन्दी में इस्तेमाल करें?</string>
     <string name="language_suggestion_hint">आपके क्षेत्र के लिए सुझाव</string>
     <string name="language_suggestion_switch">बदलें</string>
+    <string name="quick_convert_label">मुद्रा बदलें</string>
+    <string name="quick_copy">कॉपी करें</string>
+    <string name="quick_copied">कॉपी हो गया</string>
+    <string name="quick_replace">बदलें</string>
+    <string name="quick_open">ऐप में खोलें</string>
+    <string name="quick_total">कुल</string>
+    <string name="quick_no_price">चुने गए टेक्स्ट में कोई कीमत नहीं मिली</string>
+    <string name="quick_assumed">अनुमानित मुद्रा</string>
+    <string name="tip_select_title">किसी भी ऐप से बदलें</string>
+    <string name="tip_select_body">किसी भी ऐप में कीमत चुनें और मेन्यू से \"मुद्रा बदलें\" चुनें (कभी-कभी ⋮ में)। नतीजा तुरंत दिखेगा, जो कर रहे हैं उसे छोड़े बिना।</string>
 </resources>

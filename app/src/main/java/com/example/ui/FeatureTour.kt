@@ -40,6 +40,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Add
 import androidx.compose.material.icons.rounded.Close
+import androidx.compose.material.icons.rounded.ContentCopy
 import androidx.compose.material.icons.rounded.TouchApp
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -76,13 +77,13 @@ import androidx.compose.ui.unit.sp
 import com.example.R
 import com.example.ui.theme.LocalPalette
 
-/** The features people tend to miss; the tour shows one card per tip. */
-enum class FeatureTip { WIDGET, EXTRA_CURRENCY }
+/** The features people tend to miss; the tour shows one card per tip, in this order. */
+enum class FeatureTip { WIDGET, SELECT_CONVERT, EXTRA_CURRENCY }
 
 /**
- * A short tour over the calculator: what the home-screen widget and the additional currency do, each with a
- * way to try it ("show me how" walks to the widget button in Settings). Shown on first launch, and again
- * after a while when a feature is still unused.
+ * A short tour over the calculator: the home-screen widget, converting a price selected in another app, and
+ * the additional currency, with a way to try them where there is one ("show me how" walks to the widget button
+ * in Settings). Shown on first launch, and again after a while when a feature is still unused.
  */
 @Composable
 fun FeatureTour(
@@ -172,23 +173,38 @@ fun FeatureTour(
                     ) {
                         when (tip) {
                             FeatureTip.WIDGET -> WidgetIllustration()
+                            FeatureTip.SELECT_CONVERT -> SelectConvertIllustration()
                             FeatureTip.EXTRA_CURRENCY -> ExtraCurrencyIllustration()
                         }
                     }
                     Spacer(Modifier.height(18.dp))
                     Text(
-                        text = stringResource(if (tip == FeatureTip.WIDGET) R.string.tip_widget_title else R.string.tip_extra_title),
+                        text = stringResource(
+                            when (tip) {
+                                FeatureTip.WIDGET -> R.string.tip_widget_title
+                                FeatureTip.SELECT_CONVERT -> R.string.tip_select_title
+                                FeatureTip.EXTRA_CURRENCY -> R.string.tip_extra_title
+                            }
+                        ),
                         style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.SemiBold),
                         color = palette.ink
                     )
                     Spacer(Modifier.height(6.dp))
                     Text(
-                        text = stringResource(if (tip == FeatureTip.WIDGET) R.string.tip_widget_body else R.string.tip_extra_body),
+                        text = stringResource(
+                            when (tip) {
+                                FeatureTip.WIDGET -> R.string.tip_widget_body
+                                FeatureTip.SELECT_CONVERT -> R.string.tip_select_body
+                                FeatureTip.EXTRA_CURRENCY -> R.string.tip_extra_body
+                            }
+                        ),
                         style = MaterialTheme.typography.bodyMedium,
                         color = palette.inkMuted
                     )
                     Spacer(Modifier.height(18.dp))
                     when {
+                        // Nothing to try from here: it happens in other apps.
+                        tip == FeatureTip.SELECT_CONVERT -> Unit
                         tip == FeatureTip.EXTRA_CURRENCY -> TourButton(stringResource(R.string.add_currency), Icons.Rounded.Add, guarded(onAddCurrency))
                         canPinWidget -> TourButton(stringResource(R.string.tip_widget_action), Icons.Rounded.TouchApp, guarded(onShowWidgetGuide))
                         // Launchers that cannot pin widgets: explain the manual way instead of a dead button.
@@ -517,4 +533,160 @@ private fun MiniRow(flag: String, amount: String, background: Color, height: Dp,
         Spacer(Modifier.weight(1f))
         if (flagOnRight) flagText() else amountText()
     }
+}
+
+/**
+ * A page in another app: a finger long-presses a price, "Convert currency" pops up in the selection menu,
+ * the finger taps it and the converted price slides up over the page.
+ */
+@Composable
+private fun SelectConvertIllustration() {
+    val palette = LocalPalette.current
+    val clock = rememberInfiniteTransition(label = "select")
+    val t by clock.animateFloat(
+        initialValue = 0f,
+        targetValue = SELECT_LOOP,
+        animationSpec = infiniteRepeatable(tween((SELECT_LOOP * 1000).toInt(), easing = LinearEasing)),
+        label = "t"
+    )
+    fun ramp(from: Float, to: Float) = ((t - from) / (to - from)).coerceIn(0f, 1f)
+    val selection = ramp(0.9f, 1.0f) * (1f - ramp(2.05f, 2.15f))
+    val menu = ramp(1.1f, 1.25f) * (1f - ramp(2.0f, 2.1f))
+    val bubble = FastOutSlowInEasing.transform(ramp(2.1f, 2.4f)) * (1f - ramp(4.1f, 4.5f))
+    val fingerAlpha = ramp(0.1f, 0.3f) * (1f - ramp(2.3f, 2.6f))
+    val pressing = t in 0.6f..1.2f || t in 1.85f..2.0f
+    val finger = selectFingerPosition(t)
+
+    Box(
+        modifier = Modifier
+            .size(PAGE_WIDTH, PAGE_HEIGHT)
+            .clip(RoundedCornerShape(18.dp))
+            .background(palette.background)
+    ) {
+        // Lines of text, with the price in the middle of one of them.
+        listOf(Triple(16, 110, 10), Triple(36, 184, 7), Triple(50, 150, 7), Triple(118, 176, 7), Triple(132, 128, 7))
+            .forEach { (y, width, height) -> TextLine(x = 14.dp, y = y.dp, width = width.dp, height = height.dp) }
+        TextLine(x = 14.dp, y = PRICE_TOP + 8.dp, width = PAGE_WIDTH / 2 - PRICE_WIDTH / 2 - 22.dp, height = 7.dp)
+        TextLine(x = PAGE_WIDTH / 2 + PRICE_WIDTH / 2 + 8.dp, y = PRICE_TOP + 8.dp, width = 46.dp, height = 7.dp)
+        Box(
+            modifier = Modifier
+                .offset(x = PAGE_WIDTH / 2 - PRICE_WIDTH / 2, y = PRICE_TOP)
+                .size(PRICE_WIDTH, PRICE_HEIGHT)
+                .clip(RoundedCornerShape(4.dp))
+                .background(palette.accent.copy(alpha = 0.28f * selection)),
+            contentAlignment = Alignment.Center
+        ) {
+            Text("€120", fontSize = 14.sp, fontWeight = FontWeight.Bold, color = palette.ink)
+        }
+        // Selection handles under both ends of the price.
+        listOf(-1, 1).forEach { side ->
+            Box(
+                modifier = Modifier
+                    .offset(x = PAGE_WIDTH / 2 + PRICE_WIDTH / 2 * side - 4.dp, y = PRICE_TOP + PRICE_HEIGHT - 1.dp)
+                    .graphicsLayer { alpha = selection }
+                    .size(8.dp)
+                    .clip(CircleShape)
+                    .background(palette.accent)
+            )
+        }
+        // The selection menu above the price: copy, and ours.
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .offset(y = PRICE_TOP - 34.dp)
+                .graphicsLayer {
+                    alpha = menu
+                    scaleX = 0.9f + menu * 0.1f
+                    scaleY = 0.9f + menu * 0.1f
+                },
+            horizontalArrangement = Arrangement.Center
+        ) {
+            Row(
+                modifier = Modifier
+                    .clip(RoundedCornerShape(14.dp))
+                    .background(palette.ink)
+                    .padding(horizontal = 10.dp, vertical = 6.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Icon(Icons.Rounded.ContentCopy, contentDescription = null, tint = palette.background.copy(alpha = 0.7f), modifier = Modifier.size(13.dp))
+                Spacer(Modifier.width(10.dp))
+                Text(
+                    stringResource(R.string.quick_convert_label),
+                    fontSize = 11.sp,
+                    fontWeight = FontWeight.SemiBold,
+                    color = palette.background,
+                    maxLines = 1
+                )
+            }
+        }
+        // The answer, sliding up over the page.
+        Row(
+            modifier = Modifier
+                .align(Alignment.BottomCenter)
+                .padding(10.dp)
+                .fillMaxWidth()
+                .graphicsLayer {
+                    alpha = bubble
+                    translationY = (1f - bubble) * 24.dp.toPx()
+                }
+                .clip(RoundedCornerShape(16.dp))
+                .background(palette.highlight)
+                .padding(horizontal = 14.dp, vertical = 9.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text("🇪🇺 €120", fontSize = 12.sp, color = palette.inkMuted, modifier = Modifier.weight(1f))
+            Text(
+                "₪452.30",
+                style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold, textDirection = TextDirection.Ltr),
+                color = palette.ink
+            )
+        }
+        Box(
+            modifier = Modifier
+                .offset(x = finger.first - FINGER / 2, y = finger.second - FINGER / 2)
+                .graphicsLayer {
+                    alpha = fingerAlpha
+                    val press = if (pressing) 0.82f else 1f
+                    scaleX = press
+                    scaleY = press
+                }
+                .size(FINGER)
+                .clip(CircleShape)
+                .background(palette.ink.copy(alpha = 0.22f))
+                .padding(3.dp)
+                .clip(CircleShape)
+                .background(Color.White.copy(alpha = 0.95f))
+        )
+    }
+}
+
+@Composable
+private fun TextLine(x: Dp, y: Dp, width: Dp, height: Dp) {
+    Box(
+        Modifier
+            .offset(x = x, y = y)
+            .size(width, height)
+            .clip(CircleShape)
+            .background(LocalPalette.current.inkMuted.copy(alpha = 0.22f))
+    )
+}
+
+private const val SELECT_LOOP = 4.6f
+private val PAGE_WIDTH = 236.dp
+private val PAGE_HEIGHT = 176.dp
+private val PRICE_WIDTH = 48.dp
+private val PRICE_HEIGHT = 22.dp
+private val PRICE_TOP = 78.dp
+
+/** In from below, a long press on the price, then up to "Convert currency" in the menu for a tap. */
+private fun selectFingerPosition(t: Float): Pair<Dp, Dp> {
+    val rest = (PAGE_WIDTH * 0.72f) to (PAGE_HEIGHT + 14.dp)
+    val price = (PAGE_WIDTH / 2) to (PRICE_TOP + PRICE_HEIGHT / 2)
+    val menu = (PAGE_WIDTH / 2 + 14.dp) to (PRICE_TOP - 20.dp)
+    val path = listOf(0f to rest, 0.55f to price, 1.35f to price, 1.75f to menu, SELECT_LOOP to menu)
+    val next = path.indexOfFirst { it.first >= t }.coerceAtLeast(1)
+    val (t0, from) = path[next - 1]
+    val (t1, to) = path[next]
+    val f = if (t1 > t0) FastOutSlowInEasing.transform(((t - t0) / (t1 - t0)).coerceIn(0f, 1f)) else 1f
+    return (from.first + (to.first - from.first) * f) to (from.second + (to.second - from.second) * f)
 }

@@ -5,4 +5,13 @@
         <!-- Matches the app background so there is no flash before Compose draws. -->
         <item name="android:windowBackground">@color/window_background</item>
     </style>
+
+    <!-- The quick-convert bubble: a see-through window over the app the text was selected in, opened without
+         a window animation so it appears at once (the bubble slides in by itself). -->
+    <style name="Theme.MyApplication.QuickConvert" parent="android:Theme.DeviceDefault.NoActionBar">
+        <item name="android:windowIsTranslucent">true</item>
+        <item name="android:windowBackground">@android:color/transparent</item>
+        <item name="android:windowAnimationStyle">@null</item>
+        <item name="android:backgroundDimEnabled">false</item>
+    </style>
 </resources>

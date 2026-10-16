@@ -97,4 +97,14 @@
     <string name="language_suggestion">Utiliser l\'app en français ?</string>
     <string name="language_suggestion_hint">Suggéré pour votre région</string>
     <string name="language_suggestion_switch">Changer</string>
+    <string name="quick_convert_label">Convertir la devise</string>
+    <string name="quick_copy">Copier</string>
+    <string name="quick_copied">Copié</string>
+    <string name="quick_replace">Remplacer</string>
+    <string name="quick_open">Ouvrir dans l\'app</string>
+    <string name="quick_total">Total</string>
+    <string name="quick_no_price">Aucun prix trouvé dans le texte sélectionné</string>
+    <string name="quick_assumed">Devise supposée</string>
+    <string name="tip_select_title">Convertissez depuis n\'importe quelle app</string>
+    <string name="tip_select_body">Sélectionnez un prix dans n\'importe quelle app et choisissez \"Convertir la devise\" dans le menu (parfois sous ⋮). Le résultat s\'affiche aussitôt, sans quitter ce que vous faites.</string>
 </resources>

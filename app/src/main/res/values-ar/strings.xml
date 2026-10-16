@@ -97,4 +97,14 @@
     <string name="language_suggestion">استخدام التطبيق باللغة العربية؟</string>
     <string name="language_suggestion_hint">اقتراح حسب منطقتك</string>
     <string name="language_suggestion_switch">تغيير</string>
+    <string name="quick_convert_label">تحويل العملة</string>
+    <string name="quick_copy">نسخ</string>
+    <string name="quick_copied">تم النسخ</string>
+    <string name="quick_replace">استبدال</string>
+    <string name="quick_open">فتح في التطبيق</string>
+    <string name="quick_total">المجموع</string>
+    <string name="quick_no_price">لم يتم العثور على سعر في النص المحدد</string>
+    <string name="quick_assumed">عملة مفترضة</string>
+    <string name="tip_select_title">حوّل من أي تطبيق</string>
+    <string name="tip_select_body">حدّد سعرًا في أي تطبيق واختر \"تحويل العملة\" من القائمة (أحيانًا تحت ⋮). تظهر النتيجة فورًا دون مغادرة ما تفعله.</string>
 </resources>
