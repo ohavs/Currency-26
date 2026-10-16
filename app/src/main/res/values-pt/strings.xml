@@ -91,4 +91,6 @@
     <string name="tip_done">Entendi</string>
     <string name="tip_skip">Pular</string>
     <string name="show_tips">Ver o tour rápido</string>
+    <string name="tip_widget_action">Mostre como</string>
+    <string name="guide_add_widget">Toque aqui para adicionar o widget à tela inicial</string>
 </resources>

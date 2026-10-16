@@ -123,6 +123,7 @@ fun CalculatorScreen(viewModel: MainViewModel, onRemoveLegacyApp: () -> Unit = {
     val language by viewModel.language.collectAsState()
     val legacyAppInstalled by viewModel.legacyAppInstalled.collectAsState()
     val tour by viewModel.tour.collectAsState()
+    val widgetGuide by viewModel.widgetGuide.collectAsState()
     val palette = LocalPalette.current
 
     val screen = when {
@@ -183,6 +184,8 @@ fun CalculatorScreen(viewModel: MainViewModel, onRemoveLegacyApp: () -> Unit = {
                     language = language,
                     onLanguageChange = viewModel::setLanguage,
                     onShowTour = viewModel::showTour,
+                    highlightAddWidget = widgetGuide,
+                    onWidgetGuideDone = viewModel::endWidgetGuide,
                 )
                 AppScreen.Picker -> CurrencySelector(
                     state = state,
@@ -199,7 +202,7 @@ fun CalculatorScreen(viewModel: MainViewModel, onRemoveLegacyApp: () -> Unit = {
                 FeatureTour(
                     tips = tour,
                     canPinWidget = viewModel.canPinWidget,
-                    onAddWidget = viewModel::addWidgetToHomeScreen,
+                    onShowWidgetGuide = viewModel::startWidgetGuide,
                     onAddCurrency = {
                         viewModel.dismissTour()
                         viewModel.openCurrencySelector(CurrencySlot.EXTRA_TARGET)

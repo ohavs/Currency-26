@@ -91,4 +91,6 @@
     <string name="tip_done">Verstanden</string>
     <string name="tip_skip">Überspringen</string>
     <string name="show_tips">Kurze Einführung anzeigen</string>
+    <string name="tip_widget_action">Zeig mir, wie</string>
+    <string name="guide_add_widget">Hier tippen, um das Widget zum Startbildschirm hinzuzufügen</string>
 </resources>

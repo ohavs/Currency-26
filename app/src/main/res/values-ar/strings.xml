@@ -91,4 +91,6 @@
     <string name="tip_done">فهمت</string>
     <string name="tip_skip">تخطٍّ</string>
     <string name="show_tips">عرض الجولة السريعة</string>
+    <string name="tip_widget_action">أرني كيف</string>
+    <string name="guide_add_widget">اضغط هنا لإضافة الأداة إلى شاشتك الرئيسية</string>
 </resources>

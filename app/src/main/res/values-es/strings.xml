@@ -91,4 +91,6 @@
     <string name="tip_done">Entendido</string>
     <string name="tip_skip">Omitir</string>
     <string name="show_tips">Ver la guía rápida</string>
+    <string name="tip_widget_action">Muéstrame cómo</string>
+    <string name="guide_add_widget">Toca aquí para añadir el widget a tu pantalla de inicio</string>
 </resources>

@@ -2,6 +2,10 @@ package com.example.ui
 
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedContent
+import androidx.compose.ui.unit.LayoutDirection
+import androidx.compose.ui.platform.LocalLayoutDirection
+import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.RepeatMode
@@ -36,6 +40,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Add
 import androidx.compose.material.icons.rounded.Close
+import androidx.compose.material.icons.rounded.TouchApp
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -74,13 +79,14 @@ enum class FeatureTip { WIDGET, EXTRA_CURRENCY }
 
 /**
  * A short tour over the calculator: what the home-screen widget and the additional currency do, each with a
- * one-tap way to try it. Shown on first launch, and again after a while when a feature is still unused.
+ * way to try it ("show me how" walks to the widget button in Settings). Shown on first launch, and again
+ * after a while when a feature is still unused.
  */
 @Composable
 fun FeatureTour(
     tips: List<FeatureTip>,
     canPinWidget: Boolean,
-    onAddWidget: () -> Unit,
+    onShowWidgetGuide: () -> Unit,
     onAddCurrency: () -> Unit,
     onDismiss: () -> Unit,
     initialPage: Int = 0,
@@ -148,7 +154,7 @@ fun FeatureTour(
                     Box(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .height(176.dp)
+                            .height(196.dp)
                             .clip(RoundedCornerShape(24.dp))
                             .background(palette.card),
                         contentAlignment = Alignment.Center
@@ -173,10 +179,7 @@ fun FeatureTour(
                     Spacer(Modifier.height(18.dp))
                     when {
                         tip == FeatureTip.EXTRA_CURRENCY -> TourButton(stringResource(R.string.add_currency), Icons.Rounded.Add, onAddCurrency)
-                        canPinWidget -> TourButton(stringResource(R.string.add_widget), Icons.Rounded.Add) {
-                            onAddWidget()
-                            next()
-                        }
+                        canPinWidget -> TourButton(stringResource(R.string.tip_widget_action), Icons.Rounded.TouchApp, onShowWidgetGuide)
                         // Launchers that cannot pin widgets: explain the manual way instead of a dead button.
                         else -> Text(
                             text = stringResource(R.string.add_widget_manual),
@@ -232,94 +235,170 @@ private fun PageDots(count: Int, current: Int) {
     }
 }
 
-/** A home screen with the widget floating in, and a "+" badge. */
+/** The real widget in miniature on a home screen: a finger types 1, 0, 0 and both amounts follow. */
 @Composable
 private fun WidgetIllustration() {
     val palette = LocalPalette.current
-    val motion = rememberInfiniteTransition(label = "widget")
-    val lift by motion.animateFloat(
+    val readingRtl = LocalLayoutDirection.current == LayoutDirection.Rtl
+    val clock = rememberInfiniteTransition(label = "typing")
+    val t by clock.animateFloat(
         initialValue = 0f,
-        targetValue = 1f,
-        animationSpec = infiniteRepeatable(tween(1400, easing = FastOutSlowInEasing), RepeatMode.Reverse),
-        label = "lift"
+        targetValue = TYPING_LOOP,
+        animationSpec = infiniteRepeatable(tween((TYPING_LOOP * 1000).toInt(), easing = LinearEasing)),
+        label = "t"
     )
-    Box(contentAlignment = Alignment.Center) {
-        Box(
-            modifier = Modifier
-                .width(220.dp)
-                .height(150.dp)
-                .clip(RoundedCornerShape(22.dp))
-                .background(Brush.verticalGradient(listOf(palette.accent, palette.accent.copy(alpha = 0.72f))))
-        ) {
-            Row(
-                modifier = Modifier
-                    .align(Alignment.BottomCenter)
-                    .padding(bottom = 12.dp),
-                horizontalArrangement = Arrangement.spacedBy(16.dp)
-            ) {
-                repeat(4) {
-                    Box(
-                        Modifier
-                            .size(22.dp)
-                            .clip(RoundedCornerShape(7.dp))
-                            .background(Color.White.copy(alpha = 0.28f))
-                    )
+    val typed = TAPS.count { t >= it }
+    val pressed = TAPS.indexOfFirst { t in (it - 0.05f)..(it + 0.15f) }
+    val finger = fingerPosition(t)
+    val fingerAlpha = when {
+        t < 0.1f -> 0f
+        t < 0.3f -> (t - 0.1f) / 0.2f
+        t > 4.0f -> 0f
+        t > 3.6f -> 1f - (t - 3.6f) / 0.4f
+        else -> 1f
+    }
+
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(Brush.verticalGradient(listOf(palette.accent, palette.accent.copy(alpha = 0.7f)))),
+        contentAlignment = Alignment.Center
+    ) {
+        // Other apps on the home screen, either side of the widget.
+        Row(horizontalArrangement = Arrangement.spacedBy(MINI_WIDGET_WIDTH + 28.dp), verticalAlignment = Alignment.CenterVertically) {
+            repeat(2) {
+                Column(verticalArrangement = Arrangement.spacedBy(18.dp)) {
+                    repeat(3) {
+                        Box(
+                            Modifier
+                                .size(28.dp)
+                                .clip(RoundedCornerShape(9.dp))
+                                .background(Color.White.copy(alpha = 0.24f))
+                        )
+                    }
                 }
             }
-            MiniWidget(
-                modifier = Modifier
-                    .align(Alignment.TopCenter)
-                    .padding(top = 14.dp)
-                    .graphicsLayer {
-                        translationY = -lift * 4.dp.toPx()
-                        scaleX = 1f + lift * 0.03f
-                        scaleY = 1f + lift * 0.03f
-                    }
-            )
         }
-        Box(
-            modifier = Modifier
-                .offset(x = 96.dp, y = (-62).dp)
-                .graphicsLayer {
-                    scaleX = 0.88f + lift * 0.18f
-                    scaleY = 0.88f + lift * 0.18f
-                }
-                .size(30.dp)
-                .clip(CircleShape)
-                .background(palette.background)
-                .padding(3.dp)
-                .clip(CircleShape)
-                .background(palette.highlight),
-            contentAlignment = Alignment.Center
-        ) {
-            Icon(Icons.Rounded.Add, contentDescription = null, tint = palette.ink, modifier = Modifier.size(18.dp))
+        // Keypads stay 7-8-9 left to right in every language, so the miniature is laid out left to right.
+        CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Ltr) {
+            Box {
+                MiniWidget(typed = typed, pressedKey = if (pressed >= 0) TAP_KEYS[pressed] else null, flagOnRight = readingRtl)
+                Box(
+                    modifier = Modifier
+                        .offset(x = finger.first - FINGER / 2, y = finger.second - FINGER / 2)
+                        .graphicsLayer {
+                            alpha = fingerAlpha
+                            val press = if (pressed >= 0) 0.82f else 1f
+                            scaleX = press
+                            scaleY = press
+                        }
+                        .size(FINGER)
+                        .clip(CircleShape)
+                        // A soft dark rim keeps the fingertip visible over the light keys.
+                        .background(palette.ink.copy(alpha = 0.22f))
+                        .padding(3.dp)
+                        .clip(CircleShape)
+                        .background(Color.White.copy(alpha = 0.95f))
+                )
+            }
         }
     }
 }
 
+private const val TYPING_LOOP = 4.4f
+/** Seconds into the loop at which a key is tapped, and which keys: 1, 0, 0. */
+private val TAPS = listOf(0.7f, 1.5f, 2.3f)
+private val TAP_KEYS = listOf("1", "0", "0")
+private val MINI_WIDGET_WIDTH = 156.dp
+private val FINGER = 24.dp
+private val MINI_PADDING = 7.dp
+private val MINI_CARD = 32.dp
+private val MINI_GAP = 3.dp
+private val MINI_KEY_HEIGHT = 17.dp
+private val MINI_KEYPAD_TOP = MINI_PADDING + MINI_CARD * 2 + MINI_GAP + 6.dp
+private val MINI_KEYS = listOf(listOf("7", "8", "9"), listOf("4", "5", "6"), listOf("1", "2", "3"), listOf("C", "0", "⌫"))
+
+/** Center of a key in the miniature, from its top-left corner. */
+private fun keyCenter(key: String): Pair<Dp, Dp> {
+    val row = MINI_KEYS.indexOfFirst { key in it }
+    val column = MINI_KEYS[row].indexOf(key)
+    val keyWidth = (MINI_WIDGET_WIDTH - MINI_PADDING * 2 - MINI_GAP * 2) / 3
+    val x = MINI_PADDING + (keyWidth + MINI_GAP) * column + keyWidth / 2
+    val y = MINI_KEYPAD_TOP + (MINI_KEY_HEIGHT + MINI_GAP) * row + MINI_KEY_HEIGHT / 2
+    return x to y
+}
+
+/** The finger glides in from below, taps 1, moves to 0 and taps it twice. */
+private fun fingerPosition(t: Float): Pair<Dp, Dp> {
+    val rest = (MINI_WIDGET_WIDTH * 0.8f) to (MINI_KEYPAD_TOP + 96.dp)
+    val one = keyCenter("1")
+    val zero = keyCenter("0")
+    val path = listOf(0f to rest, 0.6f to one, 0.8f to one, 1.4f to zero, TYPING_LOOP to zero)
+    val next = path.indexOfFirst { it.first >= t }.coerceAtLeast(1)
+    val (t0, from) = path[next - 1]
+    val (t1, to) = path[next]
+    val f = if (t1 > t0) FastOutSlowInEasing.transform(((t - t0) / (t1 - t0)).coerceIn(0f, 1f)) else 1f
+    return (from.first + (to.first - from.first) * f) to (from.second + (to.second - from.second) * f)
+}
+
 @Composable
-private fun MiniWidget(modifier: Modifier = Modifier) {
+private fun MiniWidget(typed: Int, pressedKey: String?, flagOnRight: Boolean) {
     val palette = LocalPalette.current
+    val amount = listOf("0", "1", "10", "100")[typed]
+    val converted = listOf("0.00", "0.27", "2.69", "26.94")[typed]
     Column(
-        modifier = modifier
-            .width(150.dp)
-            .clip(RoundedCornerShape(14.dp))
+        modifier = Modifier
+            .width(MINI_WIDGET_WIDTH)
+            .clip(RoundedCornerShape(18.dp))
             .background(palette.background)
-            .padding(6.dp),
-        verticalArrangement = Arrangement.spacedBy(4.dp)
+            .padding(MINI_PADDING)
     ) {
-        MiniRow(flag = "🇮🇱", amount = "₪ 100", background = palette.card, height = 26.dp)
-        MiniRow(flag = "🇺🇸", amount = "$ 26.94", background = palette.highlight, height = 26.dp)
-        repeat(2) {
-            Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
-                repeat(3) {
-                    Box(
-                        Modifier
-                            .weight(1f)
-                            .height(8.dp)
-                            .clip(CircleShape)
-                            .background(palette.cardSoft)
-                    )
+        Box(contentAlignment = Alignment.Center) {
+            Column(verticalArrangement = Arrangement.spacedBy(MINI_GAP)) {
+                MiniRow(flag = "🇮🇱", amount = "₪ $amount", background = palette.card, height = MINI_CARD, flagOnRight = flagOnRight)
+                MiniRow(flag = "🇺🇸", amount = "$ $converted", background = palette.highlight, height = MINI_CARD, flagOnRight = flagOnRight)
+            }
+            Box(
+                modifier = Modifier
+                    .size(width = 30.dp, height = 18.dp)
+                    .clip(RoundedCornerShape(7.dp))
+                    .background(palette.background)
+                    .padding(2.dp)
+                    .clip(RoundedCornerShape(6.dp))
+                    .background(palette.accent),
+                contentAlignment = Alignment.Center
+            ) {
+                Text("⇅", fontSize = 9.sp, color = palette.onAccent, fontWeight = FontWeight.Bold)
+            }
+        }
+        Spacer(Modifier.height(6.dp))
+        Column(verticalArrangement = Arrangement.spacedBy(MINI_GAP)) {
+            MINI_KEYS.forEach { row ->
+                Row(horizontalArrangement = Arrangement.spacedBy(MINI_GAP)) {
+                    row.forEach { key ->
+                        val background = when {
+                            key == pressedKey -> palette.highlight
+                            key == "C" -> palette.accent
+                            key == "⌫" -> palette.highlight
+                            else -> palette.cardSoft
+                        }
+                        Box(
+                            modifier = Modifier
+                                .weight(1f)
+                                .height(MINI_KEY_HEIGHT)
+                                .clip(RoundedCornerShape(6.dp))
+                                .background(background),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Text(
+                                key,
+                                fontSize = 9.sp,
+                                lineHeight = 10.sp,
+                                fontWeight = FontWeight.Medium,
+                                color = if (key == "C") palette.onAccent else palette.ink
+                            )
+                        }
+                    }
                 }
             }
         }
@@ -381,7 +460,7 @@ private fun ExtraCurrencyIllustration() {
 
 /** A tiny currency row: flag on the reading side, symbol and amount on the other (like the real cards). */
 @Composable
-private fun MiniRow(flag: String, amount: String, background: Color, height: Dp, dashed: Boolean = false) {
+private fun MiniRow(flag: String, amount: String, background: Color, height: Dp, dashed: Boolean = false, flagOnRight: Boolean = false) {
     val palette = LocalPalette.current
     val outline = palette.inkMuted.copy(alpha = 0.55f)
     Row(
@@ -409,18 +488,22 @@ private fun MiniRow(flag: String, amount: String, background: Color, height: Dp,
             .padding(horizontal = 10.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        Text(flag, fontSize = (height.value * 0.42f).sp)
+        val flagText = @Composable { Text(flag, fontSize = (height.value * 0.42f).sp) }
+        val amountText = @Composable {
+            Text(
+                text = amount,
+                style = MaterialTheme.typography.labelLarge.copy(
+                    fontSize = (height.value * 0.38f).sp,
+                    fontWeight = FontWeight.Bold,
+                    textDirection = TextDirection.Ltr
+                ),
+                color = palette.ink,
+                textAlign = TextAlign.End,
+                maxLines = 1
+            )
+        }
+        if (flagOnRight) amountText() else flagText()
         Spacer(Modifier.weight(1f))
-        Text(
-            text = amount,
-            style = MaterialTheme.typography.labelLarge.copy(
-                fontSize = (height.value * 0.38f).sp,
-                fontWeight = FontWeight.Bold,
-                textDirection = TextDirection.Ltr
-            ),
-            color = palette.ink,
-            textAlign = TextAlign.End,
-            maxLines = 1
-        )
+        if (flagOnRight) flagText() else amountText()
     }
 }

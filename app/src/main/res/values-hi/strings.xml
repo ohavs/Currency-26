@@ -91,4 +91,6 @@
     <string name="tip_done">समझ गया</string>
     <string name="tip_skip">छोड़ें</string>
     <string name="show_tips">छोटा टूर दिखाएँ</string>
+    <string name="tip_widget_action">मुझे दिखाएँ</string>
+    <string name="guide_add_widget">विजेट को होम स्क्रीन पर जोड़ने के लिए यहाँ टैप करें</string>
 </resources>

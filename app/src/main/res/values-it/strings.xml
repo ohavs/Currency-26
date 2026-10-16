@@ -91,4 +91,6 @@
     <string name="tip_done">Ho capito</string>
     <string name="tip_skip">Salta</string>
     <string name="show_tips">Rivedi la guida rapida</string>
+    <string name="tip_widget_action">Mostrami come</string>
+    <string name="guide_add_widget">Tocca qui per aggiungere il widget alla schermata Home</string>
 </resources>

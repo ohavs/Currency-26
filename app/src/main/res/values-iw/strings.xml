@@ -91,4 +91,6 @@
     <string name="tip_done">הבנתי</string>
     <string name="tip_skip">דילוג</string>
     <string name="show_tips">הצגת ההדרכה הקצרה</string>
+    <string name="tip_widget_action">הראו לי איך</string>
+    <string name="guide_add_widget">לחצו כאן כדי להוסיף את הווידג\'ט למסך הבית</string>
 </resources>

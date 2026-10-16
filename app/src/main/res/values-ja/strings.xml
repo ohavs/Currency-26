@@ -91,4 +91,6 @@
     <string name="tip_done">OK</string>
     <string name="tip_skip">スキップ</string>
     <string name="show_tips">クイックツアーを見る</string>
+    <string name="tip_widget_action">やり方を見る</string>
+    <string name="guide_add_widget">ここをタップしてウィジェットをホーム画面に追加</string>
 </resources>

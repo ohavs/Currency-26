@@ -99,4 +99,6 @@ ROWS = [
  ("tip_done", "הבנתי", "Got it", "Entendido"),
  ("tip_skip", "דילוג", "Skip", "Omitir"),
  ("show_tips", "הצגת ההדרכה הקצרה", "Show the quick tour", "Ver la guía rápida"),
+ ("tip_widget_action", "הראו לי איך", "Show me how", "Muéstrame cómo"),
+ ("guide_add_widget", "לחצו כאן כדי להוסיף את הווידג'ט למסך הבית", "Tap here to add the widget to your home screen", "Toca aquí para añadir el widget a tu pantalla de inicio"),
 ]

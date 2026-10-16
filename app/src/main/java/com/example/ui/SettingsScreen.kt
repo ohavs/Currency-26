@@ -51,6 +51,12 @@ import androidx.compose.material3.Switch
 import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import kotlinx.coroutines.delay
+import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.layout.boundsInWindow
+import androidx.compose.ui.geometry.Rect
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -92,239 +98,277 @@ fun SettingsScreen(
     language: String = AppLanguage.DEFAULT,
     onLanguageChange: (String) -> Unit = {},
     onShowTour: () -> Unit = {},
+    /** Walks the user to "add widget": the widget section opens, scrolls into view and gets a spotlight. */
+    highlightAddWidget: Boolean = false,
+    onWidgetGuideDone: () -> Unit = {},
 ) {
     BackHandler(onBack = onClose)
+    BackHandler(enabled = highlightAddWidget, onBack = onWidgetGuideDone)
     val palette = LocalPalette.current
+    val scroll = rememberScrollState()
+    var addWidgetBounds by remember { mutableStateOf<Rect?>(null) }
+    var spotlightReady by remember { mutableStateOf(false) }
+    LaunchedEffect(highlightAddWidget) {
+        spotlightReady = false
+        if (highlightAddWidget) {
+            // Let the widget section finish opening, then bring it (the last section) into view.
+            delay(380)
+            scroll.animateScrollTo(scroll.maxValue)
+            spotlightReady = true
+        }
+    }
 
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .safeDrawingPadding()
-            .padding(horizontal = 16.dp)
-    ) {
-        AppTopBar(
-            title = stringResource(R.string.settings),
-            navigation = { RoundIconButton(Icons.AutoMirrored.Rounded.ArrowBack, stringResource(R.string.back), onClose) }
-        )
-
+    Box(modifier = Modifier.fillMaxSize()) {
         Column(
             modifier = Modifier
-                .weight(1f)
-                .verticalScroll(rememberScrollState())
-                .padding(bottom = 24.dp),
-            verticalArrangement = Arrangement.spacedBy(10.dp)
+                .fillMaxSize()
+                .safeDrawingPadding()
+                .padding(horizontal = 16.dp)
         ) {
-            // Every section starts closed: its title and a one-line summary of the current values.
-            val languageSummary = if (language == AppLanguage.SYSTEM) {
-                stringResource(R.string.language_system)
-            } else {
-                AppLanguage.OPTIONS.firstOrNull { it.first == language }?.second
-            }
-            SettingsSection(title = stringResource(R.string.language), icon = Icons.Rounded.Language, summary = languageSummary) {
-                LanguageGrid(
-                    options = listOf(AppLanguage.SYSTEM to stringResource(R.string.language_system)) + AppLanguage.OPTIONS,
-                    selected = language,
-                    onSelect = onLanguageChange
-                )
-            }
+            AppTopBar(
+                title = stringResource(R.string.settings),
+                navigation = { RoundIconButton(Icons.AutoMirrored.Rounded.ArrowBack, stringResource(R.string.back), onClose) }
+            )
 
-            val modeLabel = when (themeMode) {
-                "light" -> stringResource(R.string.mode_light)
-                "dark" -> stringResource(R.string.mode_dark)
-                else -> stringResource(R.string.mode_system)
-            }
-            val themeLabel = stringResource(Palettes.option(colorTheme).labelRes)
-            SettingsSection(title = stringResource(R.string.appearance), icon = Icons.Rounded.Palette, summary = "$modeLabel · $themeLabel") {
-                SettingLabel(stringResource(R.string.display_mode))
-                SegmentedControl(
-                    options = listOf(
-                        "light" to stringResource(R.string.mode_light),
-                        "dark" to stringResource(R.string.mode_dark),
-                        "system" to stringResource(R.string.mode_system)
-                    ),
-                    selected = themeMode,
-                    onSelect = onThemeModeChange,
-                    modifier = Modifier.fillMaxWidth()
-                )
-                Spacer(Modifier.height(4.dp))
-                SettingLabel(stringResource(R.string.color_theme))
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween
-                ) {
-                    val selectedKey = Palettes.normalize(colorTheme)
-                    Palettes.options.forEach { option ->
-                        ThemeSwatch(
-                            option = option,
-                            dark = palette.isDark,
-                            selected = option.key == selectedKey,
-                            onClick = { onColorThemeChange(option.key) }
+            Column(
+                modifier = Modifier
+                    .weight(1f)
+                    .verticalScroll(scroll)
+                    .padding(bottom = 24.dp),
+                verticalArrangement = Arrangement.spacedBy(10.dp)
+            ) {
+                // Every section starts closed: its title and a one-line summary of the current values.
+                val languageSummary = if (language == AppLanguage.SYSTEM) {
+                    stringResource(R.string.language_system)
+                } else {
+                    AppLanguage.OPTIONS.firstOrNull { it.first == language }?.second
+                }
+                SettingsSection(title = stringResource(R.string.language), icon = Icons.Rounded.Language, summary = languageSummary) {
+                    LanguageGrid(
+                        options = listOf(AppLanguage.SYSTEM to stringResource(R.string.language_system)) + AppLanguage.OPTIONS,
+                        selected = language,
+                        onSelect = onLanguageChange
+                    )
+                }
+
+                val modeLabel = when (themeMode) {
+                    "light" -> stringResource(R.string.mode_light)
+                    "dark" -> stringResource(R.string.mode_dark)
+                    else -> stringResource(R.string.mode_system)
+                }
+                val themeLabel = stringResource(Palettes.option(colorTheme).labelRes)
+                SettingsSection(title = stringResource(R.string.appearance), icon = Icons.Rounded.Palette, summary = "$modeLabel · $themeLabel") {
+                    SettingLabel(stringResource(R.string.display_mode))
+                    SegmentedControl(
+                        options = listOf(
+                            "light" to stringResource(R.string.mode_light),
+                            "dark" to stringResource(R.string.mode_dark),
+                            "system" to stringResource(R.string.mode_system)
+                        ),
+                        selected = themeMode,
+                        onSelect = onThemeModeChange,
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                    Spacer(Modifier.height(4.dp))
+                    SettingLabel(stringResource(R.string.color_theme))
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween
+                    ) {
+                        val selectedKey = Palettes.normalize(colorTheme)
+                        Palettes.options.forEach { option ->
+                            ThemeSwatch(
+                                option = option,
+                                dark = palette.isDark,
+                                selected = option.key == selectedKey,
+                                onClick = { onColorThemeChange(option.key) }
+                            )
+                        }
+                    }
+                }
+
+                val updatesSummary = appUpdate.available?.let { stringResource(R.string.update_available, it.versionName) }
+                    ?: stringResource(R.string.installed_version, appUpdate.installedVersion)
+                SettingsSection(title = stringResource(R.string.app_updates), icon = Icons.Rounded.SystemUpdate, summary = updatesSummary) {
+                    SwitchRow(
+                        title = stringResource(R.string.auto_check_updates),
+                        subtitle = stringResource(R.string.auto_check_updates_desc),
+                        checked = checkAppUpdates,
+                        onCheckedChange = onCheckAppUpdatesChange
+                    )
+                    val available = appUpdate.available
+                    val downloading = appUpdate.downloadProgress
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clip(RoundedCornerShape(18.dp))
+                            .background(palette.cardSoft)
+                            .padding(start = 16.dp, end = 8.dp, top = 8.dp, bottom = 8.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Column(modifier = Modifier.weight(1f)) {
+                            Text(stringResource(R.string.installed_version, appUpdate.installedVersion), style = MaterialTheme.typography.labelMedium, color = palette.inkMuted)
+                            Text(
+                                text = when {
+                                    downloading != null -> stringResource(R.string.downloading, (downloading * 100).toInt())
+                                    appUpdate.checking -> stringResource(R.string.checking_updates)
+                                    available != null -> stringResource(R.string.update_available, available.versionName)
+                                    appUpdate.failed -> stringResource(R.string.update_check_failed)
+                                    appUpdate.checked -> stringResource(R.string.up_to_date)
+                                    else -> stringResource(R.string.not_checked)
+                                },
+                                style = MaterialTheme.typography.bodyLarge,
+                                color = palette.ink
+                            )
+                        }
+                        if (available != null) {
+                            PillButton(
+                                text = stringResource(R.string.update_action),
+                                icon = Icons.Rounded.SystemUpdate,
+                                loading = downloading != null,
+                                onClick = onStartAppUpdate
+                            )
+                        } else {
+                            PillButton(
+                                text = stringResource(R.string.check_action),
+                                icon = Icons.Rounded.Refresh,
+                                loading = appUpdate.checking,
+                                onClick = onCheckForAppUpdate
+                            )
+                        }
+                    }
+                    if (appUpdate.needsInstallPermission) {
+                        Text(
+                            text = stringResource(R.string.install_permission_hint),
+                            style = MaterialTheme.typography.bodySmall,
+                            color = palette.inkMuted
                         )
                     }
                 }
-            }
 
-            val updatesSummary = appUpdate.available?.let { stringResource(R.string.update_available, it.versionName) }
-                ?: stringResource(R.string.installed_version, appUpdate.installedVersion)
-            SettingsSection(title = stringResource(R.string.app_updates), icon = Icons.Rounded.SystemUpdate, summary = updatesSummary) {
-                SwitchRow(
-                    title = stringResource(R.string.auto_check_updates),
-                    subtitle = stringResource(R.string.auto_check_updates_desc),
-                    checked = checkAppUpdates,
-                    onCheckedChange = onCheckAppUpdatesChange
-                )
-                val available = appUpdate.available
-                val downloading = appUpdate.downloadProgress
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .clip(RoundedCornerShape(18.dp))
-                        .background(palette.cardSoft)
-                        .padding(start = 16.dp, end = 8.dp, top = 8.dp, bottom = 8.dp),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Column(modifier = Modifier.weight(1f)) {
-                        Text(stringResource(R.string.installed_version, appUpdate.installedVersion), style = MaterialTheme.typography.labelMedium, color = palette.inkMuted)
-                        Text(
-                            text = when {
-                                downloading != null -> stringResource(R.string.downloading, (downloading * 100).toInt())
-                                appUpdate.checking -> stringResource(R.string.checking_updates)
-                                available != null -> stringResource(R.string.update_available, available.versionName)
-                                appUpdate.failed -> stringResource(R.string.update_check_failed)
-                                appUpdate.checked -> stringResource(R.string.up_to_date)
-                                else -> stringResource(R.string.not_checked)
-                            },
-                            style = MaterialTheme.typography.bodyLarge,
-                            color = palette.ink
-                        )
+                val ratesSummary = if (autoUpdate.enabled) {
+                    stringResource(R.string.background_updates_every, intervalLabel(autoUpdate.intervalMinutes))
+                } else {
+                    stringResource(R.string.background_updates_off)
+                }
+                SettingsSection(title = stringResource(R.string.rate_updates), icon = Icons.Rounded.Update, summary = ratesSummary) {
+                    SwitchRow(
+                        title = stringResource(R.string.background_updates),
+                        subtitle = stringResource(R.string.background_updates_desc),
+                        checked = autoUpdate.enabled,
+                        onCheckedChange = onAutoUpdateEnabledChange
+                    )
+                    AnimatedVisibility(visible = autoUpdate.enabled) {
+                        Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                            SettingLabel(stringResource(R.string.update_frequency))
+                            ChipSelector(
+                                options = AutoUpdateSettings.INTERVAL_OPTIONS.map { it to intervalLabel(it) },
+                                selected = autoUpdate.intervalMinutes,
+                                onSelect = onIntervalChange,
+                                modifier = Modifier.fillMaxWidth()
+                            )
+                            SwitchRow(
+                                title = stringResource(R.string.wifi_only),
+                                subtitle = stringResource(R.string.wifi_only_desc),
+                                checked = autoUpdate.wifiOnly,
+                                onCheckedChange = onWifiOnlyChange
+                            )
+                        }
                     }
-                    if (available != null) {
+                    SwitchRow(
+                        title = stringResource(R.string.refresh_on_open),
+                        subtitle = stringResource(R.string.refresh_on_open_desc),
+                        checked = autoUpdate.refreshOnOpen,
+                        onCheckedChange = onRefreshOnOpenChange
+                    )
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clip(RoundedCornerShape(18.dp))
+                            .background(palette.cardSoft)
+                            .padding(start = 16.dp, end = 8.dp, top = 8.dp, bottom = 8.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Column(modifier = Modifier.weight(1f)) {
+                            Text(stringResource(R.string.last_updated), style = MaterialTheme.typography.labelMedium, color = palette.inkMuted)
+                            Text(
+                                text = when {
+                                    isRefreshing -> stringResource(R.string.updating)
+                                    lastRefreshFailed -> stringResource(R.string.update_failed)
+                                    else -> formatUpdatedAt(
+                                        lastUpdateTimestamp,
+                                        todayFormat = stringResource(R.string.today_at),
+                                        yesterdayFormat = stringResource(R.string.yesterday_at)
+                                    ) ?: stringResource(R.string.never_updated)
+                                },
+                                style = MaterialTheme.typography.bodyLarge,
+                                color = palette.ink
+                            )
+                        }
                         PillButton(
-                            text = stringResource(R.string.update_action),
-                            icon = Icons.Rounded.SystemUpdate,
-                            loading = downloading != null,
-                            onClick = onStartAppUpdate
-                        )
-                    } else {
-                        PillButton(
-                            text = stringResource(R.string.check_action),
+                            text = stringResource(R.string.update_now),
                             icon = Icons.Rounded.Refresh,
-                            loading = appUpdate.checking,
-                            onClick = onCheckForAppUpdate
+                            loading = isRefreshing,
+                            onClick = onRefreshNow
                         )
                     }
                 }
-                if (appUpdate.needsInstallPermission) {
-                    Text(
-                        text = stringResource(R.string.install_permission_hint),
-                        style = MaterialTheme.typography.bodySmall,
-                        color = palette.inkMuted
-                    )
-                }
-            }
 
-            val ratesSummary = if (autoUpdate.enabled) {
-                stringResource(R.string.background_updates_every, intervalLabel(autoUpdate.intervalMinutes))
-            } else {
-                stringResource(R.string.background_updates_off)
-            }
-            SettingsSection(title = stringResource(R.string.rate_updates), icon = Icons.Rounded.Update, summary = ratesSummary) {
-                SwitchRow(
-                    title = stringResource(R.string.background_updates),
-                    subtitle = stringResource(R.string.background_updates_desc),
-                    checked = autoUpdate.enabled,
-                    onCheckedChange = onAutoUpdateEnabledChange
-                )
-                AnimatedVisibility(visible = autoUpdate.enabled) {
-                    Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                        SettingLabel(stringResource(R.string.update_frequency))
-                        ChipSelector(
-                            options = AutoUpdateSettings.INTERVAL_OPTIONS.map { it to intervalLabel(it) },
-                            selected = autoUpdate.intervalMinutes,
-                            onSelect = onIntervalChange,
-                            modifier = Modifier.fillMaxWidth()
-                        )
-                        SwitchRow(
-                            title = stringResource(R.string.wifi_only),
-                            subtitle = stringResource(R.string.wifi_only_desc),
-                            checked = autoUpdate.wifiOnly,
-                            onCheckedChange = onWifiOnlyChange
-                        )
-                    }
-                }
-                SwitchRow(
-                    title = stringResource(R.string.refresh_on_open),
-                    subtitle = stringResource(R.string.refresh_on_open_desc),
-                    checked = autoUpdate.refreshOnOpen,
-                    onCheckedChange = onRefreshOnOpenChange
-                )
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .clip(RoundedCornerShape(18.dp))
-                        .background(palette.cardSoft)
-                        .padding(start = 16.dp, end = 8.dp, top = 8.dp, bottom = 8.dp),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Column(modifier = Modifier.weight(1f)) {
-                        Text(stringResource(R.string.last_updated), style = MaterialTheme.typography.labelMedium, color = palette.inkMuted)
-                        Text(
-                            text = when {
-                                isRefreshing -> stringResource(R.string.updating)
-                                lastRefreshFailed -> stringResource(R.string.update_failed)
-                                else -> formatUpdatedAt(
-                                    lastUpdateTimestamp,
-                                    todayFormat = stringResource(R.string.today_at),
-                                    yesterdayFormat = stringResource(R.string.yesterday_at)
-                                ) ?: stringResource(R.string.never_updated)
-                            },
-                            style = MaterialTheme.typography.bodyLarge,
-                            color = palette.ink
-                        )
-                    }
-                    PillButton(
-                        text = stringResource(R.string.update_now),
-                        icon = Icons.Rounded.Refresh,
-                        loading = isRefreshing,
-                        onClick = onRefreshNow
-                    )
-                }
-            }
-
-            SettingsSection(title = stringResource(R.string.widget), icon = Icons.Rounded.Widgets, summary = null) {
-                Text(
-                    text = stringResource(R.string.widget_desc),
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = palette.inkMuted
-                )
-                PillButton(
-                    text = stringResource(R.string.add_widget),
+                SettingsSection(
+                    title = stringResource(R.string.widget),
                     icon = Icons.Rounded.Widgets,
-                    enabled = canPinWidget,
-                    onClick = onAddWidget,
-                    modifier = Modifier.fillMaxWidth()
-                )
-                if (!canPinWidget) {
+                    summary = null,
+                    initiallyExpanded = highlightAddWidget
+                ) {
                     Text(
-                        text = stringResource(R.string.add_widget_manual),
-                        style = MaterialTheme.typography.bodySmall,
+                        text = stringResource(R.string.widget_desc),
+                        style = MaterialTheme.typography.bodyMedium,
                         color = palette.inkMuted
                     )
-                }
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .clip(RoundedCornerShape(18.dp))
-                        .clickable(role = Role.Button, onClick = onShowTour)
-                        .padding(horizontal = 6.dp, vertical = 10.dp),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.Center
-                ) {
-                    Icon(Icons.Rounded.TipsAndUpdates, contentDescription = null, tint = palette.ink, modifier = Modifier.size(18.dp))
-                    Spacer(Modifier.width(8.dp))
-                    Text(stringResource(R.string.show_tips), style = MaterialTheme.typography.labelLarge, color = palette.ink)
+                    PillButton(
+                        text = stringResource(R.string.add_widget),
+                        icon = Icons.Rounded.Widgets,
+                        enabled = canPinWidget,
+                        onClick = onAddWidget,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .onGloballyPositioned { addWidgetBounds = it.boundsInWindow() }
+                    )
+                    if (!canPinWidget) {
+                        Text(
+                            text = stringResource(R.string.add_widget_manual),
+                            style = MaterialTheme.typography.bodySmall,
+                            color = palette.inkMuted
+                        )
+                    }
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clip(RoundedCornerShape(18.dp))
+                            .clickable(role = Role.Button, onClick = onShowTour)
+                            .padding(horizontal = 6.dp, vertical = 10.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.Center
+                    ) {
+                        Icon(Icons.Rounded.TipsAndUpdates, contentDescription = null, tint = palette.ink, modifier = Modifier.size(18.dp))
+                        Spacer(Modifier.width(8.dp))
+                        Text(stringResource(R.string.show_tips), style = MaterialTheme.typography.labelLarge, color = palette.ink)
+                    }
                 }
             }
+        }
+
+        val target = addWidgetBounds
+        if (highlightAddWidget && spotlightReady && canPinWidget && target != null) {
+            Spotlight(
+                target = target,
+                message = stringResource(R.string.guide_add_widget),
+                onTargetTap = {
+                    onWidgetGuideDone()
+                    onAddWidget()
+                },
+                onDismiss = onWidgetGuideDone
+            )
         }
     }
 }
@@ -346,10 +390,13 @@ private fun SettingsSection(
     title: String,
     icon: ImageVector,
     summary: String?,
+    initiallyExpanded: Boolean = false,
     content: @Composable ColumnScope.() -> Unit,
 ) {
     val palette = LocalPalette.current
-    var expanded by rememberSaveable { mutableStateOf(false) }
+    var expanded by rememberSaveable { mutableStateOf(initiallyExpanded) }
+    // Opened by a guide while the screen is already showing.
+    LaunchedEffect(initiallyExpanded) { if (initiallyExpanded) expanded = true }
     val chevron by animateFloatAsState(if (expanded) 180f else 0f, label = "chevron")
     Column(
         modifier = Modifier

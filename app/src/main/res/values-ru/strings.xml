@@ -91,4 +91,6 @@
     <string name="tip_done">Понятно</string>
     <string name="tip_skip">Пропустить</string>
     <string name="show_tips">Показать краткий обзор</string>
+    <string name="tip_widget_action">Показать, как</string>
+    <string name="guide_add_widget">Нажмите здесь, чтобы добавить виджет на главный экран</string>
 </resources>

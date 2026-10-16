@@ -91,4 +91,6 @@
     <string name="tip_done">Anladım</string>
     <string name="tip_skip">Atla</string>
     <string name="show_tips">Kısa tanıtımı göster</string>
+    <string name="tip_widget_action">Nasıl yapılır?</string>
+    <string name="guide_add_widget">Widget\'ı ana ekrana eklemek için buraya dokunun</string>
 </resources>

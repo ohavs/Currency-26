@@ -91,4 +91,6 @@
     <string name="tip_done">知道了</string>
     <string name="tip_skip">跳过</string>
     <string name="show_tips">查看快速导览</string>
+    <string name="tip_widget_action">告诉我怎么做</string>
+    <string name="guide_add_widget">点按此处，将小组件添加到主屏幕</string>
 </resources>

@@ -92,6 +92,8 @@ TRANSLATIONS = {
         "tip_done": "فهمت",
         "tip_skip": "تخطٍّ",
         "show_tips": "عرض الجولة السريعة",
+        "tip_widget_action": "أرني كيف",
+        "guide_add_widget": "اضغط هنا لإضافة الأداة إلى شاشتك الرئيسية",
     },
     "ru": {
         "app_name": "Конвертер валют",
@@ -184,6 +186,8 @@ TRANSLATIONS = {
         "tip_done": "Понятно",
         "tip_skip": "Пропустить",
         "show_tips": "Показать краткий обзор",
+        "tip_widget_action": "Показать, как",
+        "guide_add_widget": "Нажмите здесь, чтобы добавить виджет на главный экран",
     },
     "fr": {
         "app_name": "Convertisseur de devises",
@@ -276,6 +280,8 @@ TRANSLATIONS = {
         "tip_done": "Compris",
         "tip_skip": "Passer",
         "show_tips": "Revoir la présentation",
+        "tip_widget_action": "Montrez-moi",
+        "guide_add_widget": "Touchez ici pour ajouter le widget à votre écran d'accueil",
     },
     "de": {
         "app_name": "Währungsrechner",
@@ -368,6 +374,8 @@ TRANSLATIONS = {
         "tip_done": "Verstanden",
         "tip_skip": "Überspringen",
         "show_tips": "Kurze Einführung anzeigen",
+        "tip_widget_action": "Zeig mir, wie",
+        "guide_add_widget": "Hier tippen, um das Widget zum Startbildschirm hinzuzufügen",
     },
     "pt": {
         "app_name": "Conversor de moedas",
@@ -460,6 +468,8 @@ TRANSLATIONS = {
         "tip_done": "Entendi",
         "tip_skip": "Pular",
         "show_tips": "Ver o tour rápido",
+        "tip_widget_action": "Mostre como",
+        "guide_add_widget": "Toque aqui para adicionar o widget à tela inicial",
     },
     "it": {
         "app_name": "Convertitore di valute",
@@ -552,6 +562,8 @@ TRANSLATIONS = {
         "tip_done": "Ho capito",
         "tip_skip": "Salta",
         "show_tips": "Rivedi la guida rapida",
+        "tip_widget_action": "Mostrami come",
+        "guide_add_widget": "Tocca qui per aggiungere il widget alla schermata Home",
     },
     "tr": {
         "app_name": "Döviz Çevirici",
@@ -644,6 +656,8 @@ TRANSLATIONS = {
         "tip_done": "Anladım",
         "tip_skip": "Atla",
         "show_tips": "Kısa tanıtımı göster",
+        "tip_widget_action": "Nasıl yapılır?",
+        "guide_add_widget": "Widget'ı ana ekrana eklemek için buraya dokunun",
     },
     "zh": {
         "app_name": "汇率换算",
@@ -736,6 +750,8 @@ TRANSLATIONS = {
         "tip_done": "知道了",
         "tip_skip": "跳过",
         "show_tips": "查看快速导览",
+        "tip_widget_action": "告诉我怎么做",
+        "guide_add_widget": "点按此处，将小组件添加到主屏幕",
     },
     "ja": {
         "app_name": "通貨換算",
@@ -828,6 +844,8 @@ TRANSLATIONS = {
         "tip_done": "OK",
         "tip_skip": "スキップ",
         "show_tips": "クイックツアーを見る",
+        "tip_widget_action": "やり方を見る",
+        "guide_add_widget": "ここをタップしてウィジェットをホーム画面に追加",
     },
     "hi": {
         "app_name": "मुद्रा परिवर्तक",
@@ -920,5 +938,7 @@ TRANSLATIONS = {
         "tip_done": "समझ गया",
         "tip_skip": "छोड़ें",
         "show_tips": "छोटा टूर दिखाएँ",
+        "tip_widget_action": "मुझे दिखाएँ",
+        "guide_add_widget": "विजेट को होम स्क्रीन पर जोड़ने के लिए यहाँ टैप करें",
     },
 }

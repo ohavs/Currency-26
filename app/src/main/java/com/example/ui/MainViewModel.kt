@@ -219,6 +219,20 @@ class MainViewModel(
         repository.markTourShown(System.currentTimeMillis())
     }
 
+    private val _widgetGuide = MutableStateFlow(false)
+    /** Settings is open with the "add widget" button in a spotlight (from the tour's "show me how"). */
+    val widgetGuide: StateFlow<Boolean> = _widgetGuide.asStateFlow()
+
+    fun startWidgetGuide() {
+        dismissTour()
+        _state.update { it.copy(showSettings = true) }
+        _widgetGuide.value = true
+    }
+
+    fun endWidgetGuide() {
+        _widgetGuide.value = false
+    }
+
     private val _legacyAppInstalled = MutableStateFlow(false)
     /** The old AI Studio build is still installed next to this app (checked on every resume). */
     val legacyAppInstalled: StateFlow<Boolean> = _legacyAppInstalled.asStateFlow()
@@ -348,6 +362,7 @@ class MainViewModel(
     }
 
     fun closeSettings() {
+        _widgetGuide.value = false
         _state.update { it.copy(showSettings = false) }
     }
 
