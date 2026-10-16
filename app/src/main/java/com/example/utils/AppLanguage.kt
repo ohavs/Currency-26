@@ -3,7 +3,6 @@ package com.example.utils
 import android.content.Context
 import android.content.res.Configuration
 import android.content.res.Resources
-import android.telephony.TelephonyManager
 import android.text.TextUtils
 import android.view.View
 import java.util.Locale
@@ -62,17 +61,6 @@ object AppLanguage {
     fun effective(language: String): String {
         val code = if (language == SYSTEM) CountryLanguage.normalize(systemLocale().language) else language
         return if (OPTIONS.any { it.first == code }) code else ENGLISH
-    }
-
-    /** The user's country (ISO 3166 alpha-2): from the SIM, else the mobile network, else the device region. */
-    fun country(context: Context): String? {
-        val telephony = runCatching { context.getSystemService(TelephonyManager::class.java) }.getOrNull()
-        val candidates = listOf(
-            runCatching { telephony?.simCountryIso }.getOrNull(),
-            runCatching { telephony?.networkCountryIso }.getOrNull(),
-            systemLocale().country
-        )
-        return candidates.map { it.orEmpty().trim().uppercase(Locale.ROOT) }.firstOrNull { it.length == 2 }
     }
 
     fun systemLocale(): Locale = Resources.getSystem().configuration.locales[0]

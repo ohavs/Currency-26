@@ -11,6 +11,7 @@ import com.example.data.CurrencySlot
 import com.example.update.AppUpdater
 import com.example.utils.AppLanguage
 import com.example.utils.CountryLanguage
+import com.example.utils.DeviceCountry
 import com.example.utils.FeatureTourSchedule
 import com.example.utils.applyKeypadKey
 import com.example.utils.isNewerVersion
@@ -143,7 +144,7 @@ class MainViewModel(
 
     private fun findLanguageSuggestion() {
         val context = repository.context
-        val code = CountryLanguage.suggestion(AppLanguage.country(context), AppLanguage.effective(language.value))
+        val code = CountryLanguage.suggestion(DeviceCountry.home(context), AppLanguage.effective(language.value))
         if (code == null) {
             repository.markLanguageSuggestionDone()
             return
@@ -229,12 +230,21 @@ class MainViewModel(
     fun maybeShowTour(widgetPlaced: Boolean) {
         if (tourChecked) return
         tourChecked = true
+        val selectUnused = !repository.quickConvertUsed()
         val tips = buildList {
             if (!widgetPlaced) add(FeatureTip.WIDGET)
+            if (selectUnused) add(FeatureTip.SELECT_CONVERT)
             if (_state.value.extraTargetCurrency == null && !repository.extraCurrencyEverUsed()) add(FeatureTip.EXTRA_CURRENCY)
         }
         val due = FeatureTourSchedule.isDue(repository.tourTimesShown(), repository.tourLastShownAt(), System.currentTimeMillis())
-        if (tips.isEmpty() || !due) return
+        // Converting selected text is new: everyone gets its card once, whatever the schedule says.
+        val introduceSelect = selectUnused && !repository.quickConvertTipSeen()
+        val shown = when {
+            due -> tips
+            introduceSelect -> listOf(FeatureTip.SELECT_CONVERT)
+            else -> emptyList()
+        }
+        if (shown.isEmpty()) return
         viewModelScope.launch {
             // Let the calculator appear first, and never pop up under a typing finger: wait for a quiet
             // moment on the calculator screen itself.
@@ -245,9 +255,10 @@ class MainViewModel(
             ) {
                 delay(400)
             }
-            _tour.value = tips
+            _tour.value = shown
             // Counted when it appears, so another launch (or a second app window) does not show it again.
-            repository.markTourShown(System.currentTimeMillis())
+            if (due) repository.markTourShown(System.currentTimeMillis())
+            if (FeatureTip.SELECT_CONVERT in shown) repository.markQuickConvertTipSeen()
         }
     }
 
@@ -258,7 +269,7 @@ class MainViewModel(
     /** From Settings: the whole tour, whatever was already used. */
     fun showTour() {
         _state.update { it.copy(showSettings = false) }
-        _tour.value = listOf(FeatureTip.WIDGET, FeatureTip.EXTRA_CURRENCY)
+        _tour.value = FeatureTip.entries.toList()
     }
 
     fun dismissTour() {

@@ -97,4 +97,14 @@
     <string name="language_suggestion">App auf Deutsch verwenden?</string>
     <string name="language_suggestion_hint">Vorschlag für deine Region</string>
     <string name="language_suggestion_switch">Wechseln</string>
+    <string name="quick_convert_label">Währung umrechnen</string>
+    <string name="quick_copy">Kopieren</string>
+    <string name="quick_copied">Kopiert</string>
+    <string name="quick_replace">Ersetzen</string>
+    <string name="quick_open">In der App öffnen</string>
+    <string name="quick_total">Summe</string>
+    <string name="quick_no_price">Im markierten Text wurde kein Preis gefunden</string>
+    <string name="quick_assumed">Währung angenommen</string>
+    <string name="tip_select_title">Aus jeder App umrechnen</string>
+    <string name="tip_select_body">Markiere einen Preis in einer beliebigen App und wähle \"Währung umrechnen\" im Menü (manchmal unter ⋮). Das Ergebnis erscheint sofort, ohne die App zu verlassen.</string>
 </resources>

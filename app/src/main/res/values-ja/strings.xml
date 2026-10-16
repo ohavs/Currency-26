@@ -97,4 +97,14 @@
     <string name="language_suggestion">日本語で表示しますか？</string>
     <string name="language_suggestion_hint">お住まいの地域に合わせた提案</string>
     <string name="language_suggestion_switch">切り替える</string>
+    <string name="quick_convert_label">通貨を換算</string>
+    <string name="quick_copy">コピー</string>
+    <string name="quick_copied">コピーしました</string>
+    <string name="quick_replace">置き換え</string>
+    <string name="quick_open">アプリで開く</string>
+    <string name="quick_total">合計</string>
+    <string name="quick_no_price">選択したテキストに価格が見つかりません</string>
+    <string name="quick_assumed">推定した通貨</string>
+    <string name="tip_select_title">どのアプリからでも換算</string>
+    <string name="tip_select_body">どのアプリでも価格を選択し、メニューから\"通貨を換算\"を選びます（⋮ の中にある場合もあります）。今の画面のまま、すぐに結果が表示されます。</string>
 </resources>

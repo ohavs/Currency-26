@@ -121,6 +121,14 @@ class CurrencyRepository(
         prefs.edit().putBoolean(AppLanguage.SUGGEST_KEY, false).apply()
     }
 
+    /** "Convert currency" was picked from another app's text selection at least once. */
+    fun quickConvertUsed(): Boolean = prefs.getBoolean("quick_convert_used", false)
+    fun markQuickConvertUsed() { prefs.edit().putBoolean("quick_convert_used", true).apply() }
+
+    /** The tour card about converting selected text has been shown (once to everyone, it came in 5.0.15). */
+    fun quickConvertTipSeen(): Boolean = prefs.getBoolean("quick_convert_tip_seen", false)
+    fun markQuickConvertTipSeen() { prefs.edit().putBoolean("quick_convert_tip_seen", true).apply() }
+
     fun setCheckAppUpdates(enabled: Boolean) {
         prefs.edit().putBoolean("check_app_updates", enabled).apply()
         _checkAppUpdates.value = enabled

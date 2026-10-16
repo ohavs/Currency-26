@@ -97,4 +97,14 @@
     <string name="language_suggestion">Использовать приложение на русском?</string>
     <string name="language_suggestion_hint">Предложено для вашего региона</string>
     <string name="language_suggestion_switch">Переключить</string>
+    <string name="quick_convert_label">Конвертировать валюту</string>
+    <string name="quick_copy">Копировать</string>
+    <string name="quick_copied">Скопировано</string>
+    <string name="quick_replace">Заменить</string>
+    <string name="quick_open">Открыть в приложении</string>
+    <string name="quick_total">Итого</string>
+    <string name="quick_no_price">В выделенном тексте не найдена цена</string>
+    <string name="quick_assumed">Валюта предположена</string>
+    <string name="tip_select_title">Конвертация из любого приложения</string>
+    <string name="tip_select_body">Выделите цену в любом приложении и выберите \"Конвертировать валюту\" в меню (иногда под ⋮). Результат появится сразу, не отрываясь от дела.</string>
 </resources>

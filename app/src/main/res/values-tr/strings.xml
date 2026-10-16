@@ -97,4 +97,14 @@
     <string name="language_suggestion">Uygulama Türkçe olsun mu?</string>
     <string name="language_suggestion_hint">Bölgeniz için öneri</string>
     <string name="language_suggestion_switch">Değiştir</string>
+    <string name="quick_convert_label">Döviz çevir</string>
+    <string name="quick_copy">Kopyala</string>
+    <string name="quick_copied">Kopyalandı</string>
+    <string name="quick_replace">Değiştir</string>
+    <string name="quick_open">Uygulamada aç</string>
+    <string name="quick_total">Toplam</string>
+    <string name="quick_no_price">Seçilen metinde fiyat bulunamadı</string>
+    <string name="quick_assumed">Tahmini para birimi</string>
+    <string name="tip_select_title">Her uygulamadan çevirin</string>
+    <string name="tip_select_body">Herhangi bir uygulamada bir fiyatı seçin ve menüden \"Döviz çevir\"i seçin (bazen ⋮ altında). Sonuç, yaptığınız işi bırakmadan hemen görünür.</string>
 </resources>
