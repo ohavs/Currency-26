@@ -62,6 +62,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.graphics.Color
+import androidx.compose.foundation.Image
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.unit.dp
 import com.example.R
@@ -173,15 +176,15 @@ fun SettingsScreen(
                     SettingLabel(stringResource(R.string.color_theme))
                     Row(
                         modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween
+                        horizontalArrangement = Arrangement.spacedBy(6.dp)
                     ) {
                         val selectedKey = Palettes.normalize(colorTheme)
                         Palettes.options.forEach { option ->
-                            ThemeSwatch(
+                            ThemeIconTile(
                                 option = option,
-                                dark = palette.isDark,
                                 selected = option.key == selectedKey,
-                                onClick = { onColorThemeChange(option.key) }
+                                onClick = { onColorThemeChange(option.key) },
+                                modifier = Modifier.weight(1f)
                             )
                         }
                     }
@@ -527,55 +530,30 @@ private fun SwitchRow(title: String, subtitle: String?, checked: Boolean, onChec
     }
 }
 
-/** Mini preview of a color theme: its card color with the accent dot, in the current light/dark mode. */
+/** A colour set as the app icon drawn in its colours and motif, named after it; the chosen one is framed. */
 @Composable
-private fun ThemeSwatch(option: ColorThemeOption, dark: Boolean, selected: Boolean, onClick: () -> Unit) {
+private fun ThemeIconTile(option: ColorThemeOption, selected: Boolean, onClick: () -> Unit, modifier: Modifier = Modifier) {
     val palette = LocalPalette.current
-    val preview = if (dark) option.dark else option.light
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
-        modifier = Modifier
+        modifier = modifier
             .clip(RoundedCornerShape(16.dp))
+            .background(if (selected) palette.cardSoft else Color.Transparent)
+            .border(2.dp, if (selected) palette.accent else Color.Transparent, RoundedCornerShape(16.dp))
             .clickable(role = Role.RadioButton, onClick = onClick)
-            .padding(4.dp)
+            .padding(vertical = 8.dp, horizontal = 2.dp)
     ) {
-        Box(
-            modifier = Modifier
-                .size(52.dp)
-                .clip(RoundedCornerShape(18.dp))
-                .background(preview.background)
-                .border(
-                    width = if (selected) 2.5.dp else 1.dp,
-                    color = if (selected) palette.accent else palette.ink.copy(alpha = 0.12f),
-                    shape = RoundedCornerShape(18.dp)
-                ),
-            contentAlignment = Alignment.Center
-        ) {
-            Box(
-                modifier = Modifier
-                    .size(32.dp)
-                    .clip(RoundedCornerShape(11.dp))
-                    .background(preview.highlight),
-                contentAlignment = Alignment.Center
-            ) {
-                Box(
-                    modifier = Modifier
-                        .size(16.dp)
-                        .clip(CircleShape)
-                        .background(preview.accent),
-                    contentAlignment = Alignment.Center
-                ) {
-                    if (selected) {
-                        Icon(Icons.Rounded.Check, contentDescription = null, tint = preview.onAccent, modifier = Modifier.size(12.dp))
-                    }
-                }
-            }
-        }
+        Image(
+            painter = painterResource(option.iconRes),
+            contentDescription = null,
+            modifier = Modifier.size(46.dp)
+        )
         Spacer(Modifier.height(6.dp))
         Text(
             text = stringResource(option.labelRes),
             style = MaterialTheme.typography.labelMedium,
-            color = if (selected) palette.ink else palette.inkMuted
+            color = if (selected) palette.ink else palette.inkMuted,
+            maxLines = 1
         )
     }
 }

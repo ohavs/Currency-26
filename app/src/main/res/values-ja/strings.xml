@@ -44,11 +44,11 @@
     <string name="mode_dark">ダーク</string>
     <string name="mode_system">システム</string>
     <string name="color_theme">カラーテーマ</string>
-    <string name="theme_sage">セージ</string>
-    <string name="theme_ocean">オーシャン</string>
-    <string name="theme_sunset">サンド</string>
-    <string name="theme_rose">ローズ</string>
-    <string name="theme_lavender">ラベンダー</string>
+    <string name="theme_sage">クラシック</string>
+    <string name="theme_ocean">海</string>
+    <string name="theme_sunset">砂丘</string>
+    <string name="theme_rose">夕焼け</string>
+    <string name="theme_lavender">夜空</string>
     <string name="language">言語</string>
     <string name="language_system">自動</string>
     <string name="app_updates">アプリのアップデート</string>

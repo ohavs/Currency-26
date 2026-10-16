@@ -44,11 +44,11 @@
     <string name="mode_dark">כהה</string>
     <string name="mode_system">לפי המערכת</string>
     <string name="color_theme">ערכת צבעים</string>
-    <string name="theme_sage">מרווה</string>
-    <string name="theme_ocean">אוקיינוס</string>
+    <string name="theme_sage">קלאסי</string>
+    <string name="theme_ocean">ים</string>
     <string name="theme_sunset">חול</string>
-    <string name="theme_rose">ורד</string>
-    <string name="theme_lavender">לבנדר</string>
+    <string name="theme_rose">שקיעה</string>
+    <string name="theme_lavender">לילה</string>
     <string name="language">שפה</string>
     <string name="language_system">אוטומטי</string>
     <string name="app_updates">עדכוני אפליקציה</string>
