@@ -37,6 +37,7 @@ import androidx.compose.material.icons.rounded.Add
 import androidx.compose.material.icons.rounded.Close
 import androidx.compose.material.icons.rounded.DeleteOutline
 import androidx.compose.material.icons.rounded.Edit
+import androidx.compose.material.icons.rounded.Lightbulb
 import androidx.compose.material.icons.rounded.Refresh
 import androidx.compose.material.icons.rounded.SwapVert
 import androidx.compose.material.icons.rounded.SystemUpdate
@@ -126,6 +127,7 @@ fun CalculatorScreen(viewModel: MainViewModel, onRemoveLegacyApp: () -> Unit = {
     val legacyAppInstalled by viewModel.legacyAppInstalled.collectAsState()
     val languageSuggestion by viewModel.languageSuggestion.collectAsState()
     val tour by viewModel.tour.collectAsState()
+    val tourOffer by viewModel.tourOffer.collectAsState()
     val widgetGuide by viewModel.widgetGuide.collectAsState()
     val palette = LocalPalette.current
 
@@ -166,6 +168,10 @@ fun CalculatorScreen(viewModel: MainViewModel, onRemoveLegacyApp: () -> Unit = {
                     languageSuggestion = languageSuggestion,
                     onAcceptLanguage = viewModel::acceptLanguageSuggestion,
                     onDismissLanguage = viewModel::dismissLanguageSuggestion,
+                    // One question at a time: the language comes first.
+                    tourOffer = if (languageSuggestion == null) tourOffer.firstOrNull() else null,
+                    onOpenTour = viewModel::openOfferedTour,
+                    onDismissTourOffer = viewModel::dismissTourOffer,
                 )
                 AppScreen.Settings -> SettingsScreen(
                     themeMode = themeMode,
@@ -241,6 +247,9 @@ fun CalculatorContent(
     languageSuggestion: LanguageSuggestion? = null,
     onAcceptLanguage: () -> Unit = {},
     onDismissLanguage: () -> Unit = {},
+    tourOffer: FeatureTip? = null,
+    onOpenTour: () -> Unit = {},
+    onDismissTourOffer: () -> Unit = {},
 ) {
     val updatedAt = formatUpdatedAt(
         state.lastUpdateTimestamp,
@@ -274,6 +283,10 @@ fun CalculatorContent(
 
         if (languageSuggestion != null) {
             LanguageSuggestionBanner(languageSuggestion, onAccept = onAcceptLanguage, onDismiss = onDismissLanguage)
+            Spacer(Modifier.height(8.dp))
+        }
+        if (tourOffer != null) {
+            TourOfferBanner(tourOffer, onOpen = onOpenTour, onDismiss = onDismissTourOffer)
             Spacer(Modifier.height(8.dp))
         }
         val release = appUpdate?.available
@@ -437,6 +450,54 @@ private fun LanguageSuggestionBanner(suggestion: LanguageSuggestion, onAccept: (
             contentAlignment = Alignment.Center
         ) {
             Text(suggestion.action, style = MaterialTheme.typography.labelLarge, color = palette.onAccent, maxLines = 1)
+        }
+        Icon(
+            Icons.Rounded.Close,
+            contentDescription = stringResource(R.string.close),
+            tint = palette.inkMuted,
+            modifier = Modifier
+                .padding(start = 4.dp)
+                .clip(CircleShape)
+                .clickable(role = Role.Button, onClick = onDismiss)
+                .padding(8.dp)
+                .size(18.dp)
+        )
+    }
+}
+
+/** Offers the feature tour (its first tip's title); a tap opens it, so it never covers the keypad uninvited. */
+@Composable
+private fun TourOfferBanner(tip: FeatureTip, onOpen: () -> Unit, onDismiss: () -> Unit) {
+    val palette = LocalPalette.current
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(22.dp))
+            .background(palette.card)
+            .clickable(role = Role.Button, onClick = onOpen)
+            .padding(start = 16.dp, end = 6.dp, top = 6.dp, bottom = 6.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Icon(Icons.Rounded.Lightbulb, contentDescription = null, tint = palette.accent, modifier = Modifier.size(20.dp))
+        Spacer(Modifier.width(10.dp))
+        Text(
+            text = stringResource(tip.titleRes),
+            style = MaterialTheme.typography.labelLarge,
+            color = palette.ink,
+            maxLines = 2,
+            overflow = TextOverflow.Ellipsis,
+            modifier = Modifier.weight(1f)
+        )
+        Spacer(Modifier.width(8.dp))
+        Box(
+            modifier = Modifier
+                .clip(RoundedCornerShape(16.dp))
+                .background(palette.accent)
+                .clickable(role = Role.Button, onClick = onOpen)
+                .padding(horizontal = 14.dp, vertical = 8.dp),
+            contentAlignment = Alignment.Center
+        ) {
+            Text(stringResource(R.string.tip_offer_action), style = MaterialTheme.typography.labelLarge, color = palette.onAccent, maxLines = 1)
         }
         Icon(
             Icons.Rounded.Close,

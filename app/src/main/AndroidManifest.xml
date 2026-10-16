@@ -35,7 +35,7 @@
             </intent-filter>
         </activity>
 
-        <!-- "Convert currency" in other apps' text-selection menu: a bubble over that app. -->
+        <!-- "Convert currency" in other apps' text-selection menu and share sheet: a bubble over that app. -->
         <activity
             android:name=".QuickConvertActivity"
             android:exported="true"
@@ -44,6 +44,12 @@
             android:theme="@style/Theme.MyApplication.QuickConvert">
             <intent-filter android:label="@string/quick_convert_label">
                 <action android:name="android.intent.action.PROCESS_TEXT" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <data android:mimeType="text/plain" />
+            </intent-filter>
+            <!-- Share -> "Convert currency": always visible, where the selection menu may hide other apps. -->
+            <intent-filter android:label="@string/quick_convert_label">
+                <action android:name="android.intent.action.SEND" />
                 <category android:name="android.intent.category.DEFAULT" />
                 <data android:mimeType="text/plain" />
             </intent-filter>

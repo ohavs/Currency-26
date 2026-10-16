@@ -106,5 +106,6 @@
     <string name="quick_no_price">Seçilen metinde fiyat bulunamadı</string>
     <string name="quick_assumed">Tahmini para birimi</string>
     <string name="tip_select_title">Her uygulamadan çevirin</string>
-    <string name="tip_select_body">Herhangi bir uygulamada bir fiyatı seçin ve menüden \"Döviz çevir\"i seçin (bazen ⋮ altında). Sonuç, yaptığınız işi bırakmadan hemen görünür.</string>
+    <string name="tip_select_body">Herhangi bir uygulamada bir fiyatı seçin ve menüden \"Döviz çevir\"i seçin (veya Paylaş → \"Döviz çevir\"). Sonuç, yaptığınız işi bırakmadan hemen görünür.</string>
+    <string name="tip_offer_action">Göster</string>
 </resources>

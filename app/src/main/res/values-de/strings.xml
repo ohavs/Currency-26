@@ -106,5 +106,6 @@
     <string name="quick_no_price">Im markierten Text wurde kein Preis gefunden</string>
     <string name="quick_assumed">Währung angenommen</string>
     <string name="tip_select_title">Aus jeder App umrechnen</string>
-    <string name="tip_select_body">Markiere einen Preis in einer beliebigen App und wähle \"Währung umrechnen\" im Menü (manchmal unter ⋮). Das Ergebnis erscheint sofort, ohne die App zu verlassen.</string>
+    <string name="tip_select_body">Markiere einen Preis in einer beliebigen App und wähle \"Währung umrechnen\" im Menü (oder Teilen → \"Währung umrechnen\"). Das Ergebnis erscheint sofort, ohne die App zu verlassen.</string>
+    <string name="tip_offer_action">Zeigen</string>
 </resources>

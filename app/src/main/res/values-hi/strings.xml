@@ -106,5 +106,6 @@
     <string name="quick_no_price">चुने गए टेक्स्ट में कोई कीमत नहीं मिली</string>
     <string name="quick_assumed">अनुमानित मुद्रा</string>
     <string name="tip_select_title">किसी भी ऐप से बदलें</string>
-    <string name="tip_select_body">किसी भी ऐप में कीमत चुनें और मेन्यू से \"मुद्रा बदलें\" चुनें (कभी-कभी ⋮ में)। नतीजा तुरंत दिखेगा, जो कर रहे हैं उसे छोड़े बिना।</string>
+    <string name="tip_select_body">किसी भी ऐप में कीमत चुनें और मेन्यू से \"मुद्रा बदलें\" चुनें (या शेयर करें → \"मुद्रा बदलें\")। नतीजा तुरंत दिखेगा, जो कर रहे हैं उसे छोड़े बिना।</string>
+    <string name="tip_offer_action">देखें</string>
 </resources>

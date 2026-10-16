@@ -106,5 +106,6 @@
     <string name="quick_no_price">Nessun prezzo trovato nel testo selezionato</string>
     <string name="quick_assumed">Valuta presunta</string>
     <string name="tip_select_title">Converti da qualsiasi app</string>
-    <string name="tip_select_body">Seleziona un prezzo in qualsiasi app e scegli \"Converti valuta\" dal menu (a volte sotto ⋮). Il risultato appare subito, senza lasciare ciò che stai facendo.</string>
+    <string name="tip_select_body">Seleziona un prezzo in qualsiasi app e scegli \"Converti valuta\" dal menu (o Condividi → \"Converti valuta\"). Il risultato appare subito, senza lasciare ciò che stai facendo.</string>
+    <string name="tip_offer_action">Mostra</string>
 </resources>
