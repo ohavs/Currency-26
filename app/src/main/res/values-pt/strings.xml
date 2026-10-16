@@ -49,6 +49,7 @@
     <string name="theme_sunset">Areia</string>
     <string name="theme_rose">Pôr do sol</string>
     <string name="theme_lavender">Noite</string>
+    <string name="theme_gold">Ouro</string>
     <string name="language">Idioma</string>
     <string name="language_system">Auto</string>
     <string name="app_updates">Atualizações do app</string>
@@ -93,4 +94,7 @@
     <string name="show_tips">Ver o tour rápido</string>
     <string name="tip_widget_action">Mostre como</string>
     <string name="guide_add_widget">Toque aqui para adicionar o widget à tela inicial</string>
+    <string name="language_suggestion">Usar o app em português?</string>
+    <string name="language_suggestion_hint">Sugerido para a sua região</string>
+    <string name="language_suggestion_switch">Mudar</string>
 </resources>

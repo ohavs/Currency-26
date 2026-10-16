@@ -4,6 +4,7 @@ import androidx.annotation.DrawableRes
 import androidx.annotation.StringRes
 import androidx.compose.runtime.Immutable
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.lerp
 import com.example.R
 
 /**
@@ -31,7 +32,10 @@ data class AppPalette(
     /** Solid call-to-action fill (buttons, selected chips). */
     val accent: Color,
     val onAccent: Color,
-)
+) {
+    /** The background texture's colour: the accent, toned towards the background in dark mode to stay quiet. */
+    val textureInk: Color get() = if (isDark) lerp(background, accent, 0.6f) else accent
+}
 
 @Immutable
 data class ColorThemeOption(
@@ -39,6 +43,10 @@ data class ColorThemeOption(
     @param:StringRes val labelRes: Int,
     /** The app icon drawn in this set's colours and motif (tools/icons/make_icons.mjs); shown in Settings. */
     @param:DrawableRes val iconRes: Int,
+    /** The background texture's repeating tile (tools/textures/make_textures.mjs); null for the sun rays. */
+    @param:DrawableRes val textureTile: Int?,
+    /** The same texture for a widget ImageView: the tile repeated, or the sun rays as a vector. */
+    @param:DrawableRes val widgetTexture: Int,
     val light: AppPalette,
     val dark: AppPalette,
 )
@@ -50,6 +58,8 @@ object Palettes {
         key = "sage",
         labelRes = R.string.theme_sage,
         iconRes = R.drawable.palette_icon_sage,
+        textureTile = R.drawable.texture_sage_tile,
+        widgetTexture = R.drawable.texture_sage,
         light = AppPalette(
             isDark = false,
             background = Color(0xFFD9EBD7),
@@ -80,6 +90,8 @@ object Palettes {
         key = "ocean",
         labelRes = R.string.theme_ocean,
         iconRes = R.drawable.palette_icon_ocean,
+        textureTile = R.drawable.texture_ocean_tile,
+        widgetTexture = R.drawable.texture_ocean,
         light = AppPalette(
             isDark = false,
             background = Color(0xFFD8E7EF),
@@ -110,6 +122,8 @@ object Palettes {
         key = "sunset",
         labelRes = R.string.theme_sunset,
         iconRes = R.drawable.palette_icon_sunset,
+        textureTile = R.drawable.texture_sunset_tile,
+        widgetTexture = R.drawable.texture_sunset,
         light = AppPalette(
             isDark = false,
             background = Color(0xFFF2E4D8),
@@ -140,6 +154,8 @@ object Palettes {
         key = "rose",
         labelRes = R.string.theme_rose,
         iconRes = R.drawable.palette_icon_rose,
+        textureTile = null,
+        widgetTexture = R.drawable.texture_rose,
         light = AppPalette(
             isDark = false,
             background = Color(0xFFF2E0E2),
@@ -170,6 +186,8 @@ object Palettes {
         key = "lavender",
         labelRes = R.string.theme_lavender,
         iconRes = R.drawable.palette_icon_lavender,
+        textureTile = R.drawable.texture_lavender_tile,
+        widgetTexture = R.drawable.texture_lavender,
         light = AppPalette(
             isDark = false,
             background = Color(0xFFE3E1F1),
@@ -196,7 +214,39 @@ object Palettes {
         ),
     )
 
-    val options: List<ColorThemeOption> = listOf(sage, ocean, sunset, rose, lavender)
+    private val gold = ColorThemeOption(
+        key = "gold",
+        labelRes = R.string.theme_gold,
+        iconRes = R.drawable.palette_icon_gold,
+        textureTile = R.drawable.texture_gold_tile,
+        widgetTexture = R.drawable.texture_gold,
+        light = AppPalette(
+            isDark = false,
+            background = Color(0xFFF0E7CC),
+            card = Color(0xFFE4D4A8),
+            cardSoft = Color(0xFFF7F1DF),
+            highlight = Color(0xFFD5BC7C),
+            highlightSoft = Color(0xFFDECA95),
+            ink = Color(0xFF3A3120),
+            inkMuted = Color(0xFF6A5A35),
+            accent = Color(0xFF4A3D1C),
+            onAccent = Color(0xFFF7EFD8),
+        ),
+        dark = AppPalette(
+            isDark = true,
+            background = Color(0xFF26231B),
+            card = Color(0xFF353023),
+            cardSoft = Color(0xFF2E2A1F),
+            highlight = Color(0xFF574B2B),
+            highlightSoft = Color(0xFF4B4127),
+            ink = Color(0xFFF5ECD2),
+            inkMuted = Color(0xFFBDAE85),
+            accent = Color(0xFFEBD49A),
+            onAccent = Color(0xFF26231B),
+        ),
+    )
+
+    val options: List<ColorThemeOption> = listOf(sage, ocean, sunset, rose, lavender, gold)
 
     /** Maps keys stored by older versions ("standard", "forest") onto the current themes. */
     fun normalize(key: String?): String = when (key) {

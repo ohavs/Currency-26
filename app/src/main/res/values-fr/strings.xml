@@ -49,6 +49,7 @@
     <string name="theme_sunset">Sable</string>
     <string name="theme_rose">Crépuscule</string>
     <string name="theme_lavender">Nuit</string>
+    <string name="theme_gold">Or</string>
     <string name="language">Langue</string>
     <string name="language_system">Auto</string>
     <string name="app_updates">Mises à jour de l\'app</string>
@@ -93,4 +94,7 @@
     <string name="show_tips">Revoir la présentation</string>
     <string name="tip_widget_action">Montrez-moi</string>
     <string name="guide_add_widget">Touchez ici pour ajouter le widget à votre écran d\'accueil</string>
+    <string name="language_suggestion">Utiliser l\'app en français ?</string>
+    <string name="language_suggestion_hint">Suggéré pour votre région</string>
+    <string name="language_suggestion_switch">Changer</string>
 </resources>

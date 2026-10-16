@@ -49,6 +49,7 @@
     <string name="theme_sunset">חול</string>
     <string name="theme_rose">שקיעה</string>
     <string name="theme_lavender">לילה</string>
+    <string name="theme_gold">זהב</string>
     <string name="language">שפה</string>
     <string name="language_system">אוטומטי</string>
     <string name="app_updates">עדכוני אפליקציה</string>
@@ -93,4 +94,7 @@
     <string name="show_tips">הצגת ההדרכה הקצרה</string>
     <string name="tip_widget_action">הראו לי איך</string>
     <string name="guide_add_widget">לחצו כאן כדי להוסיף את הווידג\'ט למסך הבית</string>
+    <string name="language_suggestion">להשתמש באפליקציה בעברית?</string>
+    <string name="language_suggestion_hint">הצעה לפי האזור שלך</string>
+    <string name="language_suggestion_switch">החלפה</string>
 </resources>

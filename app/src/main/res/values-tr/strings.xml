@@ -49,6 +49,7 @@
     <string name="theme_sunset">Kum</string>
     <string name="theme_rose">Gün batımı</string>
     <string name="theme_lavender">Gece</string>
+    <string name="theme_gold">Altın</string>
     <string name="language">Dil</string>
     <string name="language_system">Otomatik</string>
     <string name="app_updates">Uygulama güncellemeleri</string>
@@ -93,4 +94,7 @@
     <string name="show_tips">Kısa tanıtımı göster</string>
     <string name="tip_widget_action">Nasıl yapılır?</string>
     <string name="guide_add_widget">Widget\'ı ana ekrana eklemek için buraya dokunun</string>
+    <string name="language_suggestion">Uygulama Türkçe olsun mu?</string>
+    <string name="language_suggestion_hint">Bölgeniz için öneri</string>
+    <string name="language_suggestion_switch">Değiştir</string>
 </resources>

@@ -1,4 +1,4 @@
-// The app icon, in five looks: one per colour set (Settings -> Appearance shows them; a tap changes the
+// The app icon, in six looks: one per colour set (Settings -> Appearance shows them; a tap changes the
 // colours and the background texture, never the launcher icon). The launcher icon is "classic".
 //
 // Each look is an SVG on Android's 108dp adaptive-icon grid, rendered with Chromium (Playwright):
@@ -141,6 +141,34 @@ const LOOKS = {
         <circle cx="76" cy="28" r="7.5" fill="#FFE7A6" mask="url(#moon)"/>`;
     },
   },
+  gold: {
+    label: 'gold',
+    ink: '#4A3412', cardB: '#FFF3D4',
+    background: () => {
+      // A coin: engine-turned rings, a reeded rim and a sheen across the metal.
+      const rings = [];
+      for (let r = 8; r <= 40; r += 4) rings.push(`<circle cx="54" cy="54" r="${r}"/>`);
+      const ticks = [];
+      for (let i = 0; i < 72; i++) {
+        const a = (i / 72) * Math.PI * 2, c = Math.cos(a), s = Math.sin(a);
+        ticks.push(`M${r1(54 + 44 * c)} ${r1(54 + 44 * s)}L${r1(54 + 49 * c)} ${r1(54 + 49 * s)}`);
+      }
+      return `
+        <defs>
+          <linearGradient id="bg" x1="0" y1="0" x2="108" y2="108" gradientUnits="userSpaceOnUse">
+            <stop offset="0" stop-color="#FBE29A"/><stop offset="0.5" stop-color="#E2AF48"/><stop offset="1" stop-color="#9E6A1C"/>
+          </linearGradient>
+          <linearGradient id="sheen" x1="0" y1="0" x2="108" y2="108" gradientUnits="userSpaceOnUse">
+            <stop offset="0.25" stop-color="#fff" stop-opacity="0"/><stop offset="0.4" stop-color="#fff" stop-opacity="0.32"/><stop offset="0.55" stop-color="#fff" stop-opacity="0"/>
+          </linearGradient>
+        </defs>
+        <rect width="108" height="108" fill="url(#bg)"/>
+        <g fill="none" stroke="#fff" stroke-opacity="0.16" stroke-width="0.7">${rings.join('')}</g>
+        <circle cx="54" cy="54" r="42.5" fill="none" stroke="#7A4E10" stroke-opacity="0.25" stroke-width="0.8"/>
+        <path d="${ticks.join('')}" stroke="#fff" stroke-opacity="0.28" stroke-width="0.9"/>
+        <rect width="108" height="108" fill="url(#sheen)"/>`;
+    },
+  },
 };
 
 const ARROWS = 'M50 57.4V50.6M47.7 52.9L50 50.6L52.3 52.9M58 50.6V57.4M55.7 55.1L58 57.4L60.3 55.1';
@@ -211,11 +239,11 @@ async function main() {
   }
 
   if (preview) {
-    // All five side by side as rounded squares, to compare.
+    // All of them side by side as rounded squares, to compare.
     const scoped = (markup, p) => markup.replace(/id="([^"]+)"/g, `id="${p}$1"`).replace(/url\(#([^)]+)\)/g, `url(#${p}$1)`);
     const cells = Object.values(LOOKS).map((look, i) =>
       `<div style="display:inline-block;width:160px;height:160px;margin:8px">${scoped(svg(full(look), '18 18 72 72', squircle), `l${i}`)}</div>`).join('');
-    await page.setViewportSize({ width: 5 * 176, height: 176 });
+    await page.setViewportSize({ width: Object.keys(LOOKS).length * 176, height: 176 });
     await page.setContent(`<!doctype html><html><head><style>
       @font-face { font-family: IconRubik; font-weight: 700; src: url(data:font/ttf;base64,${FONT}); }
       body { margin: 0; background: #fff; }</style></head><body>${cells}</body></html>`);

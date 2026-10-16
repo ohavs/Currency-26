@@ -49,6 +49,7 @@
     <string name="theme_sunset">रेत</string>
     <string name="theme_rose">सूर्यास्त</string>
     <string name="theme_lavender">रात</string>
+    <string name="theme_gold">सुनहरा</string>
     <string name="language">भाषा</string>
     <string name="language_system">अपने-आप</string>
     <string name="app_updates">ऐप अपडेट</string>
@@ -93,4 +94,7 @@
     <string name="show_tips">छोटा टूर दिखाएँ</string>
     <string name="tip_widget_action">मुझे दिखाएँ</string>
     <string name="guide_add_widget">विजेट को होम स्क्रीन पर जोड़ने के लिए यहाँ टैप करें</string>
+    <string name="language_suggestion">ऐप को हिन्दी में इस्तेमाल करें?</string>
+    <string name="language_suggestion_hint">आपके क्षेत्र के लिए सुझाव</string>
+    <string name="language_suggestion_switch">बदलें</string>
 </resources>

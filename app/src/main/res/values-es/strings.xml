@@ -49,6 +49,7 @@
     <string name="theme_sunset">Arena</string>
     <string name="theme_rose">Atardecer</string>
     <string name="theme_lavender">Noche</string>
+    <string name="theme_gold">Oro</string>
     <string name="language">Idioma</string>
     <string name="language_system">Auto</string>
     <string name="app_updates">Actualizaciones de la app</string>
@@ -93,4 +94,7 @@
     <string name="show_tips">Ver la guía rápida</string>
     <string name="tip_widget_action">Muéstrame cómo</string>
     <string name="guide_add_widget">Toca aquí para añadir el widget a tu pantalla de inicio</string>
+    <string name="language_suggestion">¿Usar la app en español?</string>
+    <string name="language_suggestion_hint">Sugerido para tu región</string>
+    <string name="language_suggestion_switch">Cambiar</string>
 </resources>

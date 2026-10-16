@@ -107,63 +107,65 @@ class LargeCurrencyWidget : GlanceAppWidget() {
             )
         }
 
-        Column(
+        Box(
             modifier = GlanceModifier
                 .fillMaxSize()
                 .background(colors.background)
                 .cornerRadius(28.dp)
-                .padding(padding)
         ) {
-            // The cards with a swap button on each seam, cut into the cards around it (as in the app):
-            // source <-> target, and with an extra currency also target <-> extra (no dragging in widgets).
-            Box(
-                modifier = GlanceModifier.fillMaxWidth().defaultWeight(),
-                contentAlignment = if (extra != null) Alignment.TopCenter else Alignment.Center
-            ) {
-                Column(modifier = GlanceModifier.fillMaxSize()) {
-                    card(data.sourceCurrency, sourceText, CurrencySlot.SOURCE, colors.card, false, GlanceModifier.fillMaxWidth().defaultWeight())
-                    Spacer(GlanceModifier.height(gap))
-                    card(data.targetCurrency, targetText, CurrencySlot.TARGET, colors.highlight, false, GlanceModifier.fillMaxWidth().defaultWeight())
-                    if (extra != null) {
+            WidgetTexture(colors)
+            Column(modifier = GlanceModifier.fillMaxSize().padding(padding)) {
+                // The cards with a swap button on each seam, cut into the cards around it (as in the app):
+                // source <-> target, and with an extra currency also target <-> extra (no dragging in widgets).
+                Box(
+                    modifier = GlanceModifier.fillMaxWidth().defaultWeight(),
+                    contentAlignment = if (extra != null) Alignment.TopCenter else Alignment.Center
+                ) {
+                    Column(modifier = GlanceModifier.fillMaxSize()) {
+                        card(data.sourceCurrency, sourceText, CurrencySlot.SOURCE, colors.card, false, GlanceModifier.fillMaxWidth().defaultWeight())
                         Spacer(GlanceModifier.height(gap))
-                        // The optional currency: lighter card plus a remove button, matching the app.
-                        card(extra, formatAmount(amount * data.extraRate), CurrencySlot.EXTRA_TARGET, colors.cardSoft, true, GlanceModifier.fillMaxWidth().defaultWeight())
+                        card(data.targetCurrency, targetText, CurrencySlot.TARGET, colors.highlight, false, GlanceModifier.fillMaxWidth().defaultWeight())
+                        if (extra != null) {
+                            Spacer(GlanceModifier.height(gap))
+                            // The optional currency: lighter card plus a remove button, matching the app.
+                            card(extra, formatAmount(amount * data.extraRate), CurrencySlot.EXTRA_TARGET, colors.cardSoft, true, GlanceModifier.fillMaxWidth().defaultWeight())
+                        }
+                    }
+                    if (extra == null) {
+                        SwapButton(colors, layout.swapWidthDp, layout.swapHeightDp, actionRunCallback<SwapAction>())
+                    } else {
+                        val card = layout.cardHeightDp
+                        val button = layout.swapHeightDp
+                        Column(modifier = GlanceModifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally) {
+                            Spacer(GlanceModifier.height((card + LargeWidgetLayout.GAP / 2 - button / 2).dp))
+                            SwapButton(colors, layout.swapWidthDp, button, actionRunCallback<SwapAction>())
+                            Spacer(GlanceModifier.height((card + LargeWidgetLayout.GAP - button).dp))
+                            SwapButton(colors, layout.swapWidthDp, button, actionRunCallback<SwapExtraAction>())
+                        }
                     }
                 }
-                if (extra == null) {
-                    SwapButton(colors, layout.swapWidthDp, layout.swapHeightDp, actionRunCallback<SwapAction>())
-                } else {
-                    val card = layout.cardHeightDp
-                    val button = layout.swapHeightDp
-                    Column(modifier = GlanceModifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally) {
-                        Spacer(GlanceModifier.height((card + LargeWidgetLayout.GAP / 2 - button / 2).dp))
-                        SwapButton(colors, layout.swapWidthDp, button, actionRunCallback<SwapAction>())
-                        Spacer(GlanceModifier.height((card + LargeWidgetLayout.GAP - button).dp))
-                        SwapButton(colors, layout.swapWidthDp, button, actionRunCallback<SwapExtraAction>())
-                    }
+                if (layout.showKeypad) {
+                    Spacer(GlanceModifier.height(LargeWidgetLayout.KEYPAD_SPACING.dp))
+                    Keypad(
+                        colors = colors,
+                        mirrored = launcherRtl,
+                        gap = gap,
+                        rowHeight = layout.keyRowDp.dp,
+                        fontSize = layout.keyFontSp.sp,
+                        modifier = GlanceModifier.fillMaxWidth()
+                    )
                 }
-            }
-            if (layout.showKeypad) {
-                Spacer(GlanceModifier.height(LargeWidgetLayout.KEYPAD_SPACING.dp))
-                Keypad(
-                    colors = colors,
-                    mirrored = launcherRtl,
-                    gap = gap,
-                    rowHeight = layout.keyRowDp.dp,
-                    fontSize = layout.keyFontSp.sp,
-                    modifier = GlanceModifier.fillMaxWidth()
-                )
-            }
-            if (layout.showRate) {
-                RateLine(
-                    data = data,
-                    colors = colors,
-                    updatedTime = updatedTime,
-                    updatedLabel = localized.getString(R.string.updated_at, updatedTime.orEmpty()),
-                    pillFirst = pillFirst,
-                    height = LargeWidgetLayout.RATE_HEIGHT.dp,
-                    widthDp = size.width.value - LargeWidgetLayout.PADDING * 2
-                )
+                if (layout.showRate) {
+                    RateLine(
+                        data = data,
+                        colors = colors,
+                        updatedTime = updatedTime,
+                        updatedLabel = localized.getString(R.string.updated_at, updatedTime.orEmpty()),
+                        pillFirst = pillFirst,
+                        height = LargeWidgetLayout.RATE_HEIGHT.dp,
+                        widthDp = size.width.value - LargeWidgetLayout.PADDING * 2
+                    )
+                }
             }
         }
     }

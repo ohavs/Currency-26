@@ -49,6 +49,7 @@
     <string name="theme_sunset">Sabbia</string>
     <string name="theme_rose">Tramonto</string>
     <string name="theme_lavender">Notte</string>
+    <string name="theme_gold">Oro</string>
     <string name="language">Lingua</string>
     <string name="language_system">Auto</string>
     <string name="app_updates">Aggiornamenti dell\'app</string>
@@ -93,4 +94,7 @@
     <string name="show_tips">Rivedi la guida rapida</string>
     <string name="tip_widget_action">Mostrami come</string>
     <string name="guide_add_widget">Tocca qui per aggiungere il widget alla schermata Home</string>
+    <string name="language_suggestion">Usare l\'app in italiano?</string>
+    <string name="language_suggestion_hint">Suggerito per la tua zona</string>
+    <string name="language_suggestion_switch">Cambia</string>
 </resources>

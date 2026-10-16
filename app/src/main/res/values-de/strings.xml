@@ -49,6 +49,7 @@
     <string name="theme_sunset">Sand</string>
     <string name="theme_rose">Abendrot</string>
     <string name="theme_lavender">Nacht</string>
+    <string name="theme_gold">Gold</string>
     <string name="language">Sprache</string>
     <string name="language_system">Auto</string>
     <string name="app_updates">App-Updates</string>
@@ -93,4 +94,7 @@
     <string name="show_tips">Kurze Einführung anzeigen</string>
     <string name="tip_widget_action">Zeig mir, wie</string>
     <string name="guide_add_widget">Hier tippen, um das Widget zum Startbildschirm hinzuzufügen</string>
+    <string name="language_suggestion">App auf Deutsch verwenden?</string>
+    <string name="language_suggestion_hint">Vorschlag für deine Region</string>
+    <string name="language_suggestion_switch">Wechseln</string>
 </resources>

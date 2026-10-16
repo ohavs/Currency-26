@@ -174,18 +174,22 @@ fun SettingsScreen(
                     )
                     Spacer(Modifier.height(4.dp))
                     SettingLabel(stringResource(R.string.color_theme))
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.spacedBy(6.dp)
-                    ) {
-                        val selectedKey = Palettes.normalize(colorTheme)
-                        Palettes.options.forEach { option ->
-                            ThemeIconTile(
-                                option = option,
-                                selected = option.key == selectedKey,
-                                onClick = { onColorThemeChange(option.key) },
-                                modifier = Modifier.weight(1f)
-                            )
+                    val selectedKey = Palettes.normalize(colorTheme)
+                    Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                        Palettes.options.chunked(3).forEach { row ->
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.spacedBy(6.dp)
+                            ) {
+                                row.forEach { option ->
+                                    ThemeIconTile(
+                                        option = option,
+                                        selected = option.key == selectedKey,
+                                        onClick = { onColorThemeChange(option.key) },
+                                        modifier = Modifier.weight(1f)
+                                    )
+                                }
+                            }
                         }
                     }
                 }
@@ -546,7 +550,7 @@ private fun ThemeIconTile(option: ColorThemeOption, selected: Boolean, onClick: 
         Image(
             painter = painterResource(option.iconRes),
             contentDescription = null,
-            modifier = Modifier.size(46.dp)
+            modifier = Modifier.size(56.dp)
         )
         Spacer(Modifier.height(6.dp))
         Text(

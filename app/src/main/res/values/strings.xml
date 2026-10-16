@@ -49,6 +49,7 @@
     <string name="theme_sunset">Sand</string>
     <string name="theme_rose">Sunset</string>
     <string name="theme_lavender">Night</string>
+    <string name="theme_gold">Gold</string>
     <string name="language">Language</string>
     <string name="language_system">Auto</string>
     <string name="app_updates">App updates</string>
@@ -93,4 +94,7 @@
     <string name="show_tips">Show the quick tour</string>
     <string name="tip_widget_action">Show me how</string>
     <string name="guide_add_widget">Tap here to add the widget to your home screen</string>
+    <string name="language_suggestion">Use the app in English?</string>
+    <string name="language_suggestion_hint">Suggested for your region</string>
+    <string name="language_suggestion_switch">Switch</string>
 </resources>

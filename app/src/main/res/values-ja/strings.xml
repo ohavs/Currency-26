@@ -49,6 +49,7 @@
     <string name="theme_sunset">砂丘</string>
     <string name="theme_rose">夕焼け</string>
     <string name="theme_lavender">夜空</string>
+    <string name="theme_gold">ゴールド</string>
     <string name="language">言語</string>
     <string name="language_system">自動</string>
     <string name="app_updates">アプリのアップデート</string>
@@ -93,4 +94,7 @@
     <string name="show_tips">クイックツアーを見る</string>
     <string name="tip_widget_action">やり方を見る</string>
     <string name="guide_add_widget">ここをタップしてウィジェットをホーム画面に追加</string>
+    <string name="language_suggestion">日本語で表示しますか？</string>
+    <string name="language_suggestion_hint">お住まいの地域に合わせた提案</string>
+    <string name="language_suggestion_switch">切り替える</string>
 </resources>
