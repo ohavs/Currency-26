@@ -114,6 +114,6 @@ ROWS = [
  ("quick_no_price", "לא נמצא מחיר בטקסט שסימנת", "No price found in the selected text", "No se encontró ningún precio en el texto seleccionado"),
  ("quick_assumed", "מטבע משוער", "Currency assumed", "Moneda supuesta"),
  ("tip_select_title", "המרה מכל אפליקציה", "Convert from any app", "Convierte desde cualquier app"),
- ("tip_select_body", "סמנו מחיר בכל אפליקציה ובחרו \"המרת מטבע\" בתפריט (לפעמים מאחורי ⋮). התוצאה קופצת מיד, בלי לעזוב את מה שאתם עושים.", "Select a price in any app and choose \"Convert currency\" from the menu (sometimes under ⋮). The result pops up right away, without leaving what you're doing.", "Selecciona un precio en cualquier app y elige \"Convertir moneda\" en el menú (a veces en ⋮). El resultado aparece al instante, sin salir de lo que estás haciendo."),
+ ("tip_select_body", "סמנו מחיר בכל אפליקציה ובחרו \"המרת מטבע\" בתפריט (או \"שיתוף\" ← \"המרת מטבע\"). התוצאה קופצת מיד, בלי לעזוב את מה שאתם עושים.", "Select a price in any app and choose \"Convert currency\" from the menu (or Share → \"Convert currency\"). The result pops up right away, without leaving what you're doing.", "Selecciona un precio en cualquier app y elige \"Convertir moneda\" en el menú (o Compartir → \"Convertir moneda\"). El resultado aparece al instante, sin salir de lo que estás haciendo."),
  ("tip_offer_action", "הצגה", "Show", "Ver"),
 ]

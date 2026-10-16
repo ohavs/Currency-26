@@ -30,9 +30,10 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 /**
- * "Convert currency" in other apps' text-selection menu (ACTION_PROCESS_TEXT). It shows a bubble over the app
- * the text came from, with the selected price converted, and tapping outside returns to that app. In editable
- * text it can also put the converted price in place of the original.
+ * "Convert currency" in other apps' text-selection menu (ACTION_PROCESS_TEXT) and in the share sheet
+ * (ACTION_SEND, for phones that hide selection-menu apps, like recent Samsungs). It shows a bubble over the
+ * app the text came from, with the price converted, and tapping outside returns to that app. In editable text
+ * picked from the selection menu it can also put the converted price in place of the original.
  */
 class QuickConvertActivity : ComponentActivity() {
     override fun attachBaseContext(newBase: Context) {
@@ -45,9 +46,15 @@ class QuickConvertActivity : ComponentActivity() {
             statusBarStyle = SystemBarStyle.dark(Color.TRANSPARENT),
             navigationBarStyle = SystemBarStyle.dark(Color.TRANSPARENT)
         )
-        val text = intent.getCharSequenceExtra(Intent.EXTRA_PROCESS_TEXT)?.toString().orEmpty()
-        // Callers mark editable text explicitly; anything else is treated as read-only.
-        val canReplace = !intent.getBooleanExtra(Intent.EXTRA_PROCESS_TEXT_READONLY, true)
+        val shared = intent.action == Intent.ACTION_SEND
+        val text = if (shared) {
+            // Browsers share a selection with a link to it, whose digits are not prices.
+            intent.getCharSequenceExtra(Intent.EXTRA_TEXT)?.toString().orEmpty().replace(LINK, " ")
+        } else {
+            intent.getCharSequenceExtra(Intent.EXTRA_PROCESS_TEXT)?.toString().orEmpty()
+        }
+        // Callers mark editable text explicitly; anything else (and anything shared) is treated as read-only.
+        val canReplace = !shared && !intent.getBooleanExtra(Intent.EXTRA_PROCESS_TEXT_READONLY, true)
         val repository = (application as CurrencyApp).repository
         val local = DeviceCountry.currency(this)
         repository.markQuickConvertUsed()
@@ -136,5 +143,6 @@ class QuickConvertActivity : ComponentActivity() {
 
     private companion object {
         const val STALE_AFTER_MS = 6 * 60 * 60 * 1000L
+        val LINK = Regex("""https?://\S+""")
     }
 }

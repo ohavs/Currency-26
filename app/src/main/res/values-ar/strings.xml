@@ -106,6 +106,6 @@
     <string name="quick_no_price">لم يتم العثور على سعر في النص المحدد</string>
     <string name="quick_assumed">عملة مفترضة</string>
     <string name="tip_select_title">حوّل من أي تطبيق</string>
-    <string name="tip_select_body">حدّد سعرًا في أي تطبيق واختر \"تحويل العملة\" من القائمة (أحيانًا تحت ⋮). تظهر النتيجة فورًا دون مغادرة ما تفعله.</string>
+    <string name="tip_select_body">حدّد سعرًا في أي تطبيق واختر \"تحويل العملة\" من القائمة (أو مشاركة ← \"تحويل العملة\"). تظهر النتيجة فورًا دون مغادرة ما تفعله.</string>
     <string name="tip_offer_action">عرض</string>
 </resources>
