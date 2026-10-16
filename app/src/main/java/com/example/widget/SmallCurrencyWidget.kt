@@ -69,65 +69,69 @@ class SmallCurrencyWidget : GlanceAppWidget() {
         val sourceText = formatAmountInput(data.amount)
         val targetText = formatAmount(amount * data.rate)
 
-        Column(
+        Box(
             modifier = GlanceModifier
                 .fillMaxSize()
                 .background(colors.background)
                 .cornerRadius(24.dp)
-                .padding(padding)
-                .clickable(actionStartActivity(MainActivity.openAppIntent(context))),
-            verticalAlignment = Alignment.CenterVertically
+                .clickable(actionStartActivity(MainActivity.openAppIntent(context)))
         ) {
-            CurrencyLine(
-                code = data.sourceCurrency,
-                amount = sourceText,
-                fontSize = fitAmountSp(sourceText, amountWidth, maxAmountSp, minSp = 12f, symbol = amountSymbol(data.sourceCurrency)),
-                slot = CurrencySlot.SOURCE,
-                background = colors.card,
-                colors = colors,
-                compact = compact,
-                flagSp = flagSp,
-                pillFirst = pillFirst,
-                launcherRtl = launcherRtl
-            )
-            Spacer(GlanceModifier.height(gap))
-            CurrencyLine(
-                code = data.targetCurrency,
-                amount = targetText,
-                fontSize = fitAmountSp(targetText, amountWidth, maxAmountSp, minSp = 12f, symbol = amountSymbol(data.targetCurrency)),
-                slot = CurrencySlot.TARGET,
-                background = colors.highlight,
-                colors = colors,
-                compact = compact,
-                flagSp = flagSp,
-                pillFirst = pillFirst,
-                launcherRtl = launcherRtl
-            )
-            if (extra != null) {
-                val extraText = formatAmount(amount * data.extraRate)
-                Spacer(GlanceModifier.height(gap))
-                // The optional currency gets the lighter card, like in the app.
+            WidgetTexture(colors)
+            Column(
+                modifier = GlanceModifier.fillMaxSize().padding(padding),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
                 CurrencyLine(
-                    code = extra,
-                    amount = extraText,
-                    fontSize = fitAmountSp(extraText, amountWidth, maxAmountSp, minSp = 12f, symbol = amountSymbol(extra)),
-                    slot = CurrencySlot.EXTRA_TARGET,
-                    background = colors.cardSoft,
+                    code = data.sourceCurrency,
+                    amount = sourceText,
+                    fontSize = fitAmountSp(sourceText, amountWidth, maxAmountSp, minSp = 12f, symbol = amountSymbol(data.sourceCurrency)),
+                    slot = CurrencySlot.SOURCE,
+                    background = colors.card,
                     colors = colors,
                     compact = compact,
                     flagSp = flagSp,
                     pillFirst = pillFirst,
                     launcherRtl = launcherRtl
                 )
-            }
-            if (showRate) {
-                Spacer(GlanceModifier.height(8.dp))
-                Text(
-                    ltr("1 ${data.sourceCurrency} = ${formatRate(data.rate)} ${data.targetCurrency}"),
-                    style = TextStyle(color = colors.inkMuted, fontSize = 11.sp, textAlign = TextAlign.Center),
-                    maxLines = 1,
-                    modifier = GlanceModifier.fillMaxWidth()
+                Spacer(GlanceModifier.height(gap))
+                CurrencyLine(
+                    code = data.targetCurrency,
+                    amount = targetText,
+                    fontSize = fitAmountSp(targetText, amountWidth, maxAmountSp, minSp = 12f, symbol = amountSymbol(data.targetCurrency)),
+                    slot = CurrencySlot.TARGET,
+                    background = colors.highlight,
+                    colors = colors,
+                    compact = compact,
+                    flagSp = flagSp,
+                    pillFirst = pillFirst,
+                    launcherRtl = launcherRtl
                 )
+                if (extra != null) {
+                    val extraText = formatAmount(amount * data.extraRate)
+                    Spacer(GlanceModifier.height(gap))
+                    // The optional currency gets the lighter card, like in the app.
+                    CurrencyLine(
+                        code = extra,
+                        amount = extraText,
+                        fontSize = fitAmountSp(extraText, amountWidth, maxAmountSp, minSp = 12f, symbol = amountSymbol(extra)),
+                        slot = CurrencySlot.EXTRA_TARGET,
+                        background = colors.cardSoft,
+                        colors = colors,
+                        compact = compact,
+                        flagSp = flagSp,
+                        pillFirst = pillFirst,
+                        launcherRtl = launcherRtl
+                    )
+                }
+                if (showRate) {
+                    Spacer(GlanceModifier.height(8.dp))
+                    Text(
+                        ltr("1 ${data.sourceCurrency} = ${formatRate(data.rate)} ${data.targetCurrency}"),
+                        style = TextStyle(color = colors.inkMuted, fontSize = 11.sp, textAlign = TextAlign.Center),
+                        maxLines = 1,
+                        modifier = GlanceModifier.fillMaxWidth()
+                    )
+                }
             }
         }
     }

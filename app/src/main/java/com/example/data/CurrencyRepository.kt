@@ -110,8 +110,15 @@ class CurrencyRepository(
 
     fun setLanguage(language: String) {
         // commit() so the activity recreated right after reads the new value.
-        prefs.edit().putString(AppLanguage.KEY, language).commit()
+        prefs.edit().putString(AppLanguage.KEY, language).putBoolean(AppLanguage.SUGGEST_KEY, false).commit()
         _language.value = language
+    }
+
+    /** A fresh install that has not yet been offered the language of the user's country. */
+    fun languageSuggestionPending(): Boolean = prefs.getBoolean(AppLanguage.SUGGEST_KEY, false)
+
+    fun markLanguageSuggestionDone() {
+        prefs.edit().putBoolean(AppLanguage.SUGGEST_KEY, false).apply()
     }
 
     fun setCheckAppUpdates(enabled: Boolean) {

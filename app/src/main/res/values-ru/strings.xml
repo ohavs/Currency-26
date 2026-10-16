@@ -49,6 +49,7 @@
     <string name="theme_sunset">Песок</string>
     <string name="theme_rose">Закат</string>
     <string name="theme_lavender">Ночь</string>
+    <string name="theme_gold">Золото</string>
     <string name="language">Язык</string>
     <string name="language_system">Авто</string>
     <string name="app_updates">Обновления приложения</string>
@@ -93,4 +94,7 @@
     <string name="show_tips">Показать краткий обзор</string>
     <string name="tip_widget_action">Показать, как</string>
     <string name="guide_add_widget">Нажмите здесь, чтобы добавить виджет на главный экран</string>
+    <string name="language_suggestion">Использовать приложение на русском?</string>
+    <string name="language_suggestion_hint">Предложено для вашего региона</string>
+    <string name="language_suggestion_switch">Переключить</string>
 </resources>

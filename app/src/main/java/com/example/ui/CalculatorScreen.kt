@@ -40,6 +40,7 @@ import androidx.compose.material.icons.rounded.Edit
 import androidx.compose.material.icons.rounded.Refresh
 import androidx.compose.material.icons.rounded.SwapVert
 import androidx.compose.material.icons.rounded.SystemUpdate
+import androidx.compose.material.icons.rounded.Translate
 import androidx.compose.material.icons.rounded.Tune
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
@@ -123,6 +124,7 @@ fun CalculatorScreen(viewModel: MainViewModel, onRemoveLegacyApp: () -> Unit = {
     val checkAppUpdates by viewModel.checkAppUpdates.collectAsState()
     val language by viewModel.language.collectAsState()
     val legacyAppInstalled by viewModel.legacyAppInstalled.collectAsState()
+    val languageSuggestion by viewModel.languageSuggestion.collectAsState()
     val tour by viewModel.tour.collectAsState()
     val widgetGuide by viewModel.widgetGuide.collectAsState()
     val palette = LocalPalette.current
@@ -161,6 +163,9 @@ fun CalculatorScreen(viewModel: MainViewModel, onRemoveLegacyApp: () -> Unit = {
                     onRemoveExtra = viewModel::removeExtraTarget,
                     legacyAppInstalled = legacyAppInstalled,
                     onRemoveLegacyApp = onRemoveLegacyApp,
+                    languageSuggestion = languageSuggestion,
+                    onAcceptLanguage = viewModel::acceptLanguageSuggestion,
+                    onDismissLanguage = viewModel::dismissLanguageSuggestion,
                 )
                 AppScreen.Settings -> SettingsScreen(
                     themeMode = themeMode,
@@ -233,6 +238,9 @@ fun CalculatorContent(
     onRemoveExtra: () -> Unit = {},
     legacyAppInstalled: Boolean = false,
     onRemoveLegacyApp: () -> Unit = {},
+    languageSuggestion: LanguageSuggestion? = null,
+    onAcceptLanguage: () -> Unit = {},
+    onDismissLanguage: () -> Unit = {},
 ) {
     val updatedAt = formatUpdatedAt(
         state.lastUpdateTimestamp,
@@ -264,6 +272,10 @@ fun CalculatorContent(
             }
         )
 
+        if (languageSuggestion != null) {
+            LanguageSuggestionBanner(languageSuggestion, onAccept = onAcceptLanguage, onDismiss = onDismissLanguage)
+            Spacer(Modifier.height(8.dp))
+        }
         val release = appUpdate?.available
         if (appUpdate != null && release != null && !appUpdate.bannerDismissed) {
             UpdateBanner(
@@ -364,6 +376,72 @@ private fun UpdateBanner(versionName: String, progress: Float?, onUpdate: () -> 
             Icons.Rounded.Close,
             contentDescription = stringResource(R.string.close),
             tint = palette.onAccent,
+            modifier = Modifier
+                .padding(start = 4.dp)
+                .clip(CircleShape)
+                .clickable(role = Role.Button, onClick = onDismiss)
+                .padding(8.dp)
+                .size(18.dp)
+        )
+    }
+}
+
+/**
+ * First launch: the app follows the device language, but the user's country speaks another one the app has.
+ * The question and the button are written in that language, the hint in the current one.
+ */
+@Composable
+private fun LanguageSuggestionBanner(suggestion: LanguageSuggestion, onAccept: () -> Unit, onDismiss: () -> Unit) {
+    val palette = LocalPalette.current
+    // Keep the lines on the layout's side even when the suggested language runs the other way.
+    val align = if (LocalLayoutDirection.current == LayoutDirection.Ltr) TextAlign.Left else TextAlign.Right
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(22.dp))
+            .background(palette.card)
+            .padding(start = 16.dp, end = 6.dp, top = 8.dp, bottom = 8.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Icon(Icons.Rounded.Translate, contentDescription = null, tint = palette.accent, modifier = Modifier.size(20.dp))
+        Spacer(Modifier.width(10.dp))
+        Column(modifier = Modifier.weight(1f)) {
+            Text(
+                text = suggestion.title,
+                // Its own direction (a Hebrew question in an English screen ends with "?" on the left).
+                style = MaterialTheme.typography.labelLarge.copy(textDirection = TextDirection.Content),
+                fontWeight = FontWeight.SemiBold,
+                color = palette.ink,
+                textAlign = align,
+                maxLines = 2,
+                overflow = TextOverflow.Ellipsis,
+                modifier = Modifier.fillMaxWidth()
+            )
+            Text(
+                text = stringResource(R.string.language_suggestion_hint),
+                style = MaterialTheme.typography.labelMedium,
+                color = palette.inkMuted,
+                textAlign = align,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+                modifier = Modifier.fillMaxWidth()
+            )
+        }
+        Spacer(Modifier.width(8.dp))
+        Box(
+            modifier = Modifier
+                .clip(RoundedCornerShape(16.dp))
+                .background(palette.accent)
+                .clickable(role = Role.Button, onClick = onAccept)
+                .padding(horizontal = 14.dp, vertical = 8.dp),
+            contentAlignment = Alignment.Center
+        ) {
+            Text(suggestion.action, style = MaterialTheme.typography.labelLarge, color = palette.onAccent, maxLines = 1)
+        }
+        Icon(
+            Icons.Rounded.Close,
+            contentDescription = stringResource(R.string.close),
+            tint = palette.inkMuted,
             modifier = Modifier
                 .padding(start = 4.dp)
                 .clip(CircleShape)

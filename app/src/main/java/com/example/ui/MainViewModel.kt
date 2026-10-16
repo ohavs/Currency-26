@@ -3,11 +3,14 @@ package com.example.ui
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.BuildConfig
+import com.example.R
 import com.example.data.AppRelease
 import com.example.data.AutoUpdateSettings
 import com.example.data.CurrencyRepository
 import com.example.data.CurrencySlot
 import com.example.update.AppUpdater
+import com.example.utils.AppLanguage
+import com.example.utils.CountryLanguage
 import com.example.utils.FeatureTourSchedule
 import com.example.utils.applyKeypadKey
 import com.example.utils.isNewerVersion
@@ -75,6 +78,9 @@ data class AppUpdateState(
     val bannerDismissed: Boolean = false,
 )
 
+/** The language of the user's country, offered once on a fresh install; [title] and [action] are in it. */
+data class LanguageSuggestion(val language: String, val title: String, val action: String)
+
 class MainViewModel(
     private val repository: CurrencyRepository,
     private val updater: AppUpdater,
@@ -102,6 +108,10 @@ class MainViewModel(
             return android.appwidget.AppWidgetManager.getInstance(repository.context).isRequestPinAppWidgetSupported
         }
 
+    // Declared before init, which fills it.
+    private val _languageSuggestion = MutableStateFlow<LanguageSuggestion?>(null)
+    val languageSuggestion: StateFlow<LanguageSuggestion?> = _languageSuggestion.asStateFlow()
+
     init {
         viewModelScope.launch {
             repository.allRatesFlow.collect { rates ->
@@ -128,6 +138,32 @@ class MainViewModel(
         if (repository.checkAppUpdates.value) {
             checkForAppUpdate()
         }
+        if (repository.languageSuggestionPending()) findLanguageSuggestion()
+    }
+
+    private fun findLanguageSuggestion() {
+        val context = repository.context
+        val code = CountryLanguage.suggestion(AppLanguage.country(context), AppLanguage.effective(language.value))
+        if (code == null) {
+            repository.markLanguageSuggestionDone()
+            return
+        }
+        val localized = AppLanguage.wrap(context, code)
+        _languageSuggestion.value = LanguageSuggestion(
+            language = code,
+            title = localized.getString(R.string.language_suggestion),
+            action = localized.getString(R.string.language_suggestion_switch)
+        )
+    }
+
+    fun acceptLanguageSuggestion() {
+        val suggestion = _languageSuggestion.value ?: return
+        setLanguage(suggestion.language)
+    }
+
+    fun dismissLanguageSuggestion() {
+        _languageSuggestion.value = null
+        repository.markLanguageSuggestionDone()
     }
 
     fun checkForAppUpdate() {
@@ -290,6 +326,7 @@ class MainViewModel(
     }
 
     fun setLanguage(language: String) {
+        if (_languageSuggestion.value != null) dismissLanguageSuggestion()
         if (language == repository.language.value) return
         repository.setLanguage(language)
         notifyWidgets(settle = true)

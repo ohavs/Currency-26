@@ -1,6 +1,13 @@
 package com.example.widget
 
+import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
+import androidx.glance.ColorFilter
+import androidx.glance.GlanceModifier
+import androidx.glance.Image
+import androidx.glance.ImageProvider
+import androidx.glance.layout.ContentScale
+import androidx.glance.layout.fillMaxSize
 import androidx.glance.unit.ColorProvider
 import com.example.ui.theme.AppPalette
 import com.example.ui.theme.Palettes
@@ -31,6 +38,25 @@ class WidgetColors(themeMode: String, colorTheme: String) {
     val inkMuted = pick { it.inkMuted }
     val accent = pick { it.accent }
     val onAccent = pick { it.onAccent }
+    /** Opaque, so the texture's own alpha sets its strength with either tint mode (API 31+ or older). */
+    val texture = pick { it.textureInk }
+    /** The colour set's texture drawable (see [WidgetTexture]). */
+    val textureRes = option.widgetTexture
+}
+
+/**
+ * The colour set's background texture, as in the app: a tile repeated over the widget (or the sun rays
+ * stretched over it), tinted with the accent. Goes first in a Box, under the content.
+ */
+@Composable
+internal fun WidgetTexture(colors: WidgetColors) {
+    Image(
+        provider = ImageProvider(colors.textureRes),
+        contentDescription = null,
+        contentScale = ContentScale.FillBounds,
+        colorFilter = ColorFilter.tint(colors.texture),
+        modifier = GlanceModifier.fillMaxSize()
+    )
 }
 
 /** Forces left-to-right display for numbers/codes in RTL launchers (Glance has no text-direction option). */

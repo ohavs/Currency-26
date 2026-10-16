@@ -56,6 +56,7 @@ ROWS = [
  ("theme_sunset", "חול", "Sand", "Arena"),
  ("theme_rose", "שקיעה", "Sunset", "Atardecer"),
  ("theme_lavender", "לילה", "Night", "Noche"),
+ ("theme_gold", "זהב", "Gold", "Oro"),
  ("language", "שפה", "Language", "Idioma"),
  ("language_system", "אוטומטי", "Auto", "Auto"),
  ("app_updates", "עדכוני אפליקציה", "App updates", "Actualizaciones de la app"),
@@ -101,4 +102,7 @@ ROWS = [
  ("show_tips", "הצגת ההדרכה הקצרה", "Show the quick tour", "Ver la guía rápida"),
  ("tip_widget_action", "הראו לי איך", "Show me how", "Muéstrame cómo"),
  ("guide_add_widget", "לחצו כאן כדי להוסיף את הווידג'ט למסך הבית", "Tap here to add the widget to your home screen", "Toca aquí para añadir el widget a tu pantalla de inicio"),
+ ("language_suggestion", "להשתמש באפליקציה בעברית?", "Use the app in English?", "¿Usar la app en español?"),
+ ("language_suggestion_hint", "הצעה לפי האזור שלך", "Suggested for your region", "Sugerido para tu región"),
+ ("language_suggestion_switch", "החלפה", "Switch", "Cambiar"),
 ]

@@ -3,6 +3,7 @@ package com.example.utils
 import android.content.Context
 import android.content.res.Configuration
 import android.content.res.Resources
+import android.telephony.TelephonyManager
 import android.text.TextUtils
 import android.view.View
 import java.util.Locale
@@ -31,14 +32,48 @@ object AppLanguage {
         "hi" to "हिन्दी",
     )
 
-    /** The app was Hebrew-only, so Hebrew stays the default until the user picks something else. */
-    const val DEFAULT = HEBREW
+    /** Follow the device: its language when the app has it, English (res/values) otherwise. */
+    const val DEFAULT = SYSTEM
 
     private const val PREFS = "currency_prefs"
     const val KEY = "app_language"
+    /** Set on a fresh install: offer the language of the user's country once, on the first launch. */
+    const val SUGGEST_KEY = "language_suggestion_pending"
 
-    fun stored(context: Context): String =
-        context.getSharedPreferences(PREFS, Context.MODE_PRIVATE).getString(KEY, DEFAULT) ?: DEFAULT
+    private fun prefs(context: Context) = context.getSharedPreferences(PREFS, Context.MODE_PRIVATE)
+
+    /**
+     * Runs before anything reads the language. A fresh install follows the device language; an install from
+     * before this setting existed keeps Hebrew, which was the app's only language back then.
+     */
+    fun initialize(context: Context) {
+        val prefs = prefs(context)
+        if (prefs.contains(KEY)) return
+        val existingInstall = prefs.all.isNotEmpty()
+        prefs.edit()
+            .putString(KEY, if (existingInstall) HEBREW else SYSTEM)
+            .putBoolean(SUGGEST_KEY, !existingInstall)
+            .commit()
+    }
+
+    fun stored(context: Context): String = prefs(context).getString(KEY, DEFAULT) ?: DEFAULT
+
+    /** The language the app actually shows for the [language] setting. */
+    fun effective(language: String): String {
+        val code = if (language == SYSTEM) CountryLanguage.normalize(systemLocale().language) else language
+        return if (OPTIONS.any { it.first == code }) code else ENGLISH
+    }
+
+    /** The user's country (ISO 3166 alpha-2): from the SIM, else the mobile network, else the device region. */
+    fun country(context: Context): String? {
+        val telephony = runCatching { context.getSystemService(TelephonyManager::class.java) }.getOrNull()
+        val candidates = listOf(
+            runCatching { telephony?.simCountryIso }.getOrNull(),
+            runCatching { telephony?.networkCountryIso }.getOrNull(),
+            systemLocale().country
+        )
+        return candidates.map { it.orEmpty().trim().uppercase(Locale.ROOT) }.firstOrNull { it.length == 2 }
+    }
 
     fun systemLocale(): Locale = Resources.getSystem().configuration.locales[0]
 

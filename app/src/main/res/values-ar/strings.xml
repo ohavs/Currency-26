@@ -49,6 +49,7 @@
     <string name="theme_sunset">رمال</string>
     <string name="theme_rose">غروب</string>
     <string name="theme_lavender">ليل</string>
+    <string name="theme_gold">ذهبي</string>
     <string name="language">اللغة</string>
     <string name="language_system">تلقائي</string>
     <string name="app_updates">تحديثات التطبيق</string>
@@ -93,4 +94,7 @@
     <string name="show_tips">عرض الجولة السريعة</string>
     <string name="tip_widget_action">أرني كيف</string>
     <string name="guide_add_widget">اضغط هنا لإضافة الأداة إلى شاشتك الرئيسية</string>
+    <string name="language_suggestion">استخدام التطبيق باللغة العربية؟</string>
+    <string name="language_suggestion_hint">اقتراح حسب منطقتك</string>
+    <string name="language_suggestion_switch">تغيير</string>
 </resources>
