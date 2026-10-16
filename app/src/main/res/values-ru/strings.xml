@@ -107,4 +107,5 @@
     <string name="quick_assumed">Валюта предположена</string>
     <string name="tip_select_title">Конвертация из любого приложения</string>
     <string name="tip_select_body">Выделите цену в любом приложении и выберите \"Конвертировать валюту\" в меню (иногда под ⋮). Результат появится сразу, не отрываясь от дела.</string>
+    <string name="tip_offer_action">Показать</string>
 </resources>

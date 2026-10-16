@@ -108,6 +108,7 @@ TRANSLATIONS = {
         "quick_assumed": "عملة مفترضة",
         "tip_select_title": "حوّل من أي تطبيق",
         "tip_select_body": "حدّد سعرًا في أي تطبيق واختر \"تحويل العملة\" من القائمة (أحيانًا تحت ⋮). تظهر النتيجة فورًا دون مغادرة ما تفعله.",
+        "tip_offer_action": "عرض",
     },
     "ru": {
         "app_name": "Конвертер валют",
@@ -216,6 +217,7 @@ TRANSLATIONS = {
         "quick_assumed": "Валюта предположена",
         "tip_select_title": "Конвертация из любого приложения",
         "tip_select_body": "Выделите цену в любом приложении и выберите \"Конвертировать валюту\" в меню (иногда под ⋮). Результат появится сразу, не отрываясь от дела.",
+        "tip_offer_action": "Показать",
     },
     "fr": {
         "app_name": "Convertisseur de devises",
@@ -324,6 +326,7 @@ TRANSLATIONS = {
         "quick_assumed": "Devise supposée",
         "tip_select_title": "Convertissez depuis n'importe quelle app",
         "tip_select_body": "Sélectionnez un prix dans n'importe quelle app et choisissez \"Convertir la devise\" dans le menu (parfois sous ⋮). Le résultat s'affiche aussitôt, sans quitter ce que vous faites.",
+        "tip_offer_action": "Voir",
     },
     "de": {
         "app_name": "Währungsrechner",
@@ -432,6 +435,7 @@ TRANSLATIONS = {
         "quick_assumed": "Währung angenommen",
         "tip_select_title": "Aus jeder App umrechnen",
         "tip_select_body": "Markiere einen Preis in einer beliebigen App und wähle \"Währung umrechnen\" im Menü (manchmal unter ⋮). Das Ergebnis erscheint sofort, ohne die App zu verlassen.",
+        "tip_offer_action": "Zeigen",
     },
     "pt": {
         "app_name": "Conversor de moedas",
@@ -540,6 +544,7 @@ TRANSLATIONS = {
         "quick_assumed": "Moeda presumida",
         "tip_select_title": "Converta a partir de qualquer app",
         "tip_select_body": "Selecione um preço em qualquer app e escolha \"Converter moeda\" no menu (às vezes em ⋮). O resultado aparece na hora, sem sair do que você está fazendo.",
+        "tip_offer_action": "Ver",
     },
     "it": {
         "app_name": "Convertitore di valute",
@@ -648,6 +653,7 @@ TRANSLATIONS = {
         "quick_assumed": "Valuta presunta",
         "tip_select_title": "Converti da qualsiasi app",
         "tip_select_body": "Seleziona un prezzo in qualsiasi app e scegli \"Converti valuta\" dal menu (a volte sotto ⋮). Il risultato appare subito, senza lasciare ciò che stai facendo.",
+        "tip_offer_action": "Mostra",
     },
     "tr": {
         "app_name": "Döviz Çevirici",
@@ -756,6 +762,7 @@ TRANSLATIONS = {
         "quick_assumed": "Tahmini para birimi",
         "tip_select_title": "Her uygulamadan çevirin",
         "tip_select_body": "Herhangi bir uygulamada bir fiyatı seçin ve menüden \"Döviz çevir\"i seçin (bazen ⋮ altında). Sonuç, yaptığınız işi bırakmadan hemen görünür.",
+        "tip_offer_action": "Göster",
     },
     "zh": {
         "app_name": "汇率换算",
@@ -864,6 +871,7 @@ TRANSLATIONS = {
         "quick_assumed": "推测的货币",
         "tip_select_title": "在任何应用中换算",
         "tip_select_body": "在任何应用中选中价格，然后在菜单中选择\"货币换算\"（有时在 ⋮ 中）。结果立即弹出，无需离开当前应用。",
+        "tip_offer_action": "查看",
     },
     "ja": {
         "app_name": "通貨換算",
@@ -972,6 +980,7 @@ TRANSLATIONS = {
         "quick_assumed": "推定した通貨",
         "tip_select_title": "どのアプリからでも換算",
         "tip_select_body": "どのアプリでも価格を選択し、メニューから\"通貨を換算\"を選びます（⋮ の中にある場合もあります）。今の画面のまま、すぐに結果が表示されます。",
+        "tip_offer_action": "見る",
     },
     "hi": {
         "app_name": "मुद्रा परिवर्तक",
@@ -1080,5 +1089,6 @@ TRANSLATIONS = {
         "quick_assumed": "अनुमानित मुद्रा",
         "tip_select_title": "किसी भी ऐप से बदलें",
         "tip_select_body": "किसी भी ऐप में कीमत चुनें और मेन्यू से \"मुद्रा बदलें\" चुनें (कभी-कभी ⋮ में)। नतीजा तुरंत दिखेगा, जो कर रहे हैं उसे छोड़े बिना।",
+        "tip_offer_action": "देखें",
     },
 }

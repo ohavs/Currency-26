@@ -107,4 +107,5 @@
     <string name="quick_assumed">推测的货币</string>
     <string name="tip_select_title">在任何应用中换算</string>
     <string name="tip_select_body">在任何应用中选中价格，然后在菜单中选择\"货币换算\"（有时在 ⋮ 中）。结果立即弹出，无需离开当前应用。</string>
+    <string name="tip_offer_action">查看</string>
 </resources>

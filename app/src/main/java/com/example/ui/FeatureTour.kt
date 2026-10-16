@@ -80,10 +80,19 @@ import com.example.ui.theme.LocalPalette
 /** The features people tend to miss; the tour shows one card per tip, in this order. */
 enum class FeatureTip { WIDGET, SELECT_CONVERT, EXTRA_CURRENCY }
 
+/** The tip's card title, also used by the banner that offers the tour. */
+internal val FeatureTip.titleRes: Int
+    get() = when (this) {
+        FeatureTip.WIDGET -> R.string.tip_widget_title
+        FeatureTip.SELECT_CONVERT -> R.string.tip_select_title
+        FeatureTip.EXTRA_CURRENCY -> R.string.tip_extra_title
+    }
+
 /**
  * A short tour over the calculator: the home-screen widget, converting a price selected in another app, and
  * the additional currency, with a way to try them where there is one ("show me how" walks to the widget button
- * in Settings). Shown on first launch, and again after a while when a feature is still unused.
+ * in Settings). Opened from the banner that offers it (first launch, then after a while while a feature is
+ * still unused) or from Settings.
  */
 @Composable
 fun FeatureTour(
@@ -179,13 +188,7 @@ fun FeatureTour(
                     }
                     Spacer(Modifier.height(18.dp))
                     Text(
-                        text = stringResource(
-                            when (tip) {
-                                FeatureTip.WIDGET -> R.string.tip_widget_title
-                                FeatureTip.SELECT_CONVERT -> R.string.tip_select_title
-                                FeatureTip.EXTRA_CURRENCY -> R.string.tip_extra_title
-                            }
-                        ),
+                        text = stringResource(tip.titleRes),
                         style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.SemiBold),
                         color = palette.ink
                     )

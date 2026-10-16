@@ -107,4 +107,5 @@
     <string name="quick_assumed">推定した通貨</string>
     <string name="tip_select_title">どのアプリからでも換算</string>
     <string name="tip_select_body">どのアプリでも価格を選択し、メニューから\"通貨を換算\"を選びます（⋮ の中にある場合もあります）。今の画面のまま、すぐに結果が表示されます。</string>
+    <string name="tip_offer_action">見る</string>
 </resources>
