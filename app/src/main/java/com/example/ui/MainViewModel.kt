@@ -200,12 +200,24 @@ class MainViewModel(
         val due = FeatureTourSchedule.isDue(repository.tourTimesShown(), repository.tourLastShownAt(), System.currentTimeMillis())
         if (tips.isEmpty() || !due) return
         viewModelScope.launch {
-            // Let the calculator appear first.
+            // Let the calculator appear first, and never pop up under a typing finger: wait for a quiet
+            // moment on the calculator screen itself.
             delay(1_200)
-            val current = _state.value
-            if (!current.showSettings && !current.showCurrencySelector) _tour.value = tips
+            while (
+                System.currentTimeMillis() - lastInteractionAt < TOUR_QUIET_MS ||
+                _state.value.showSettings || _state.value.showCurrencySelector
+            ) {
+                delay(400)
+            }
+            _tour.value = tips
+            // Counted when it appears, so another launch (or a second app window) does not show it again.
+            repository.markTourShown(System.currentTimeMillis())
         }
     }
+
+    /** Last time the user typed or swapped on the calculator; the tour waits for a quiet moment after it. */
+    @Volatile
+    private var lastInteractionAt = 0L
 
     /** From Settings: the whole tour, whatever was already used. */
     fun showTour() {
@@ -214,9 +226,7 @@ class MainViewModel(
     }
 
     fun dismissTour() {
-        if (_tour.value.isEmpty()) return
         _tour.value = emptyList()
-        repository.markTourShown(System.currentTimeMillis())
     }
 
     private val _widgetGuide = MutableStateFlow(false)
@@ -316,6 +326,7 @@ class MainViewModel(
     }
 
     fun onKeypadPress(key: String) {
+        lastInteractionAt = System.currentTimeMillis()
         val current = _state.value.sourceAmountRaw
         val next = applyKeypadKey(current, key)
         if (next == current) return
@@ -329,6 +340,7 @@ class MainViewModel(
     /** Exchanges the currencies shown in two slots (swap button, or dragging one row onto another). */
     fun swapSlots(a: CurrencySlot, b: CurrencySlot) {
         if (a == b) return
+        lastInteractionAt = System.currentTimeMillis()
         val current = _state.value
         val codeA = current.currencyIn(a) ?: return
         val codeB = current.currencyIn(b) ?: return
@@ -411,5 +423,10 @@ class MainViewModel(
 
     fun updateSearchQuery(query: String) {
         _state.update { it.copy(searchQuery = query) }
+    }
+
+    private companion object {
+        /** No keypad activity for this long before the tour may appear. */
+        const val TOUR_QUIET_MS = 2_500L
     }
 }

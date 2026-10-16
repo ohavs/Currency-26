@@ -44,11 +44,11 @@
     <string name="mode_dark">داكن</string>
     <string name="mode_system">حسب النظام</string>
     <string name="color_theme">ألوان السمة</string>
-    <string name="theme_sage">مريمية</string>
-    <string name="theme_ocean">محيط</string>
+    <string name="theme_sage">كلاسيكي</string>
+    <string name="theme_ocean">بحر</string>
     <string name="theme_sunset">رمال</string>
-    <string name="theme_rose">وردي</string>
-    <string name="theme_lavender">خزامى</string>
+    <string name="theme_rose">غروب</string>
+    <string name="theme_lavender">ليل</string>
     <string name="language">اللغة</string>
     <string name="language_system">تلقائي</string>
     <string name="app_updates">تحديثات التطبيق</string>

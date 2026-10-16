@@ -1,5 +1,6 @@
 package com.example.ui.theme
 
+import androidx.annotation.DrawableRes
 import androidx.annotation.StringRes
 import androidx.compose.runtime.Immutable
 import androidx.compose.ui.graphics.Color
@@ -36,6 +37,8 @@ data class AppPalette(
 data class ColorThemeOption(
     val key: String,
     @param:StringRes val labelRes: Int,
+    /** The app icon drawn in this set's colours and motif (tools/icons/make_icons.mjs); shown in Settings. */
+    @param:DrawableRes val iconRes: Int,
     val light: AppPalette,
     val dark: AppPalette,
 )
@@ -46,6 +49,7 @@ object Palettes {
     private val sage = ColorThemeOption(
         key = "sage",
         labelRes = R.string.theme_sage,
+        iconRes = R.drawable.palette_icon_sage,
         light = AppPalette(
             isDark = false,
             background = Color(0xFFD9EBD7),
@@ -75,6 +79,7 @@ object Palettes {
     private val ocean = ColorThemeOption(
         key = "ocean",
         labelRes = R.string.theme_ocean,
+        iconRes = R.drawable.palette_icon_ocean,
         light = AppPalette(
             isDark = false,
             background = Color(0xFFD8E7EF),
@@ -104,6 +109,7 @@ object Palettes {
     private val sunset = ColorThemeOption(
         key = "sunset",
         labelRes = R.string.theme_sunset,
+        iconRes = R.drawable.palette_icon_sunset,
         light = AppPalette(
             isDark = false,
             background = Color(0xFFF2E4D8),
@@ -133,6 +139,7 @@ object Palettes {
     private val rose = ColorThemeOption(
         key = "rose",
         labelRes = R.string.theme_rose,
+        iconRes = R.drawable.palette_icon_rose,
         light = AppPalette(
             isDark = false,
             background = Color(0xFFF2E0E2),
@@ -162,6 +169,7 @@ object Palettes {
     private val lavender = ColorThemeOption(
         key = "lavender",
         labelRes = R.string.theme_lavender,
+        iconRes = R.drawable.palette_icon_lavender,
         light = AppPalette(
             isDark = false,
             background = Color(0xFFE3E1F1),

@@ -44,11 +44,11 @@
     <string name="mode_dark">Koyu</string>
     <string name="mode_system">Sistem</string>
     <string name="color_theme">Renk teması</string>
-    <string name="theme_sage">Adaçayı</string>
-    <string name="theme_ocean">Okyanus</string>
+    <string name="theme_sage">Klasik</string>
+    <string name="theme_ocean">Deniz</string>
     <string name="theme_sunset">Kum</string>
-    <string name="theme_rose">Gül</string>
-    <string name="theme_lavender">Lavanta</string>
+    <string name="theme_rose">Gün batımı</string>
+    <string name="theme_lavender">Gece</string>
     <string name="language">Dil</string>
     <string name="language_system">Otomatik</string>
     <string name="app_updates">Uygulama güncellemeleri</string>

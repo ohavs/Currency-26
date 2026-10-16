@@ -44,11 +44,11 @@
     <string name="mode_dark">深色</string>
     <string name="mode_system">跟随系统</string>
     <string name="color_theme">颜色主题</string>
-    <string name="theme_sage">鼠尾草</string>
+    <string name="theme_sage">经典</string>
     <string name="theme_ocean">海洋</string>
-    <string name="theme_sunset">沙色</string>
-    <string name="theme_rose">玫瑰</string>
-    <string name="theme_lavender">薰衣草</string>
+    <string name="theme_sunset">沙丘</string>
+    <string name="theme_rose">日落</string>
+    <string name="theme_lavender">夜空</string>
     <string name="language">语言</string>
     <string name="language_system">自动</string>
     <string name="app_updates">应用更新</string>

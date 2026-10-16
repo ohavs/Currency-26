@@ -100,6 +100,7 @@ import com.example.R
 import com.example.data.CurrencySlot
 import com.example.ui.theme.AmountTextStyle
 import com.example.ui.theme.LocalPalette
+import com.example.ui.theme.paletteTexture
 import com.example.utils.amountSymbol
 import com.example.utils.formatAmount
 import com.example.utils.formatAmountInput
@@ -133,10 +134,12 @@ fun CalculatorScreen(viewModel: MainViewModel, onRemoveLegacyApp: () -> Unit = {
     }
 
     // Layout direction comes from the app language (RTL for Hebrew, LTR for English/Spanish).
+    // The colour set's texture sits behind every screen, fixed while they change.
     Box(
         modifier = Modifier
             .fillMaxSize()
             .background(palette.background)
+            .paletteTexture(colorTheme, palette)
     ) {
         AnimatedContent(
             targetState = screen,

@@ -49,6 +49,8 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
+import kotlinx.coroutines.delay
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -95,8 +97,17 @@ fun FeatureTour(
     val palette = LocalPalette.current
     var page by rememberSaveable { mutableIntStateOf(initialPage.coerceIn(0, tips.lastIndex)) }
     val appear = remember { Animatable(0f) }
-    LaunchedEffect(Unit) { appear.animateTo(1f, tween(380, easing = FastOutSlowInEasing)) }
+    // Taps right after the sheet slides in were meant for whatever was under the finger (often the keypad):
+    // the sheet only reacts once it has settled.
+    var settled by remember { mutableStateOf(false) }
+    LaunchedEffect(Unit) {
+        appear.animateTo(1f, tween(380, easing = FastOutSlowInEasing))
+        delay(450)
+        settled = true
+    }
     BackHandler(onBack = onDismiss)
+
+    fun guarded(action: () -> Unit): () -> Unit = { if (settled) action() }
 
     fun next() {
         if (page < tips.lastIndex) page++ else onDismiss()
@@ -108,7 +119,7 @@ fun FeatureTour(
                 .fillMaxSize()
                 .graphicsLayer { alpha = appear.value }
                 .background(Color.Black.copy(alpha = 0.45f))
-                .clickable(interactionSource = remember { MutableInteractionSource() }, indication = null, onClick = onDismiss)
+                .clickable(interactionSource = remember { MutableInteractionSource() }, indication = null, onClick = guarded(onDismiss))
         )
         Column(
             modifier = Modifier
@@ -134,7 +145,7 @@ fun FeatureTour(
                     tint = palette.inkMuted,
                     modifier = Modifier
                         .clip(CircleShape)
-                        .clickable(role = Role.Button, onClick = onDismiss)
+                        .clickable(role = Role.Button, onClick = guarded(onDismiss))
                         .padding(6.dp)
                         .size(20.dp)
                 )
@@ -178,8 +189,8 @@ fun FeatureTour(
                     )
                     Spacer(Modifier.height(18.dp))
                     when {
-                        tip == FeatureTip.EXTRA_CURRENCY -> TourButton(stringResource(R.string.add_currency), Icons.Rounded.Add, onAddCurrency)
-                        canPinWidget -> TourButton(stringResource(R.string.tip_widget_action), Icons.Rounded.TouchApp, onShowWidgetGuide)
+                        tip == FeatureTip.EXTRA_CURRENCY -> TourButton(stringResource(R.string.add_currency), Icons.Rounded.Add, guarded(onAddCurrency))
+                        canPinWidget -> TourButton(stringResource(R.string.tip_widget_action), Icons.Rounded.TouchApp, guarded(onShowWidgetGuide))
                         // Launchers that cannot pin widgets: explain the manual way instead of a dead button.
                         else -> Text(
                             text = stringResource(R.string.add_widget_manual),
@@ -200,7 +211,7 @@ fun FeatureTour(
                     .fillMaxWidth()
                     .height(44.dp)
                     .clip(CircleShape)
-                    .clickable(role = Role.Button) { next() },
+                    .clickable(role = Role.Button, onClick = guarded { next() }),
                 contentAlignment = Alignment.Center
             ) {
                 Text(

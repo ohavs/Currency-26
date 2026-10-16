@@ -44,11 +44,11 @@
     <string name="mode_dark">Тёмный</string>
     <string name="mode_system">Как в системе</string>
     <string name="color_theme">Цветовая тема</string>
-    <string name="theme_sage">Шалфей</string>
-    <string name="theme_ocean">Океан</string>
+    <string name="theme_sage">Классика</string>
+    <string name="theme_ocean">Море</string>
     <string name="theme_sunset">Песок</string>
-    <string name="theme_rose">Роза</string>
-    <string name="theme_lavender">Лаванда</string>
+    <string name="theme_rose">Закат</string>
+    <string name="theme_lavender">Ночь</string>
     <string name="language">Язык</string>
     <string name="language_system">Авто</string>
     <string name="app_updates">Обновления приложения</string>

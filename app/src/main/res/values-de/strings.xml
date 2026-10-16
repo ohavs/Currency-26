@@ -44,11 +44,11 @@
     <string name="mode_dark">Dunkel</string>
     <string name="mode_system">System</string>
     <string name="color_theme">Farbschema</string>
-    <string name="theme_sage">Salbei</string>
-    <string name="theme_ocean">Ozean</string>
+    <string name="theme_sage">Klassisch</string>
+    <string name="theme_ocean">Meer</string>
     <string name="theme_sunset">Sand</string>
-    <string name="theme_rose">Rose</string>
-    <string name="theme_lavender">Lavendel</string>
+    <string name="theme_rose">Abendrot</string>
+    <string name="theme_lavender">Nacht</string>
     <string name="language">Sprache</string>
     <string name="language_system">Auto</string>
     <string name="app_updates">App-Updates</string>
