@@ -14,8 +14,22 @@ object AppLanguage {
     const val ENGLISH = "en"
     const val SPANISH = "es"
 
-    /** Shown in Settings, each in its own language. */
-    val OPTIONS = listOf(HEBREW to "עברית", ENGLISH to "English", SPANISH to "Español")
+    /** Shown in Settings, each in its own language (strings come from res/values-<code>). */
+    val OPTIONS = listOf(
+        HEBREW to "עברית",
+        ENGLISH to "English",
+        "ar" to "العربية",
+        "ru" to "Русский",
+        SPANISH to "Español",
+        "fr" to "Français",
+        "de" to "Deutsch",
+        "pt" to "Português",
+        "it" to "Italiano",
+        "tr" to "Türkçe",
+        "zh" to "中文",
+        "ja" to "日本語",
+        "hi" to "हिन्दी",
+    )
 
     /** The app was Hebrew-only, so Hebrew stays the default until the user picks something else. */
     const val DEFAULT = HEBREW

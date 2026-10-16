@@ -6,11 +6,18 @@ import java.util.concurrent.ConcurrentHashMap
 
 /**
  * Finds currencies by whatever the user types: the code, the symbol, the currency name, or any country
- * that uses it - in Hebrew, English and Spanish, whatever the UI language. Accents, niqqud, quote marks
+ * that uses it - in Hebrew, English and Spanish whatever the UI language, plus the UI language itself. Accents, niqqud, quote marks
  * ("ארה״ב", "ש"ח") and Hebrew final letters are ignored; every word of the query has to match.
  */
 object CurrencySearch {
-    private val languages = listOf(Locale.forLanguageTag("he"), Locale.ENGLISH, Locale.forLanguageTag("es"))
+    private val baseLanguages = listOf(Locale.forLanguageTag("he"), Locale.ENGLISH, Locale.forLanguageTag("es"))
+
+    private fun languagesFor(ui: Locale?): List<Locale> =
+        if (ui == null || baseLanguages.any { it.language == ui.language || (ui.language == "iw" && it.language == "he") }) {
+            baseLanguages
+        } else {
+            baseLanguages + Locale.forLanguageTag(ui.language)
+        }
 
     /** Everyday names that neither the system nor the predefined list knows. */
     private val aliases = mapOf(
@@ -40,9 +47,13 @@ object CurrencySearch {
 
     private val index = ConcurrentHashMap<String, Entry>()
 
-    private fun entry(code: String): Entry = index.getOrPut(code.uppercase()) { build(code.uppercase()) }
+    private fun entry(code: String, ui: Locale?): Entry {
+        val languages = languagesFor(ui)
+        val key = code.uppercase() + "|" + languages.joinToString(",") { it.language }
+        return index.getOrPut(key) { build(code.uppercase(), languages) }
+    }
 
-    private fun build(code: String): Entry {
+    private fun build(code: String, languages: List<Locale>): Entry {
         val info = getCurrencyInfo(code)
         val currency = try { java.util.Currency.getInstance(code) } catch (e: Exception) { null }
         val names = listOf(info.hebrewName) + languages.map { currencyName(code, it) }
@@ -65,21 +76,21 @@ object CurrencySearch {
     }
 
     /** Builds the search index ahead of time (it reads locale data for every country). */
-    fun warmUp(codes: Collection<String>) {
-        codes.forEach { entry(it) }
+    fun warmUp(codes: Collection<String>, ui: Locale? = null) {
+        codes.forEach { entry(it, ui) }
     }
 
     /** Well-known currencies (the predefined list, most used first) win ties: "dollar" lists USD before AUD. */
     private val popularity: Map<String, Int> by lazy { currencyMap.keys.withIndex().associate { (i, code) -> code to i } }
 
     /** The [codes] matching [query], best matches first (code, then name, then word starts); all of them when blank. */
-    fun search(codes: Collection<String>, query: String): List<String> {
+    fun search(codes: Collection<String>, query: String, ui: Locale? = null): List<String> {
         val normalized = normalize(query)
         val tokens = normalized.split(' ').filter { it.isNotEmpty() }
         if (tokens.isEmpty()) return codes.toList()
         return codes
             .mapNotNull { code ->
-                val e = entry(code)
+                val e = entry(code, ui)
                 if (tokens.all { e.haystack.contains(it) }) code to score(e, normalized, tokens) else null
             }
             .sortedWith(compareBy({ it.second }, { popularity[it.first] ?: Int.MAX_VALUE }, { it.first }))

@@ -1,5 +1,7 @@
 package com.example
 
+import android.appwidget.AppWidgetManager
+import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
 import android.graphics.Color
@@ -24,8 +26,10 @@ import com.example.ui.LocalAppLocale
 import com.example.ui.MainViewModel
 import com.example.ui.theme.MyApplicationTheme
 import com.example.ui.theme.isDarkTheme
-import com.example.utils.AppLanguage
 import com.example.update.LegacyApp
+import com.example.utils.AppLanguage
+import com.example.widget.LargeCurrencyWidgetReceiver
+import com.example.widget.SmallCurrencyWidgetReceiver
 
 
 class MainActivity : ComponentActivity() {
@@ -94,6 +98,14 @@ class MainActivity : ComponentActivity() {
         super.onResume()
         viewModel.reloadSelection()
         viewModel.setLegacyAppInstalled(LegacyApp.isInstalled(this))
+        viewModel.maybeShowTour(widgetPlaced = isWidgetPlaced())
+    }
+
+    /** Whether any of the app's widgets is on the home screen (the tour then skips the widget card). */
+    private fun isWidgetPlaced(): Boolean {
+        val manager = AppWidgetManager.getInstance(this)
+        return listOf(LargeCurrencyWidgetReceiver::class.java, SmallCurrencyWidgetReceiver::class.java)
+            .any { receiver -> manager.getAppWidgetIds(ComponentName(this, receiver)).isNotEmpty() }
     }
 
     private fun handleWidgetIntent(intent: Intent?) {

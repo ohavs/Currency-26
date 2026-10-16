@@ -60,7 +60,23 @@ class CurrencyRepository(
     fun setSourceCurrency(code: String) { prefs.edit().putString("source", code).apply() }
     fun setTargetCurrency(code: String) { prefs.edit().putString("target", code).apply() }
     fun setAmount(amount: String) { prefs.edit().putString("amount", amount).apply() }
-    fun setExtraTargetCurrency(code: String?) { prefs.edit().putString("target2", code).apply() }
+    fun setExtraTargetCurrency(code: String?) {
+        val editor = prefs.edit().putString("target2", code)
+        // Remembered for good: the feature tour skips a feature the user has already found.
+        if (code != null) editor.putBoolean("extra_currency_used", true)
+        editor.apply()
+    }
+
+    fun extraCurrencyEverUsed(): Boolean = prefs.getBoolean("extra_currency_used", false)
+
+    fun tourTimesShown(): Int = prefs.getInt("tour_times_shown", 0)
+    fun tourLastShownAt(): Long = prefs.getLong("tour_last_shown_at", 0L)
+    fun markTourShown(now: Long) {
+        prefs.edit()
+            .putInt("tour_times_shown", tourTimesShown() + 1)
+            .putLong("tour_last_shown_at", now)
+            .apply()
+    }
 
     fun setThemeMode(mode: String) {
         prefs.edit().putString("theme_mode", mode).apply()

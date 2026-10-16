@@ -50,6 +50,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateMapOf
@@ -74,6 +75,7 @@ import androidx.compose.ui.layout.boundsInParent
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.res.stringResource
@@ -120,6 +122,8 @@ fun CalculatorScreen(viewModel: MainViewModel, onRemoveLegacyApp: () -> Unit = {
     val checkAppUpdates by viewModel.checkAppUpdates.collectAsState()
     val language by viewModel.language.collectAsState()
     val legacyAppInstalled by viewModel.legacyAppInstalled.collectAsState()
+    val tour by viewModel.tour.collectAsState()
+    val widgetGuide by viewModel.widgetGuide.collectAsState()
     val palette = LocalPalette.current
 
     val screen = when {
@@ -179,6 +183,9 @@ fun CalculatorScreen(viewModel: MainViewModel, onRemoveLegacyApp: () -> Unit = {
                     onStartAppUpdate = viewModel::startAppUpdate,
                     language = language,
                     onLanguageChange = viewModel::setLanguage,
+                    onShowTour = viewModel::showTour,
+                    highlightAddWidget = widgetGuide,
+                    onWidgetGuideDone = viewModel::endWidgetGuide,
                 )
                 AppScreen.Picker -> CurrencySelector(
                     state = state,
@@ -186,6 +193,21 @@ fun CalculatorScreen(viewModel: MainViewModel, onRemoveLegacyApp: () -> Unit = {
                     onSelect = viewModel::selectCurrency,
                     onSearch = viewModel::updateSearchQuery,
                     onRemove = viewModel::removeExtraTarget
+                )
+            }
+        }
+
+        if (screen == AppScreen.Calculator && tour.isNotEmpty()) {
+            key(tour) {
+                FeatureTour(
+                    tips = tour,
+                    canPinWidget = viewModel.canPinWidget,
+                    onShowWidgetGuide = viewModel::startWidgetGuide,
+                    onAddCurrency = {
+                        viewModel.dismissTour()
+                        viewModel.openCurrencySelector(CurrencySlot.EXTRA_TARGET)
+                    },
+                    onDismiss = viewModel::dismissTour
                 )
             }
         }
@@ -652,15 +674,7 @@ private fun CurrencyRow(
         ) {
             Text(text = info.flag, fontSize = 30.sp)
             Spacer(Modifier.width(10.dp))
-            Text(
-                text = currencyName(code, LocalAppLocale.current),
-                style = MaterialTheme.typography.titleMedium.copy(fontSize = 18.sp, lineHeight = 21.sp, fontWeight = FontWeight.SemiBold),
-                color = palette.ink,
-                // Long names ("Israeli New Shekel") wrap to a second line instead of being cut.
-                maxLines = 2,
-                overflow = TextOverflow.Ellipsis,
-                modifier = Modifier.widthIn(max = 150.dp)
-            )
+            CurrencyName(currencyName(code, LocalAppLocale.current))
         }
         Spacer(Modifier.width(12.dp))
         AutoSizeText(
@@ -690,6 +704,30 @@ private fun CurrencyRow(
             }
         }
     }
+}
+
+/**
+ * The currency name: one line, shrinking from 18sp to 14sp to fit; only longer names ("Новый израильский
+ * шекель") take two compact lines, which stay clear of the swap buttons cut into the cards.
+ */
+@Composable
+private fun CurrencyName(text: String, maxWidth: Dp = 150.dp) {
+    val measurer = rememberTextMeasurer()
+    val maxPx = with(LocalDensity.current) { maxWidth.roundToPx() }
+    val base = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.SemiBold)
+    val oneLine = remember(text, maxPx, base) {
+        (18 downTo 14).asSequence()
+            .map { size -> base.copy(fontSize = size.sp, lineHeight = (size + 3).sp) }
+            .firstOrNull { style -> measurer.measure(text, style, maxLines = 1, softWrap = false).size.width <= maxPx }
+    }
+    Text(
+        text = text,
+        style = oneLine ?: base.copy(fontSize = 14.sp, lineHeight = 16.sp),
+        color = LocalPalette.current.ink,
+        maxLines = if (oneLine != null) 1 else 2,
+        overflow = TextOverflow.Ellipsis,
+        modifier = Modifier.widthIn(max = maxWidth)
+    )
 }
 
 /** The amount with its currency symbol beside it ("$ 1,250", "1,250 Ft"): smaller and in the accent color. */

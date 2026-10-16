@@ -17,3 +17,5 @@ local.properties
 .env
 # Release upload key - never commit it
 *.jks
+
+__pycache__/

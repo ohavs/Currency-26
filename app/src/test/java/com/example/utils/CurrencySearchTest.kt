@@ -58,6 +58,14 @@ class CurrencySearchTest {
   }
 
   @Test
+  fun `the UI language adds its own names`() {
+    val german = java.util.Locale.GERMAN
+    assertTrue("HUF" in CurrencySearch.search(codes, "Ungarn", german))
+    assertTrue("CHF" in CurrencySearch.search(codes, "Schweizer Franken", german))
+    assertTrue("JPY" in CurrencySearch.search(codes, "日本", java.util.Locale.JAPANESE))
+  }
+
+  @Test
   fun `a blank query keeps everything in order`() {
     assertEquals(codes, CurrencySearch.search(codes, "  "))
   }
