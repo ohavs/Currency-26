@@ -8,12 +8,14 @@ import com.example.data.AutoUpdateSettings
 import com.example.data.CurrencyRepository
 import com.example.data.CurrencySlot
 import com.example.update.AppUpdater
+import com.example.utils.FeatureTourSchedule
 import com.example.utils.applyKeypadKey
 import com.example.utils.isNewerVersion
 import java.io.File
 import com.example.widget.triggerWidgetUpdate
 import com.example.workers.RateUpdateScheduler
 import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 data class CalculatorState(
@@ -177,6 +179,44 @@ class MainViewModel(
                 repository.context.startActivity(updater.installIntent(apk))
             }
         }
+    }
+
+    private val _tour = MutableStateFlow<List<FeatureTip>>(emptyList())
+    /** Feature tour cards to show over the calculator; empty = hidden. */
+    val tour: StateFlow<List<FeatureTip>> = _tour.asStateFlow()
+    private var tourChecked = false
+
+    /**
+     * Once per session: on first launch (or again after a while, see [FeatureTourSchedule]) show the tour
+     * for the features still unused - the widget unless one is placed, the extra currency unless it was used.
+     */
+    fun maybeShowTour(widgetPlaced: Boolean) {
+        if (tourChecked) return
+        tourChecked = true
+        val tips = buildList {
+            if (!widgetPlaced) add(FeatureTip.WIDGET)
+            if (_state.value.extraTargetCurrency == null && !repository.extraCurrencyEverUsed()) add(FeatureTip.EXTRA_CURRENCY)
+        }
+        val due = FeatureTourSchedule.isDue(repository.tourTimesShown(), repository.tourLastShownAt(), System.currentTimeMillis())
+        if (tips.isEmpty() || !due) return
+        viewModelScope.launch {
+            // Let the calculator appear first.
+            delay(1_200)
+            val current = _state.value
+            if (!current.showSettings && !current.showCurrencySelector) _tour.value = tips
+        }
+    }
+
+    /** From Settings: the whole tour, whatever was already used. */
+    fun showTour() {
+        _state.update { it.copy(showSettings = false) }
+        _tour.value = listOf(FeatureTip.WIDGET, FeatureTip.EXTRA_CURRENCY)
+    }
+
+    fun dismissTour() {
+        if (_tour.value.isEmpty()) return
+        _tour.value = emptyList()
+        repository.markTourShown(System.currentTimeMillis())
     }
 
     private val _legacyAppInstalled = MutableStateFlow(false)

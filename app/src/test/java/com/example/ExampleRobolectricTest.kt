@@ -32,4 +32,26 @@ class ExampleRobolectricTest {
     val context = ApplicationProvider.getApplicationContext<Context>()
     assertEquals("Conversor de divisas", context.getString(R.string.app_name))
   }
+
+  @Test
+  @Config(qualifiers = "ar")
+  fun `arabic strings`() {
+    val context = ApplicationProvider.getApplicationContext<Context>()
+    assertEquals("محوّل العملات", context.getString(R.string.app_name))
+  }
+
+  @Test
+  @Config(qualifiers = "ja")
+  fun `japanese strings fill their placeholders`() {
+    val context = ApplicationProvider.getApplicationContext<Context>()
+    assertEquals("通貨換算", context.getString(R.string.app_name))
+    assertEquals("ダウンロード中… 40%", context.getString(R.string.downloading, 40))
+  }
+
+  @Test
+  @Config(qualifiers = "tr")
+  fun `turkish puts the percent sign first`() {
+    val context = ApplicationProvider.getApplicationContext<Context>()
+    assertEquals("İndiriliyor… %40", context.getString(R.string.downloading, 40))
+  }
 }

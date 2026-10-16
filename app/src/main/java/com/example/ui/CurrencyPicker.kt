@@ -83,9 +83,10 @@ fun CurrencySelector(
     }
     val query = state.searchQuery.trim()
     // Code, symbol, currency and country names in every app language - best matches first.
-    val filtered = remember(allCurrencies, query) { CurrencySearch.search(allCurrencies, query) }
-    LaunchedEffect(allCurrencies) {
-        withContext(Dispatchers.Default) { CurrencySearch.warmUp(allCurrencies) }
+    val locale = LocalAppLocale.current
+    val filtered = remember(allCurrencies, query, locale) { CurrencySearch.search(allCurrencies, query, locale) }
+    LaunchedEffect(allCurrencies, locale) {
+        withContext(Dispatchers.Default) { CurrencySearch.warmUp(allCurrencies, locale) }
     }
     val recents = state.recentCurrencies.filter { it in allCurrencies }.take(8)
 

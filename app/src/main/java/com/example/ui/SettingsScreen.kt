@@ -42,6 +42,7 @@ import androidx.compose.material.icons.rounded.Language
 import androidx.compose.material.icons.rounded.Palette
 import androidx.compose.material.icons.rounded.Refresh
 import androidx.compose.material.icons.rounded.SystemUpdate
+import androidx.compose.material.icons.rounded.TipsAndUpdates
 import androidx.compose.material.icons.rounded.Update
 import androidx.compose.material.icons.rounded.Widgets
 import androidx.compose.material3.Icon
@@ -90,6 +91,7 @@ fun SettingsScreen(
     onStartAppUpdate: () -> Unit,
     language: String = AppLanguage.DEFAULT,
     onLanguageChange: (String) -> Unit = {},
+    onShowTour: () -> Unit = {},
 ) {
     BackHandler(onBack = onClose)
     val palette = LocalPalette.current
@@ -119,11 +121,10 @@ fun SettingsScreen(
                 AppLanguage.OPTIONS.firstOrNull { it.first == language }?.second
             }
             SettingsSection(title = stringResource(R.string.language), icon = Icons.Rounded.Language, summary = languageSummary) {
-                SegmentedControl(
-                    options = AppLanguage.OPTIONS + (AppLanguage.SYSTEM to stringResource(R.string.language_system)),
+                LanguageGrid(
+                    options = listOf(AppLanguage.SYSTEM to stringResource(R.string.language_system)) + AppLanguage.OPTIONS,
                     selected = language,
-                    onSelect = onLanguageChange,
-                    modifier = Modifier.fillMaxWidth()
+                    onSelect = onLanguageChange
                 )
             }
 
@@ -310,6 +311,19 @@ fun SettingsScreen(
                         color = palette.inkMuted
                     )
                 }
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clip(RoundedCornerShape(18.dp))
+                        .clickable(role = Role.Button, onClick = onShowTour)
+                        .padding(horizontal = 6.dp, vertical = 10.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.Center
+                ) {
+                    Icon(Icons.Rounded.TipsAndUpdates, contentDescription = null, tint = palette.ink, modifier = Modifier.size(18.dp))
+                    Spacer(Modifier.width(8.dp))
+                    Text(stringResource(R.string.show_tips), style = MaterialTheme.typography.labelLarge, color = palette.ink)
+                }
             }
         }
     }
@@ -392,6 +406,39 @@ private fun SettingsSection(
                 verticalArrangement = Arrangement.spacedBy(12.dp),
                 content = content
             )
+        }
+    }
+}
+
+/** Two columns of language pills, each name in its own language; the chosen one is filled. */
+@Composable
+private fun LanguageGrid(options: List<Pair<String, String>>, selected: String, onSelect: (String) -> Unit) {
+    val palette = LocalPalette.current
+    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+        options.chunked(2).forEach { row ->
+            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                row.forEach { (code, name) ->
+                    val isSelected = code == selected
+                    Box(
+                        modifier = Modifier
+                            .weight(1f)
+                            .height(44.dp)
+                            .clip(RoundedCornerShape(16.dp))
+                            .background(if (isSelected) palette.accent else palette.cardSoft)
+                            .clickable(role = Role.RadioButton) { onSelect(code) },
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(
+                            text = name,
+                            style = MaterialTheme.typography.labelLarge,
+                            color = if (isSelected) palette.onAccent else palette.ink,
+                            maxLines = 1
+                        )
+                    }
+                }
+                // Keeps the last pill half-width when the count is odd.
+                if (row.size == 1) Spacer(Modifier.weight(1f))
+            }
         }
     }
 }
