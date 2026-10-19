@@ -15,8 +15,8 @@ Hebrew, and show rendered previews of visual changes (see `tools/preview`).
   `[skip ci]` in the merge commit title so no empty release goes out.
 - After a release, download the APK and check it: version in the manifest
   (`pyaxmlparser` or a UTF-16 search), new strings in `resources.arsc`.
-- Latest release: 5.0.16 (5.0.17 with the calculator once merged). History and decisions:
-  `docs/PLAY_LAUNCH_PLAN.md` (Hebrew).
+- Latest release: 5.0.17 (calculator, history, quick amounts). History and decisions: `docs/PLAY_LAUNCH_PLAN.md`
+  (Hebrew).
 
 ## Where things are
 - `MainActivity`, `CurrencyApp` (runs `AppLanguage.initialize` first), `QuickConvertActivity` (bubble for
@@ -62,7 +62,7 @@ Hebrew, and show rendered previews of visual changes (see `tools/preview`).
   may still be typing: the quick-amount row (in place of C/⌫ at zero) ignores taps for 450 ms.
 
 ## Next
-- The owner is checking 5.0.16 on a Samsung (share -> "Convert currency", tour banner), then the
+- The owner is checking 5.0.16-5.0.17 on a Samsung: share -> "Convert currency", the tour banner, then the
   calculator, history and quick amounts.
 - Then more features of the owner's choosing, and later monetization and Google Play publishing as planned
   in `docs/PLAY_LAUNCH_PLAN.md`.
