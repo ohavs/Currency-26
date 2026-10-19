@@ -1,0 +1,8 @@
+# Copied in by sync.sh, and build output.
+/app/
+/apptest/
+/build/
+/out/
+/.gradle/
+/.kotlin/
+*.png
