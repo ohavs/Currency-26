@@ -39,3 +39,11 @@ tasks.register<JavaExec>("dragCheck") {
   classpath = sourceSets["main"].runtimeClasspath
   mainClass.set("render.DragCheckKt")
 }
+
+// The ViewModel needs a Context object; android-all supplies the class (only ever passed around, never used).
+val androidAll by configurations.creating
+dependencies { androidAll("org.robolectric:android-all:15-robolectric-12650502") }
+tasks.register<JavaExec>("vmCheck") {
+  classpath = sourceSets["main"].runtimeClasspath + androidAll
+  mainClass.set("render.VmCheckKt")
+}

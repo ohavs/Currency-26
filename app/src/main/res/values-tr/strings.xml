@@ -22,6 +22,15 @@
     <string name="drag_to_remove">Kaldırmak için buraya sürükleyin</string>
     <string name="release_to_remove">Kaldırmak için bırakın</string>
     <string name="backspace">Sil</string>
+    <string name="calculator">Hesap makinesi</string>
+    <string name="close_calculator">Hesap makinesini kapat</string>
+    <string name="equals">Eşittir</string>
+    <string name="history">Geçmiş</string>
+    <string name="history_clear">Temizle</string>
+    <string name="history_clear_confirm">Tümü silinsin mi?</string>
+    <string name="history_empty">Henüz geçmiş yok</string>
+    <string name="history_empty_hint">Çevirdiğiniz tutarlar ve yaptığınız hesaplar burada görünür. Geri getirmek için birine dokunun.</string>
+    <string name="back_to_keypad">Tuş takımına dön</string>
     <string name="choose_currency">Para birimi seç</string>
     <string name="slot_source">Kaynak para birimi</string>
     <string name="slot_target">Hedef para birimi</string>
@@ -108,4 +117,7 @@
     <string name="tip_select_title">Her uygulamadan çevirin</string>
     <string name="tip_select_body">Herhangi bir uygulamada bir fiyatı seçin ve menüden \"Döviz çevir\"i seçin (veya Paylaş → \"Döviz çevir\"). Sonuç, yaptığınız işi bırakmadan hemen görünür.</string>
     <string name="tip_offer_action">Göster</string>
+    <string name="tip_calc_title">Hesap makinesi, geçmiş ve hızlı tutarlar</string>
+    <string name="tip_calc_body">Alt sıradaki hesap makinesi tuşu %1$s gibi hesaplar için + − × ÷ ekler ve sonuç anında tüm para birimlerine çevrilir. Geçmişi görmek için tutara dokunun; C\'den sonra üst sıra yuvarlak tutarlar sunar.</string>
+    <string name="tip_calc_action">Dene</string>
 </resources>

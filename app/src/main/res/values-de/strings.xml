@@ -22,6 +22,15 @@
     <string name="drag_to_remove">Zum Entfernen hierher ziehen</string>
     <string name="release_to_remove">Loslassen zum Entfernen</string>
     <string name="backspace">Löschen</string>
+    <string name="calculator">Rechner</string>
+    <string name="close_calculator">Rechner schließen</string>
+    <string name="equals">Gleich</string>
+    <string name="history">Verlauf</string>
+    <string name="history_clear">Löschen</string>
+    <string name="history_clear_confirm">Alles löschen?</string>
+    <string name="history_empty">Noch kein Verlauf</string>
+    <string name="history_empty_hint">Hier erscheinen umgerechnete Beträge und deine Rechnungen. Tippe auf einen Eintrag, um ihn zurückzuholen.</string>
+    <string name="back_to_keypad">Zurück zur Tastatur</string>
     <string name="choose_currency">Währung wählen</string>
     <string name="slot_source">Ausgangswährung</string>
     <string name="slot_target">Zielwährung</string>
@@ -108,4 +117,7 @@
     <string name="tip_select_title">Aus jeder App umrechnen</string>
     <string name="tip_select_body">Markiere einen Preis in einer beliebigen App und wähle \"Währung umrechnen\" im Menü (oder Teilen → \"Währung umrechnen\"). Das Ergebnis erscheint sofort, ohne die App zu verlassen.</string>
     <string name="tip_offer_action">Zeigen</string>
+    <string name="tip_calc_title">Rechner, Verlauf und schnelle Beträge</string>
+    <string name="tip_calc_body">Die Rechner-Taste in der unteren Reihe fügt + − × ÷ hinzu, für Rechnungen wie %1$s, und das Ergebnis wird sofort in alle Währungen umgerechnet. Tippe auf den Betrag für den Verlauf; nach C bietet die obere Reihe runde Beträge an.</string>
+    <string name="tip_calc_action">Ausprobieren</string>
 </resources>

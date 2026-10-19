@@ -10,10 +10,17 @@ import com.example.data.CurrencyRepository
 import com.example.data.CurrencySlot
 import com.example.update.AppUpdater
 import com.example.utils.AppLanguage
+import com.example.utils.CalcHistory
 import com.example.utils.CountryLanguage
 import com.example.utils.DeviceCountry
 import com.example.utils.FeatureTourSchedule
+import com.example.utils.HistoryEntry
+import com.example.utils.applyCalcKey
 import com.example.utils.applyKeypadKey
+import com.example.utils.completeExpression
+import com.example.utils.hasOperation
+import com.example.utils.previewExpression
+import com.example.utils.toRawAmount
 import com.example.utils.isNewerVersion
 import java.io.File
 import com.example.widget.triggerWidgetUpdate
@@ -35,10 +42,34 @@ data class CalculatorState(
     val showSettings: Boolean = false,
     val isRefreshing: Boolean = false,
     val lastRefreshFailed: Boolean = false,
-    val lastUpdateTimestamp: Long = 0L
+    val lastUpdateTimestamp: Long = 0L,
+    /** The calculator line while the calculator keys are open ("1250+300"); null = the plain amount keypad. */
+    val expression: String? = null,
+    /** The calculation behind the amount (after "=" or from the history), shown under it until the next key. */
+    val lastExpression: String? = null,
+    /** The amount is a result, a quick amount or from the history: the next digit starts a new one. */
+    val freshAmount: Boolean = false,
+    /** The history list is shown in place of the keypad. */
+    val showHistory: Boolean = false,
+    val history: List<HistoryEntry> = emptyList(),
 ) {
+    /**
+     * The source amount: as typed, or the live result of the calculation, rounded as "=" would leave it (null
+     * while it has none: "5/0", or too large).
+     */
+    val sourceValue: Double?
+        get() = if (expression != null) {
+            previewExpression(expression)?.let(::toRawAmount)?.toDouble()
+        } else {
+            sourceAmountRaw.toDoubleOrNull() ?: 0.0
+        }
+
     val sourceAmount: Double
-        get() = sourceAmountRaw.toDoubleOrNull() ?: 0.0
+        get() = sourceValue ?: 0.0
+
+    /** The calculator line has something to compute, so the calculator key shows "=". */
+    val calculating: Boolean
+        get() = expression != null && hasOperation(expression)
 
     /** How many [code] units one source unit buys. */
     fun rateTo(code: String): Double = (rates[code] ?: 1.0) / (rates[sourceCurrency] ?: 1.0)
@@ -89,7 +120,9 @@ class MainViewModel(
         sourceCurrency = repository.getSourceCurrency(),
         targetCurrency = repository.getTargetCurrency(),
         extraTargetCurrency = repository.getExtraTargetCurrency(),
-        sourceAmountRaw = repository.getAmount()
+        sourceAmountRaw = repository.getAmount(),
+        expression = if (repository.calculatorOpen()) repository.getAmount() else null,
+        history = repository.getHistory(),
     ))
     val state: StateFlow<CalculatorState> = _state.asStateFlow()
 
@@ -238,25 +271,27 @@ class MainViewModel(
         if (tourChecked) return
         tourChecked = true
         val selectUnused = !repository.quickConvertUsed()
+        val calculatorUnused = !repository.calculatorUsed()
         val tips = buildList {
             if (!widgetPlaced) add(FeatureTip.WIDGET)
             if (selectUnused) add(FeatureTip.SELECT_CONVERT)
+            if (calculatorUnused) add(FeatureTip.CALCULATOR)
             if (_state.value.extraTargetCurrency == null && !repository.extraCurrencyEverUsed()) add(FeatureTip.EXTRA_CURRENCY)
         }
         val due = FeatureTourSchedule.isDue(repository.tourTimesShown(), repository.tourLastShownAt(), System.currentTimeMillis())
-        // Converting selected text is new: everyone gets its card once, whatever the schedule says.
-        val introduceSelect = selectUnused && !repository.quickConvertTipSeen()
-        val shown = when {
-            due -> tips
-            introduceSelect -> listOf(FeatureTip.SELECT_CONVERT)
-            else -> emptyList()
+        // New features: everyone gets their card once, whatever the schedule says.
+        val introduce = buildList {
+            if (selectUnused && !repository.quickConvertTipSeen()) add(FeatureTip.SELECT_CONVERT)
+            if (calculatorUnused && !repository.calculatorTipSeen()) add(FeatureTip.CALCULATOR)
         }
+        val shown = if (due) tips else introduce
         if (shown.isEmpty()) return
         // Offered right away, before the user starts typing, so the banner never moves the keys under a finger.
         _tourOffer.value = shown
         // Counted when offered, so another launch (or a second app window) does not offer it again.
         if (due) repository.markTourShown(System.currentTimeMillis())
         if (FeatureTip.SELECT_CONVERT in shown) repository.markQuickConvertTipSeen()
+        if (FeatureTip.CALCULATOR in shown) repository.markCalculatorTipSeen()
     }
 
     fun openOfferedTour() {
@@ -324,15 +359,23 @@ class MainViewModel(
 
     /** Picks up changes made from the widget (amount, swap) while the app was in the background. */
     fun reloadSelection() {
+        val amount = repository.getAmount()
         _state.update {
+            val changed = amount != it.sourceAmountRaw
             it.copy(
                 sourceCurrency = repository.getSourceCurrency(),
                 targetCurrency = repository.getTargetCurrency(),
                 extraTargetCurrency = repository.getExtraTargetCurrency(),
-                sourceAmountRaw = repository.getAmount()
+                sourceAmountRaw = amount,
+                // An amount typed in the widget (or opened from another app) replaces the calculation.
+                expression = if (changed && it.expression != null) amount else it.expression,
+                lastExpression = if (changed) null else it.lastExpression,
             )
         }
     }
+
+    /** The app went to the background: the conversion on screen goes to the history. */
+    fun onAppHidden() = recordHistory()
 
     fun setThemeMode(mode: String) {
         repository.setThemeMode(mode)
@@ -376,13 +419,135 @@ class MainViewModel(
         }
     }
 
+    /** The amount was changed on the keypad since it last went to the history. */
+    private var amountEdited = false
+
     fun onKeypadPress(key: String) {
-        val current = _state.value.sourceAmountRaw
-        val next = applyKeypadKey(current, key)
-        if (next == current) return
-        repository.setAmount(next)
-        _state.update { it.copy(sourceAmountRaw = next) }
+        val current = _state.value
+        if (current.expression != null) return onCalculatorKey(current.expression, key)
+        // "C" starts a new amount: the one on screen goes to the history first.
+        if (key == "C") recordHistory()
+        val startsOver = current.freshAmount && (key == "." || key.all { it.isDigit() })
+        val next = applyKeypadKey(if (startsOver) "0" else current.sourceAmountRaw, key)
+        _state.update { it.copy(freshAmount = false, lastExpression = null) }
+        if (next == current.sourceAmountRaw) return
+        amountEdited = true
+        setAmount(next)
+    }
+
+    private fun onCalculatorKey(expression: String, key: String) {
+        if (key == "=") return evaluate()
+        if (key == "C") recordHistory()
+        val next = applyCalcKey(expression, key, fresh = _state.value.freshAmount)
+        _state.update { it.copy(expression = next, freshAmount = false, lastExpression = null) }
+        if (next == expression) return
+        amountEdited = true
+        // The amount follows the live result, so the widget and the next launch see it too.
+        previewExpression(next)?.let(::toRawAmount)?.let(::setAmount)
+    }
+
+    private fun setAmount(raw: String) {
+        if (raw == _state.value.sourceAmountRaw) return
+        repository.setAmount(raw)
+        _state.update { it.copy(sourceAmountRaw = raw) }
         notifyWidgets()
+    }
+
+    /** "=": the result becomes the amount, and the calculation goes to the history. */
+    private fun evaluate() {
+        val typed = _state.value.expression ?: return
+        val expression = completeExpression(typed)
+        val raw = previewExpression(expression)?.let(::toRawAmount) ?: return
+        setAmount(raw)
+        // "1250+" is just 1250 again: nothing to show or keep.
+        if (!hasOperation(expression)) {
+            _state.update { it.copy(expression = raw, lastExpression = null) }
+            return
+        }
+        _state.update { it.copy(expression = expression) }
+        amountEdited = true
+        recordHistory()
+        _state.update { it.copy(expression = raw, lastExpression = expression, freshAmount = true) }
+    }
+
+    /**
+     * The calculator key (where "00" was): opens the calculator keys, starting from the amount on screen; with
+     * the keys open it closes them (after working out what is left to compute).
+     */
+    fun toggleCalculator() {
+        val current = _state.value
+        if (current.expression == null) {
+            repository.setCalculatorOpen(true)
+            _state.update { it.copy(expression = it.sourceAmountRaw, freshAmount = true, showHistory = false) }
+        } else {
+            if (current.calculating) evaluate()
+            repository.setCalculatorOpen(false)
+            _state.update { it.copy(expression = null) }
+        }
+    }
+
+    /** A quick amount (shown in the clear/backspace row while the amount is zero). */
+    fun applyQuickAmount(amount: Long) = loadAmount(amount.toString(), edited = true)
+
+    fun openHistory() {
+        _state.update { it.copy(showHistory = true) }
+    }
+
+    fun closeHistory() {
+        _state.update { it.copy(showHistory = false) }
+    }
+
+    fun clearHistory() {
+        repository.setHistory(emptyList())
+        _state.update { it.copy(history = emptyList()) }
+    }
+
+    /** Brings a conversion back as it was: its currencies, its amount and the calculation behind it. */
+    fun restoreHistory(entry: HistoryEntry) {
+        recordHistory()
+        val current = _state.value
+        val pair = setOf(entry.source, entry.target)
+        // The additional currency stays, unless it is now one of the pair: then it takes the one pushed out.
+        val extra = current.extraTargetCurrency?.let { extra ->
+            if (extra !in pair) extra else listOf(current.sourceCurrency, current.targetCurrency).firstOrNull { it !in pair }
+        }
+        applySlots(mapOf(CurrencySlot.SOURCE to entry.source, CurrencySlot.TARGET to entry.target, CurrencySlot.EXTRA_TARGET to extra))
+        loadAmount(entry.amount, edited = false)
+        _state.update { it.copy(lastExpression = entry.expression, showHistory = false) }
+    }
+
+    /** Puts [raw] on the keypad as a finished amount (the next digit starts a new one). */
+    private fun loadAmount(raw: String, edited: Boolean) {
+        if (edited) recordHistory()
+        setAmount(raw)
+        amountEdited = edited
+        _state.update {
+            it.copy(expression = it.expression?.let { raw }, freshAmount = true, lastExpression = null)
+        }
+    }
+
+    /** Adds the conversion on screen to the history, once it was typed or calculated (not just reopened). */
+    private fun recordHistory() {
+        if (!amountEdited) return
+        amountEdited = false
+        val current = _state.value
+        val raw = current.sourceValue?.let(::toRawAmount) ?: return
+        val value = raw.toDouble()
+        if (value == 0.0) return
+        val extra = current.extraTargetCurrency
+        val entry = HistoryEntry(
+            time = System.currentTimeMillis(),
+            source = current.sourceCurrency,
+            target = current.targetCurrency,
+            extra = extra,
+            amount = raw,
+            expression = current.expression?.let(::completeExpression)?.takeIf(::hasOperation),
+            targetAmount = value * current.rateTo(current.targetCurrency),
+            extraAmount = extra?.let { value * current.rateTo(it) },
+        )
+        val history = CalcHistory.add(current.history, entry)
+        repository.setHistory(history)
+        _state.update { it.copy(history = history) }
     }
 
     fun swapCurrencies() = swapSlots(CurrencySlot.SOURCE, CurrencySlot.TARGET)

@@ -22,6 +22,15 @@
     <string name="drag_to_remove">हटाने के लिए यहाँ खींचें</string>
     <string name="release_to_remove">हटाने के लिए छोड़ें</string>
     <string name="backspace">मिटाएँ</string>
+    <string name="calculator">कैलकुलेटर</string>
+    <string name="close_calculator">कैलकुलेटर बंद करें</string>
+    <string name="equals">बराबर</string>
+    <string name="history">इतिहास</string>
+    <string name="history_clear">साफ़ करें</string>
+    <string name="history_clear_confirm">सब साफ़ करें?</string>
+    <string name="history_empty">अभी कोई इतिहास नहीं</string>
+    <string name="history_empty_hint">आपकी बदली गई राशियाँ और हिसाब यहाँ दिखेंगे। किसी पर टैप करके उसे वापस लाएँ।</string>
+    <string name="back_to_keypad">कीपैड पर वापस</string>
     <string name="choose_currency">मुद्रा चुनें</string>
     <string name="slot_source">मूल मुद्रा</string>
     <string name="slot_target">लक्ष्य मुद्रा</string>
@@ -108,4 +117,7 @@
     <string name="tip_select_title">किसी भी ऐप से बदलें</string>
     <string name="tip_select_body">किसी भी ऐप में कीमत चुनें और मेन्यू से \"मुद्रा बदलें\" चुनें (या शेयर करें → \"मुद्रा बदलें\")। नतीजा तुरंत दिखेगा, जो कर रहे हैं उसे छोड़े बिना।</string>
     <string name="tip_offer_action">देखें</string>
+    <string name="tip_calc_title">कैलकुलेटर, इतिहास और झटपट राशियाँ</string>
+    <string name="tip_calc_body">नीचे की पंक्ति की कैलकुलेटर कुंजी %1$s जैसे हिसाब के लिए + − × ÷ जोड़ती है, और नतीजा तुरंत सभी मुद्राओं में बदल जाता है। इतिहास देखने के लिए राशि पर टैप करें; C के बाद ऊपर की पंक्ति गोल राशियाँ दिखाती है।</string>
+    <string name="tip_calc_action">आज़माएँ</string>
 </resources>

@@ -9,7 +9,8 @@ cd tools/preview
 ./sync.sh                         # copy ui/, utils/ and tests in from the app; write R stand-ins
 ONLY=v15_quick gradle -q run      # render (ONLY filters by name; omit for everything) -> out/*.png
 gradle -q test                    # utils and widget-sizing tests
-gradle -q dragCheck               # swap/drag, spotlight and tour tap checks
+gradle -q dragCheck               # swap/drag, spotlight, tour and keypad tap checks
+gradle -q vmCheck                 # the real MainViewModel: calculator, quick amounts, history
 python3 montage.py sheet.png 900 out/a.png out/b.png   # side-by-side sheet at 900px high
 ```
 

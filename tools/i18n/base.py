@@ -27,6 +27,16 @@ ROWS = [
  ("drag_to_remove", "גררו לכאן כדי להסיר", "Drag here to remove", "Arrastra aquí para quitar"),
  ("release_to_remove", "שחררו להסרה", "Release to remove", "Suelta para quitar"),
  ("backspace", "מחיקה", "Delete", "Borrar"),
+ # calculator keys and history
+ ("calculator", "מחשבון", "Calculator", "Calculadora"),
+ ("close_calculator", "סגירת המחשבון", "Close calculator", "Cerrar calculadora"),
+ ("equals", "שווה", "Equals", "Igual"),
+ ("history", "היסטוריה", "History", "Historial"),
+ ("history_clear", "ניקוי", "Clear", "Borrar"),
+ ("history_clear_confirm", "למחוק הכול?", "Clear all?", "¿Borrar todo?"),
+ ("history_empty", "עדיין אין היסטוריה", "No history yet", "Aún no hay historial"),
+ ("history_empty_hint", "סכומים שתמירו וחישובים שתעשו יופיעו כאן. נגיעה בשורה מחזירה אותה.", "Amounts you convert and calculations you make will appear here. Tap one to bring it back.", "Aquí aparecerán los importes que conviertas y los cálculos que hagas. Toca uno para recuperarlo."),
+ ("back_to_keypad", "חזרה למקלדת", "Back to keypad", "Volver al teclado"),
  # picker
  ("choose_currency", "בחירת מטבע", "Choose currency", "Elegir moneda"),
  ("slot_source", "מטבע המקור", "From currency", "Moneda de origen"),
@@ -116,4 +126,7 @@ ROWS = [
  ("tip_select_title", "המרה מכל אפליקציה", "Convert from any app", "Convierte desde cualquier app"),
  ("tip_select_body", "סמנו מחיר בכל אפליקציה ובחרו \"המרת מטבע\" בתפריט (או \"שיתוף\" ← \"המרת מטבע\"). התוצאה קופצת מיד, בלי לעזוב את מה שאתם עושים.", "Select a price in any app and choose \"Convert currency\" from the menu (or Share → \"Convert currency\"). The result pops up right away, without leaving what you're doing.", "Selecciona un precio en cualquier app y elige \"Convertir moneda\" en el menú (o Compartir → \"Convertir moneda\"). El resultado aparece al instante, sin salir de lo que estás haciendo."),
  ("tip_offer_action", "הצגה", "Show", "Ver"),
+ ("tip_calc_title", "מחשבון, היסטוריה וסכומים מהירים", "Calculator, history and quick amounts", "Calculadora, historial e importes rápidos"),
+ ("tip_calc_body", "מקש המחשבון בשורה התחתונה מוסיף פעולות חשבון לחישובים כמו %1$s, והתוצאה מומרת מיד לכל המטבעות. נגיעה בסכום מציגה את ההיסטוריה, ואחרי C השורה העליונה מציעה סכומים עגולים.", "The calculator key in the bottom row adds + − × ÷ for sums like %1$s, and the result is converted to every currency right away. Tap the amount to see your history; after C, the top row offers round amounts.", "La tecla de calculadora de la fila inferior añade + − × ÷ para cuentas como %1$s, y el resultado se convierte al instante a todas las monedas. Toca el importe para ver tu historial; tras C, la fila superior ofrece importes redondos."),
+ ("tip_calc_action", "לנסות", "Try it", "Probar"),
 ]

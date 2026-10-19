@@ -27,6 +27,8 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.absoluteOffset
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -39,6 +41,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Add
+import androidx.compose.material.icons.rounded.Calculate
 import androidx.compose.material.icons.rounded.Close
 import androidx.compose.material.icons.rounded.ContentCopy
 import androidx.compose.material.icons.rounded.TouchApp
@@ -76,22 +79,24 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.R
 import com.example.ui.theme.LocalPalette
+import com.example.utils.formatExpression
 
 /** The features people tend to miss; the tour shows one card per tip, in this order. */
-enum class FeatureTip { WIDGET, SELECT_CONVERT, EXTRA_CURRENCY }
+enum class FeatureTip { WIDGET, SELECT_CONVERT, CALCULATOR, EXTRA_CURRENCY }
 
 /** The tip's card title, also used by the banner that offers the tour. */
 internal val FeatureTip.titleRes: Int
     get() = when (this) {
         FeatureTip.WIDGET -> R.string.tip_widget_title
         FeatureTip.SELECT_CONVERT -> R.string.tip_select_title
+        FeatureTip.CALCULATOR -> R.string.tip_calc_title
         FeatureTip.EXTRA_CURRENCY -> R.string.tip_extra_title
     }
 
 /**
- * A short tour over the calculator: the home-screen widget, converting a price selected in another app, and
- * the additional currency, with a way to try them where there is one ("show me how" walks to the widget button
- * in Settings). Opened from the banner that offers it (first launch, then after a while while a feature is
+ * A short tour over the calculator: the home-screen widget, converting a price selected in another app, the
+ * calculator keys (with the history and quick amounts) and the additional currency, with a way to try them
+ * where there is one ("show me how" walks to the widget button in Settings). Opened from the banner that offers it (first launch, then after a while while a feature is
  * still unused) or from Settings.
  */
 @Composable
@@ -102,6 +107,7 @@ fun FeatureTour(
     onAddCurrency: () -> Unit,
     onDismiss: () -> Unit,
     initialPage: Int = 0,
+    onTryCalculator: () -> Unit = {},
 ) {
     if (tips.isEmpty()) return
     val palette = LocalPalette.current
@@ -183,6 +189,7 @@ fun FeatureTour(
                         when (tip) {
                             FeatureTip.WIDGET -> WidgetIllustration()
                             FeatureTip.SELECT_CONVERT -> SelectConvertIllustration()
+                            FeatureTip.CALCULATOR -> CalculatorIllustration()
                             FeatureTip.EXTRA_CURRENCY -> ExtraCurrencyIllustration()
                         }
                     }
@@ -194,13 +201,13 @@ fun FeatureTour(
                     )
                     Spacer(Modifier.height(6.dp))
                     Text(
-                        text = stringResource(
-                            when (tip) {
-                                FeatureTip.WIDGET -> R.string.tip_widget_body
-                                FeatureTip.SELECT_CONVERT -> R.string.tip_select_body
-                                FeatureTip.EXTRA_CURRENCY -> R.string.tip_extra_body
-                            }
-                        ),
+                        text = when (tip) {
+                            FeatureTip.WIDGET -> stringResource(R.string.tip_widget_body)
+                            FeatureTip.SELECT_CONVERT -> stringResource(R.string.tip_select_body)
+                            // Left-to-right marks hold the example together, or Hebrew and Arabic would show "15% + 120".
+                            FeatureTip.CALCULATOR -> stringResource(R.string.tip_calc_body, "\u200E" + formatExpression("120+15%") + "\u200E")
+                            FeatureTip.EXTRA_CURRENCY -> stringResource(R.string.tip_extra_body)
+                        },
                         style = MaterialTheme.typography.bodyMedium,
                         color = palette.inkMuted
                     )
@@ -209,6 +216,7 @@ fun FeatureTour(
                         // Nothing to try from here: it happens in other apps.
                         tip == FeatureTip.SELECT_CONVERT -> Unit
                         tip == FeatureTip.EXTRA_CURRENCY -> TourButton(stringResource(R.string.add_currency), Icons.Rounded.Add, guarded(onAddCurrency))
+                        tip == FeatureTip.CALCULATOR -> TourButton(stringResource(R.string.tip_calc_action), Icons.Rounded.Calculate, guarded(onTryCalculator))
                         canPinWidget -> TourButton(stringResource(R.string.tip_widget_action), Icons.Rounded.TouchApp, guarded(onShowWidgetGuide))
                         // Launchers that cannot pin widgets: explain the manual way instead of a dead button.
                         else -> Text(
@@ -687,6 +695,204 @@ private fun selectFingerPosition(t: Float): Pair<Dp, Dp> {
     val price = (PAGE_WIDTH / 2) to (PRICE_TOP + PRICE_HEIGHT / 2)
     val menu = (PAGE_WIDTH / 2 + 14.dp) to (PRICE_TOP - 20.dp)
     val path = listOf(0f to rest, 0.55f to price, 1.35f to price, 1.75f to menu, SELECT_LOOP to menu)
+    val next = path.indexOfFirst { it.first >= t }.coerceAtLeast(1)
+    val (t0, from) = path[next - 1]
+    val (t1, to) = path[next]
+    val f = if (t1 > t0) FastOutSlowInEasing.transform(((t - t0) / (t1 - t0)).coerceIn(0f, 1f)) else 1f
+    return (from.first + (to.first - from.first) * f) to (from.second + (to.second - from.second) * f)
+}
+
+/**
+ * The calculator keys in miniature: a finger taps the calculator key (where "00" was), the operators slide in,
+ * it types "+ 15 %" and "=", and the cards follow the result: $120 + 15% = $138, in shekels too.
+ */
+@Composable
+private fun CalculatorIllustration() {
+    val palette = LocalPalette.current
+    val clock = rememberInfiniteTransition(label = "calculator")
+    val t by clock.animateFloat(
+        initialValue = 0f,
+        targetValue = CALC_LOOP,
+        animationSpec = infiniteRepeatable(tween((CALC_LOOP * 1000).toInt(), easing = LinearEasing)),
+        label = "t"
+    )
+    fun ramp(from: Float, to: Float) = ((t - from) / (to - from)).coerceIn(0f, 1f)
+    val step = if (t > CALC_RESET) 0 else CALC_TAPS.count { t >= it }
+    val pressed = CALC_TAPS.indexOfFirst { t in (it - 0.05f)..(it + 0.15f) }
+    val open = FastOutSlowInEasing.transform(ramp(0.75f, 1.05f)) * (1f - ramp(CALC_RESET - 0.3f, CALC_RESET))
+    val fingerAlpha = ramp(0.1f, 0.3f) * (1f - ramp(4.5f, 4.9f))
+    val finger = calcFingerPosition(t)
+    val (amount, note, converted) = CALC_STEPS[step]
+
+    Box(modifier = Modifier.size(CALC_WIDTH, CALC_HEIGHT)) {
+        Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+            MiniDisplayRow("🇺🇸", amount, note, palette.background)
+            MiniRow(flag = "🇮🇱", amount = converted, background = palette.highlight, height = CALC_CARD)
+        }
+        // Keypads stay 7-8-9 left to right in every language.
+        CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Ltr) {
+            Column(
+                modifier = Modifier
+                    .absoluteOffset(y = CALC_KEYPAD_TOP)
+                    .width(CALC_WIDTH),
+                verticalArrangement = Arrangement.spacedBy(CALC_GAP)
+            ) {
+                val rows = listOf(listOf("C", "()", "%", "⌫"), listOf("7", "8", "9", "÷"), listOf("4", "5", "6", "×"), listOf("1", "2", "3", "−"), listOf(".", "0", "=", "+"))
+                rows.forEachIndexed { r, keys ->
+                    Row(Modifier.fillMaxWidth().height(if (r == 0) CALC_TOP_ROW else CALC_KEY)) {
+                        keys.forEachIndexed { c, key ->
+                            // The 2nd/3rd keys of the top row and the 4th column open with the calculator.
+                            val opening = if (r == 0) c in 1..2 else c == 3
+                            val weight = when {
+                                !opening && r == 0 -> 1.5f - 0.5f * open
+                                opening -> open
+                                else -> 1f
+                            }
+                            if (weight <= 0f) return@forEachIndexed
+                            if (c > 0) Spacer(Modifier.width(if (opening) CALC_GAP * open else CALC_GAP))
+                            val calcKey = key == "="
+                            val canEvaluate = step in 2..5
+                            val background = when {
+                                pressed >= 0 && CALC_TAP_KEYS[pressed] == key -> palette.accent.copy(alpha = 0.55f)
+                                key == "C" -> palette.accent
+                                calcKey && canEvaluate -> palette.accent
+                                calcKey && open > 0.5f -> palette.highlight
+                                opening || key == "⌫" -> palette.highlight
+                                else -> palette.cardSoft
+                            }
+                            Box(
+                                modifier = Modifier
+                                    .weight(weight)
+                                    .fillMaxHeight()
+                                    .graphicsLayer { alpha = if (opening) open else 1f }
+                                    .clip(RoundedCornerShape(6.dp))
+                                    .background(background),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                when {
+                                    calcKey && !canEvaluate -> Icon(
+                                        Icons.Rounded.Calculate,
+                                        contentDescription = null,
+                                        tint = if (open > 0.5f) palette.ink else palette.accent,
+                                        modifier = Modifier.size(12.dp)
+                                    )
+                                    else -> Text(
+                                        if (key == "()") "( )" else key,
+                                        fontSize = 9.sp,
+                                        lineHeight = 10.sp,
+                                        fontWeight = FontWeight.Medium,
+                                        color = if (key == "C" || calcKey) palette.onAccent else palette.ink,
+                                        maxLines = 1,
+                                        softWrap = false
+                                    )
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        Box(
+            modifier = Modifier
+                .absoluteOffset(x = finger.first - FINGER / 2, y = finger.second - FINGER / 2)
+                .graphicsLayer {
+                    alpha = fingerAlpha
+                    val press = if (pressed >= 0) 0.82f else 1f
+                    scaleX = press
+                    scaleY = press
+                }
+                .size(FINGER)
+                .clip(CircleShape)
+                .background(palette.ink.copy(alpha = 0.22f))
+                .padding(3.dp)
+                .clip(CircleShape)
+                .background(Color.White.copy(alpha = 0.95f))
+        )
+    }
+}
+
+/** The source card as the calculator's display: flag on the reading side, the calculation and its result opposite. */
+@Composable
+private fun MiniDisplayRow(flag: String, amount: String, note: String?, background: Color) {
+    val palette = LocalPalette.current
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(CALC_CARD)
+            .clip(RoundedCornerShape(CALC_CARD / 2.6f))
+            .background(background)
+            .padding(horizontal = 10.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Text(flag, fontSize = (CALC_CARD.value * 0.42f).sp)
+        Spacer(Modifier.weight(1f))
+        Column(horizontalAlignment = Alignment.End) {
+            Text(
+                amount,
+                style = MaterialTheme.typography.labelLarge.copy(fontSize = 12.sp, fontWeight = FontWeight.Bold, textDirection = TextDirection.Ltr),
+                color = palette.ink,
+                maxLines = 1
+            )
+            if (note != null) {
+                Text(
+                    note,
+                    style = MaterialTheme.typography.labelSmall.copy(fontSize = 8.sp, lineHeight = 9.sp, textDirection = TextDirection.Ltr),
+                    color = palette.inkMuted,
+                    maxLines = 1
+                )
+            }
+        }
+    }
+}
+
+private const val CALC_LOOP = 6.8f
+/** When the calculator closes and the loop starts over. */
+private const val CALC_RESET = 6.3f
+private val CALC_TAPS = listOf(0.7f, 1.5f, 2.05f, 2.55f, 3.15f, 3.95f)
+private val CALC_TAP_KEYS = listOf("=", "+", "1", "5", "%", "=")
+/** What the cards show after each tap: the amount, the line under it, the shekels. */
+private val CALC_STEPS = listOf(
+    Triple("$ 120", null, "₪ 445.48"),
+    Triple("$ 120", null, "₪ 445.48"),
+    Triple("$ 120 +", "= 120", "₪ 445.48"),
+    Triple("$ 120 + 1", "= 121", "₪ 449.19"),
+    Triple("$ 120 + 15", "= 135", "₪ 501.16"),
+    Triple("$ 120 + 15%", "= 138", "₪ 512.30"),
+    Triple("$ 138", "120 + 15% =", "₪ 512.30"),
+)
+private val CALC_WIDTH = 210.dp
+private val CALC_HEIGHT = 182.dp
+private val CALC_CARD = 34.dp
+private val CALC_GAP = 3.dp
+private val CALC_TOP_ROW = 14.dp
+private val CALC_KEY = 18.dp
+private val CALC_KEYPAD_TOP = CALC_CARD * 2 + 4.dp + 8.dp
+
+/** Center of a key in the miniature keypad, by row and column, with the calculator closed (3) or open (4 columns). */
+private fun calcKeyCenter(row: Int, column: Int, columns: Int): Pair<Dp, Dp> {
+    val keyWidth = (CALC_WIDTH - CALC_GAP * (columns - 1)) / columns
+    val x = (keyWidth + CALC_GAP) * column + keyWidth / 2
+    val y = if (row == 0) {
+        CALC_KEYPAD_TOP + CALC_TOP_ROW / 2
+    } else {
+        CALC_KEYPAD_TOP + CALC_TOP_ROW + CALC_GAP + (CALC_KEY + CALC_GAP) * (row - 1) + CALC_KEY / 2
+    }
+    return x to y
+}
+
+/** In from below to the calculator key, then "+", "1", "5", "%" and "=" with the operators open. */
+private fun calcFingerPosition(t: Float): Pair<Dp, Dp> {
+    val rest = (CALC_WIDTH * 0.85f) to (CALC_HEIGHT + 10.dp)
+    val calc = calcKeyCenter(4, 2, 3)
+    val plus = calcKeyCenter(4, 3, 4)
+    val one = calcKeyCenter(3, 0, 4)
+    val five = calcKeyCenter(2, 1, 4)
+    val percent = calcKeyCenter(0, 2, 4)
+    val equals = calcKeyCenter(4, 2, 4)
+    val path = listOf(
+        0f to rest, 0.55f to calc, 0.85f to calc, 1.35f to plus, 1.6f to plus, 1.9f to one, 2.15f to one,
+        2.4f to five, 2.65f to five, 3.0f to percent, 3.3f to percent, 3.8f to equals, CALC_LOOP to equals
+    )
     val next = path.indexOfFirst { it.first >= t }.coerceAtLeast(1)
     val (t0, from) = path[next - 1]
     val (t1, to) = path[next]
