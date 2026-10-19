@@ -2,6 +2,8 @@ package com.example.data
 
 import android.content.Context
 import com.example.utils.AppLanguage
+import com.example.utils.CalcHistory
+import com.example.utils.HistoryEntry
 import androidx.room.Room
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
@@ -128,6 +130,24 @@ class CurrencyRepository(
     /** The tour card about converting selected text has been shown (once to everyone, it came in 5.0.15). */
     fun quickConvertTipSeen(): Boolean = prefs.getBoolean("quick_convert_tip_seen", false)
     fun markQuickConvertTipSeen() { prefs.edit().putBoolean("quick_convert_tip_seen", true).apply() }
+
+    /** The calculator keys were left open (they stay open the next time the app starts). */
+    fun calculatorOpen(): Boolean = prefs.getBoolean("calculator_open", false)
+    fun setCalculatorOpen(open: Boolean) {
+        val editor = prefs.edit().putBoolean("calculator_open", open)
+        // Remembered for good: the feature tour skips the calculator once it was opened.
+        if (open) editor.putBoolean("calculator_used", true)
+        editor.apply()
+    }
+    fun calculatorUsed(): Boolean = prefs.getBoolean("calculator_used", false)
+
+    /** The tour card about the calculator has been shown (once to everyone, it came in 5.0.17). */
+    fun calculatorTipSeen(): Boolean = prefs.getBoolean("calculator_tip_seen", false)
+    fun markCalculatorTipSeen() { prefs.edit().putBoolean("calculator_tip_seen", true).apply() }
+
+    /** Past conversions and calculations, newest first. */
+    fun getHistory(): List<HistoryEntry> = CalcHistory.decode(prefs.getString("history", null))
+    fun setHistory(entries: List<HistoryEntry>) { prefs.edit().putString("history", CalcHistory.encode(entries)).apply() }
 
     fun setCheckAppUpdates(enabled: Boolean) {
         prefs.edit().putBoolean("check_app_updates", enabled).apply()

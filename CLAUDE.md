@@ -15,17 +15,20 @@ Hebrew, and show rendered previews of visual changes (see `tools/preview`).
   `[skip ci]` in the merge commit title so no empty release goes out.
 - After a release, download the APK and check it: version in the manifest
   (`pyaxmlparser` or a UTF-16 search), new strings in `resources.arsc`.
-- Latest release: 5.0.16. History and decisions: `docs/PLAY_LAUNCH_PLAN.md` (Hebrew).
+- Latest release: 5.0.16 (5.0.17 with the calculator once merged). History and decisions:
+  `docs/PLAY_LAUNCH_PLAN.md` (Hebrew).
 
 ## Where things are
 - `MainActivity`, `CurrencyApp` (runs `AppLanguage.initialize` first), `QuickConvertActivity` (bubble for
   text selected in other apps: `PROCESS_TEXT` and `SEND`).
 - `data/`: `CurrencyRepository` - Room rates per USD from open.er-api.com, SharedPreferences
   `currency_prefs` for everything else.
-- `ui/`: `CalculatorScreen` (banners, cards, keypad), `SettingsScreen`, `CurrencyPicker`, `FeatureTour`
-  and `Spotlight`, `QuickConvertSheet`; `theme/Color.kt` (palettes) and `theme/PaletteTexture.kt`.
-- `utils/`: `PriceParser` and `QuickConvert` (prices in free text), `CurrencySearch`, `AppLanguage`,
-  `CountryLanguage`, `DeviceCountry`, `FeatureTourSchedule`, amount formatting, currency info.
+- `ui/`: `CalculatorScreen` (banners, cards), `Keypad` (calculator keys, quick amounts), `HistoryPanel`,
+  `SettingsScreen`, `CurrencyPicker`, `FeatureTour` and `Spotlight`, `QuickConvertSheet`; `theme/Color.kt`
+  (palettes) and `theme/PaletteTexture.kt`.
+- `utils/`: `Calculator` (expression keys, parsing, `%` rules), `QuickAmounts`, `CalcHistory`, `PriceParser`
+  and `QuickConvert` (prices in free text), `CurrencySearch`, `AppLanguage`, `CountryLanguage`,
+  `DeviceCountry`, `FeatureTourSchedule`, amount formatting, currency info.
 - `widget/`: Large/Small Glance widgets, `WidgetSizing` (pure, unit-tested), `WidgetColors` and
   `WidgetTexture`, `WidgetUpdater`.
 - `update/`: `AppUpdater` (GitHub releases), `LegacyApp` (offers to remove the old AI Studio build).
@@ -52,9 +55,14 @@ Hebrew, and show rendered previews of visual changes (see `tools/preview`).
   share target.
 - Glance: keep layout nesting under 10 levels. Image tints must be opaque (texture strength is baked into
   the PNG alpha) because API < 31 tints with SRC_ATOP.
-- RTL: amounts use `TextDirection.Ltr`; `Modifier.offset` mirrors in RTL, `absoluteOffset` does not.
+- RTL: amounts use `TextDirection.Ltr`; `Modifier.offset` mirrors in RTL, `absoluteOffset` does not. A
+  calculation inside Hebrew/Arabic prose needs LRM marks around it, or "120 + 15%" shows as "15% + 120".
+- Calculator (5.0.17): "00" became the calculator key; it shows "=" only while there is something to compute.
+  The amount in prefs follows the live result (the widget reads it). Keys never change under a finger that
+  may still be typing: the quick-amount row (in place of C/⌫ at zero) ignores taps for 450 ms.
 
 ## Next
-- The owner is checking 5.0.16 on a Samsung (share -> "Convert currency", tour banner).
+- The owner is checking 5.0.16 on a Samsung (share -> "Convert currency", tour banner), then the
+  calculator, history and quick amounts.
 - Then more features of the owner's choosing, and later monetization and Google Play publishing as planned
   in `docs/PLAY_LAUNCH_PLAN.md`.

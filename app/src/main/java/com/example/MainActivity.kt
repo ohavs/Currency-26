@@ -101,6 +101,11 @@ class MainActivity : ComponentActivity() {
         viewModel.maybeShowTour(widgetPlaced = isWidgetPlaced())
     }
 
+    override fun onStop() {
+        super.onStop()
+        viewModel.onAppHidden()
+    }
+
     /** Whether any of the app's widgets is on the home screen (the tour then skips the widget card). */
     private fun isWidgetPlaced(): Boolean {
         val manager = AppWidgetManager.getInstance(this)

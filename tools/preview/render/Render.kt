@@ -89,7 +89,61 @@ private fun renderTapped(name: String, tapsDp: List<Pair<Float, Float>>, widthDp
     println("rendered out/$name.png")
 }
 
+private val now = System.currentTimeMillis()
+private val sampleHistory = listOf(
+    com.example.utils.HistoryEntry(now - 4 * 60_000, "USD", "ILS", "EUR", "1550", "1250+300", 5754.07, 1424.61),
+    com.example.utils.HistoryEntry(now - 50 * 60_000, "EUR", "ILS", null, "138", "120+15%", 557.39, null),
+    com.example.utils.HistoryEntry(now - 3 * 3600_000, "USD", "ILS", null, "89.9", null, 333.74, null),
+    com.example.utils.HistoryEntry(now - 26 * 3600_000, "THB", "ILS", null, "2400", "3*800", 248.80, null),
+    com.example.utils.HistoryEntry(now - 50 * 3600_000, "USD", "ILS", null, "250", null, 928.08, null),
+    com.example.utils.HistoryEntry(now - 70 * 3600_000, "JPY", "USD", null, "12000", null, 80.26, null),
+)
+
+private fun calcState(expression: String?, last: String? = null, raw: String = "1250", extra: String? = null, history: Boolean = false) =
+    state.copy(
+        sourceAmountRaw = raw, expression = expression, lastExpression = last, extraTargetCurrency = extra,
+        showHistory = history, history = sampleHistory, freshAmount = last != null
+    )
+
+@Composable
+private fun Calc(s: com.example.ui.CalculatorState, offer: com.example.ui.FeatureTip? = null) =
+    CalculatorContent(s, onSwap = {}, onCurrencyClick = {}, onKeypad = {}, onOpenSettings = {}, onRefresh = {}, tourOffer = offer)
+
 fun main() {
+    // v5.0.17: the calculator key, quick amounts and the history.
+    for ((lang, dark) in listOf("iw" to false, "en" to false, "iw" to true)) {
+        val tag = "${lang}_${if (dark) "dark" else "light"}"
+        render("v17_a_plain_$tag") { Frame(dark, "sage", lang) { Calc(calcState(null)) } }
+        render("v17_b_zero_$tag") { Frame(dark, "sage", lang) { Calc(calcState(null, raw = "0")) } }
+        render("v17_c_calc_$tag") { Frame(dark, "sage", lang) { Calc(calcState("1250+300", extra = "EUR")) } }
+        render("v17_d_equals_$tag") { Frame(dark, "sage", lang) { Calc(calcState("1550", last = "1250+300", raw = "1550", extra = "EUR")) } }
+        render("v17_e_history_$tag") { Frame(dark, "sage", lang) { Calc(calcState(null, raw = "1550", last = "1250+300", history = true)) } }
+    }
+    render("v17_f_long_iw") { Frame(false, "sage", "iw") { Calc(calcState("1250+300*2-(45.5+12)/3+999+12345+15%")) } }
+    render("v17_f_divzero_iw") { Frame(false, "sage", "iw") { Calc(calcState("5/0")) } }
+    render("v17_f_open_iw") { Frame(false, "sage", "iw") { Calc(calcState("1250")) } }
+    render("v17_f_history_empty_iw") { Frame(false, "sage", "iw") { Calc(calcState(null, history = true).copy(history = emptyList())) } }
+    render("v17_g_small_calc_iw", widthDp = 360, heightDp = 640) { Frame(false, "sage", "iw") { Calc(calcState("1250+300", extra = "THB")) } }
+    render("v17_g_small_history_iw", widthDp = 360, heightDp = 640) { Frame(false, "sage", "iw") { Calc(calcState(null, extra = "THB", history = true)) } }
+    render("v17_g_small_zero_iw", widthDp = 360, heightDp = 640) { Frame(false, "sage", "iw") { Calc(calcState(null, raw = "0", extra = "THB")) } }
+    for (theme in listOf("ocean", "sunset", "rose", "lavender", "gold")) {
+        render("v17_h_${theme}_calc") { Frame(theme == "lavender", theme, "iw") { Calc(calcState("1250+300", extra = "EUR")) } }
+    }
+    render("v17_h_jpy_zero") { Frame(false, "gold", "iw") { Calc(calcState(null, raw = "0").copy(sourceCurrency = "JPY")) } }
+    render("v17_h_offer_iw") { Frame(false, "sage", "iw") { Calc(calcState(null), offer = com.example.ui.FeatureTip.CALCULATOR) } }
+    for ((lang, dark) in listOf("iw" to false, "en" to false, "ar" to false, "iw" to true)) {
+        for (frames in listOf(30, 75, 140, 175, 220, 275)) {
+            renderTapped("v17_tour_${lang}_${if (dark) "dark" else "light"}_$frames", emptyList(), frames = frames) {
+                Frame(dark, "sage", lang) {
+                    Calc(calcState(null))
+                    com.example.ui.FeatureTour(
+                        tips = listOf(com.example.ui.FeatureTip.CALCULATOR),
+                        canPinWidget = true, onShowWidgetGuide = {}, onAddCurrency = {}, onDismiss = {}
+                    )
+                }
+            }
+        }
+    }
     // The tour offer banner (instead of the sheet popping up over the keypad).
     for ((lang, dark, tip) in listOf(
         Triple("iw", false, com.example.ui.FeatureTip.SELECT_CONVERT),

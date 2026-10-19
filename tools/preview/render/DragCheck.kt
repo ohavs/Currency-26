@@ -158,5 +158,49 @@ fun main() {
         println("$label -> dismissed=$dismissed")
         tourScene.close()
     }
+
+    // Keypad (v5.0.17). Keypad area: 428-848dp; top row 428-479, bottom row 765-847; columns 116dp from x=16.
+    var history = 0
+    var toggles = 0
+    val quick = mutableListOf<Long>()
+    for ((label, raw) in listOf("amount 1250" to "1250", "amount 0" to "0")) {
+        history = 0; toggles = 0; quick.clear()
+        val keypadScene = ImageComposeScene(width = px(400f).toInt(), height = px(860f).toInt(), density = Density(density)) {
+            MyApplicationTheme(themeMode = "light") {
+                CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Rtl) {
+                    CalculatorContent(
+                        state = state.copy(sourceAmountRaw = raw, extraTargetCurrency = null), onSwap = {}, onCurrencyClick = {},
+                        onKeypad = {}, onOpenSettings = {}, onRefresh = {},
+                        onToggleCalculator = { toggles++ }, onQuickAmount = { quick += it }, onOpenHistory = { history++ }
+                    )
+                }
+            }
+        }
+        var kt = 0L
+        fun kframe() { kt += 16_000_000L; keypadScene.render(kt) }
+        fun ktap(o: Offset) { keypadScene.sendPointerEvent(PointerEventType.Press, o); kframe(); keypadScene.sendPointerEvent(PointerEventType.Release, o); kframe() }
+        kframe()
+        if (raw == "0") {
+            // A tap right away lands where backspace was: ignored. Once settled, the quick amount applies.
+            ktap(Offset(px(115f), px(453f)))
+            println("$label: quick amount tapped at once  -> $quick")
+            repeat(80) { kframe() }
+            ktap(Offset(px(115f), px(453f)))
+            println("$label: quick amount once settled    -> $quick")
+            ktap(Offset(px(40f), px(453f)))
+            println("$label: history key                  -> history=$history")
+        } else {
+            ktap(Offset(px(80f), px(112f)))
+            println("$label: tap on the source amount     -> history=$history clicked=$clicked")
+            ktap(Offset(px(326f), px(806f)))
+            println("$label: tap on the calculator key    -> toggles=$toggles")
+            // A long press lifts the row for dragging; letting go without moving must not open the history.
+            keypadScene.sendPointerEvent(PointerEventType.Press, Offset(px(80f), px(112f))); kframe()
+            Thread.sleep(800); kframe()
+            keypadScene.sendPointerEvent(PointerEventType.Release, Offset(px(80f), px(112f))); kframe()
+            println("$label: long press on the amount     -> history=$history")
+        }
+        keypadScene.close()
+    }
     System.exit(0)
 }

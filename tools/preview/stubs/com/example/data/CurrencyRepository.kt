@@ -23,6 +23,13 @@ class CurrencyRepository(val context: android.content.Context) {
     fun quickConvertTipSeen(): Boolean = false
     fun markQuickConvertTipSeen() {}
     fun setCheckAppUpdates(enabled: Boolean) {}
+    fun calculatorOpen(): Boolean = false
+    fun setCalculatorOpen(open: Boolean) {}
+    fun calculatorUsed(): Boolean = false
+    fun calculatorTipSeen(): Boolean = false
+    fun markCalculatorTipSeen() {}
+    fun getHistory(): List<com.example.utils.HistoryEntry> = emptyList()
+    fun setHistory(entries: List<com.example.utils.HistoryEntry>) {}
     fun getSourceCurrency(): String = "USD"
     fun getTargetCurrency(): String = "ILS"
     fun getAmount(): String = "1"

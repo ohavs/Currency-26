@@ -1,11 +1,13 @@
 package com.example.ui
 
+import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -32,7 +34,6 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.rounded.Backspace
 import androidx.compose.material.icons.rounded.Add
 import androidx.compose.material.icons.rounded.Close
 import androidx.compose.material.icons.rounded.DeleteOutline
@@ -103,7 +104,11 @@ import com.example.data.CurrencySlot
 import com.example.ui.theme.AmountTextStyle
 import com.example.ui.theme.LocalPalette
 import com.example.ui.theme.paletteTexture
+import com.example.utils.HistoryEntry
 import com.example.utils.amountSymbol
+import com.example.utils.formatExpression
+import com.example.utils.quickAmounts
+import com.example.utils.toRawAmount
 import com.example.utils.formatAmount
 import com.example.utils.formatAmountInput
 import com.example.utils.formatRate
@@ -172,6 +177,12 @@ fun CalculatorScreen(viewModel: MainViewModel, onRemoveLegacyApp: () -> Unit = {
                     tourOffer = if (languageSuggestion == null) tourOffer.firstOrNull() else null,
                     onOpenTour = viewModel::openOfferedTour,
                     onDismissTourOffer = viewModel::dismissTourOffer,
+                    onToggleCalculator = viewModel::toggleCalculator,
+                    onQuickAmount = viewModel::applyQuickAmount,
+                    onOpenHistory = viewModel::openHistory,
+                    onCloseHistory = viewModel::closeHistory,
+                    onRestoreHistory = viewModel::restoreHistory,
+                    onClearHistory = viewModel::clearHistory,
                 )
                 AppScreen.Settings -> SettingsScreen(
                     themeMode = themeMode,
@@ -211,6 +222,8 @@ fun CalculatorScreen(viewModel: MainViewModel, onRemoveLegacyApp: () -> Unit = {
             }
         }
 
+        BackHandler(enabled = screen == AppScreen.Calculator && state.showHistory, onBack = viewModel::closeHistory)
+
         if (screen == AppScreen.Calculator && tour.isNotEmpty()) {
             key(tour) {
                 FeatureTour(
@@ -220,6 +233,10 @@ fun CalculatorScreen(viewModel: MainViewModel, onRemoveLegacyApp: () -> Unit = {
                     onAddCurrency = {
                         viewModel.dismissTour()
                         viewModel.openCurrencySelector(CurrencySlot.EXTRA_TARGET)
+                    },
+                    onTryCalculator = {
+                        viewModel.dismissTour()
+                        if (state.expression == null) viewModel.toggleCalculator()
                     },
                     onDismiss = viewModel::dismissTour
                 )
@@ -250,6 +267,12 @@ fun CalculatorContent(
     tourOffer: FeatureTip? = null,
     onOpenTour: () -> Unit = {},
     onDismissTourOffer: () -> Unit = {},
+    onToggleCalculator: () -> Unit = {},
+    onQuickAmount: (Long) -> Unit = {},
+    onOpenHistory: () -> Unit = {},
+    onCloseHistory: () -> Unit = {},
+    onRestoreHistory: (HistoryEntry) -> Unit = {},
+    onClearHistory: () -> Unit = {},
 ) {
     val updatedAt = formatUpdatedAt(
         state.lastUpdateTimestamp,
@@ -309,11 +332,26 @@ fun CalculatorContent(
         val palette = LocalPalette.current
         val extraCode = state.extraTargetCurrency
         val extraAmount = state.extraTargetAmount
+        // While calculating, the source card is the calculator's display: the calculation, and its result
+        // under it; the other cards follow the result. A calculation with no result yet ("5 ÷ 0") shows dashes.
+        val expression = state.expression
+        val noResult = state.sourceValue == null
+        fun converted(value: Double?) = if (noResult || value == null) "—" else formatAmount(value)
+        val sourceAmount = when {
+            expression == null -> formatAmountInput(state.sourceAmountRaw)
+            state.calculating -> formatExpression(expression)
+            else -> formatAmountInput(expression)
+        }
+        val sourceNote = when {
+            state.calculating -> "= " + (state.sourceValue?.let(::toRawAmount)?.let(::formatAmountInput) ?: "—")
+            state.lastExpression != null -> formatExpression(state.lastExpression) + " ="
+            else -> null
+        }
         val entries = buildList {
-            add(StackEntry(CurrencySlot.SOURCE, state.sourceCurrency, formatAmountInput(state.sourceAmountRaw), palette.card))
-            add(StackEntry(CurrencySlot.TARGET, state.targetCurrency, formatAmount(state.targetAmount), palette.highlight))
+            add(StackEntry(CurrencySlot.SOURCE, state.sourceCurrency, sourceAmount, palette.card, note = sourceNote, calculation = state.calculating))
+            add(StackEntry(CurrencySlot.TARGET, state.targetCurrency, converted(state.targetAmount), palette.highlight))
             if (extraCode != null && extraAmount != null) {
-                add(StackEntry(CurrencySlot.EXTRA_TARGET, extraCode, formatAmount(extraAmount), palette.background, removable = true))
+                add(StackEntry(CurrencySlot.EXTRA_TARGET, extraCode, converted(extraAmount), palette.background, removable = true))
             }
         }
         CurrencyStack(
@@ -321,7 +359,8 @@ fun CalculatorContent(
             onSwap = onSwap,
             onCurrencyClick = onCurrencyClick,
             onSwapSlots = onSwapSlots,
-            onRemoveExtra = onRemoveExtra
+            onRemoveExtra = onRemoveExtra,
+            onSourceAmountClick = if (state.showHistory) onCloseHistory else onOpenHistory
         )
 
         if (extraCode != null) {
@@ -336,13 +375,41 @@ fun CalculatorContent(
                 .fillMaxWidth(),
             contentAlignment = Alignment.BottomCenter
         ) {
-            Keypad(
-                onKey = onKeypad,
+            // The history takes the keypad's place, so the cards above stay in view.
+            AnimatedContent(
+                targetState = state.showHistory,
+                transitionSpec = {
+                    (fadeIn(tween(220)) + slideInVertically(tween(260)) { it / 8 }) togetherWith fadeOut(tween(150))
+                },
+                label = "keypadOrHistory",
                 modifier = Modifier
                     .fillMaxWidth()
                     .heightIn(max = 420.dp)
                     .fillMaxHeight()
-            )
+            ) { history ->
+                if (history) {
+                    HistoryPanel(
+                        history = state.history,
+                        onRestore = onRestoreHistory,
+                        onClear = onClearHistory,
+                        onClose = onCloseHistory,
+                        modifier = Modifier.fillMaxSize()
+                    )
+                } else {
+                    val raw = state.expression ?: state.sourceAmountRaw
+                    Keypad(
+                        calculatorOpen = state.expression != null,
+                        canEvaluate = state.calculating,
+                        quickAmounts = if (raw == "0" || raw.isEmpty()) quickAmounts(state.rates[state.sourceCurrency]) else null,
+                        currencySymbol = amountSymbol(state.sourceCurrency),
+                        onKey = onKeypad,
+                        onToggleCalculator = onToggleCalculator,
+                        onQuickAmount = onQuickAmount,
+                        onOpenHistory = onOpenHistory,
+                        modifier = Modifier.fillMaxSize()
+                    )
+                }
+            }
         }
 
         Spacer(Modifier.height(12.dp))
@@ -560,6 +627,10 @@ private data class StackEntry(
     val cardColor: Color,
     /** The optional extra currency: drawn as a light dashed card with its own remove button. */
     val removable: Boolean = false,
+    /** A small line under the amount: the live result while calculating, or the calculation behind the amount. */
+    val note: String? = null,
+    /** [amount] is a calculation: long ones keep their end (where typing happens) in view. */
+    val calculation: Boolean = false,
 )
 
 /**
@@ -574,6 +645,7 @@ private fun CurrencyStack(
     onCurrencyClick: (CurrencySlot) -> Unit,
     onSwapSlots: (CurrencySlot, CurrencySlot) -> Unit,
     onRemoveExtra: () -> Unit,
+    onSourceAmountClick: () -> Unit = {},
 ) {
     val palette = LocalPalette.current
     val haptics = LocalHapticFeedback.current
@@ -687,7 +759,15 @@ private fun CurrencyStack(
                         cardColor = entry.cardColor,
                         highlighted = isHover,
                         onClick = { onCurrencyClick(slot) },
-                        onRemove = if (entry.removable) onRemoveExtra else null
+                        onRemove = if (entry.removable) onRemoveExtra else null,
+                        note = entry.note,
+                        calculation = entry.calculation,
+                        // The source amount opens the history; not when a long press lifted the row and let go.
+                        onAmountClick = if (slot == CurrencySlot.SOURCE) {
+                            { if (dragging == null) onSourceAmountClick() }
+                        } else {
+                            null
+                        }
                     )
                     if (slot == CurrencySlot.EXTRA_TARGET) {
                         DropdownMenu(expanded = menuSlot == slot, onDismissRequest = { menuSlot = null }) {
@@ -793,6 +873,9 @@ private fun CurrencyRow(
     highlighted: Boolean = false,
     /** Set for the optional extra currency: shows a dashed "temporary" outline and a small remove button. */
     onRemove: (() -> Unit)? = null,
+    note: String? = null,
+    calculation: Boolean = false,
+    onAmountClick: (() -> Unit)? = null,
 ) {
     val palette = LocalPalette.current
     val info = getCurrencyInfo(code)
@@ -819,14 +902,43 @@ private fun CurrencyRow(
             CurrencyName(currencyName(code, LocalAppLocale.current))
         }
         Spacer(Modifier.width(12.dp))
-        AutoSizeText(
-            text = amountWithSymbol(amount, amountSymbol(code), palette.accent),
-            style = AmountTextStyle.copy(fontSize = 32.sp),
-            color = palette.ink,
-            // Amount on the far side from the currency (left in Hebrew, right in English/Spanish).
-            textAlign = if (LocalLayoutDirection.current == LayoutDirection.Rtl) TextAlign.Left else TextAlign.Right,
-            modifier = Modifier.weight(1f)
-        )
+        // Amount on the far side from the currency (left in Hebrew, right in English/Spanish).
+        val farSide = if (LocalLayoutDirection.current == LayoutDirection.Rtl) TextAlign.Left else TextAlign.Right
+        Column(
+            modifier = Modifier
+                .weight(1f)
+                .then(
+                    if (onAmountClick != null) {
+                        Modifier
+                            .clip(RoundedCornerShape(18.dp))
+                            .clickable(role = Role.Button, onClickLabel = stringResource(R.string.history), onClick = onAmountClick)
+                    } else {
+                        Modifier
+                    }
+                )
+                .padding(vertical = 4.dp)
+        ) {
+            AutoSizeText(
+                text = amountWithSymbol(amount, amountSymbol(code), palette.accent),
+                style = AmountTextStyle.copy(fontSize = if (note != null) 28.sp else 32.sp),
+                color = palette.ink,
+                textAlign = farSide,
+                minFontSize = if (calculation) 18f else 12f,
+                keepEnd = calculation,
+                modifier = Modifier.fillMaxWidth()
+            )
+            if (note != null) {
+                Text(
+                    text = note,
+                    style = MaterialTheme.typography.labelLarge.copy(textDirection = TextDirection.Ltr),
+                    color = palette.inkMuted,
+                    textAlign = farSide,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                    modifier = Modifier.fillMaxWidth()
+                )
+            }
+        }
         if (onRemove != null) {
             Spacer(Modifier.width(6.dp))
             Box(
@@ -919,30 +1031,41 @@ private fun AddCurrencyButton(onClick: () -> Unit) {
     }
 }
 
-/** Single-line text that shrinks its font (down to [minFontSize]) instead of cutting long amounts. */
+/**
+ * Single-line text that shrinks its font (down to [minFontSize]) instead of cutting long amounts. With
+ * [keepEnd], text still too long at that size loses its start ("…+ 12 × 3"), so a calculation being typed
+ * always shows its last keys.
+ */
 @Composable
-private fun AutoSizeText(
+internal fun AutoSizeText(
     text: AnnotatedString,
     style: TextStyle,
     color: Color,
     textAlign: TextAlign,
     modifier: Modifier = Modifier,
     minFontSize: Float = 12f,
+    keepEnd: Boolean = false,
 ) {
     BoxWithConstraints(modifier = modifier) {
         val measurer = rememberTextMeasurer()
         val maxWidth = constraints.maxWidth
-        val fontSize = remember(text, maxWidth, style) {
+        val (fontSize, shown) = remember(text, maxWidth, style, keepEnd) {
+            fun width(t: AnnotatedString, size: Float) =
+                measurer.measure(t, style.copy(fontSize = size.sp), maxLines = 1, softWrap = false).size.width
             var size = style.fontSize.value
-            while (size > minFontSize &&
-                measurer.measure(text, style.copy(fontSize = size.sp), maxLines = 1, softWrap = false).size.width > maxWidth
-            ) {
-                size -= 1f
+            while (size > minFontSize && width(text, size) > maxWidth) size -= 1f
+            var shown = text
+            if (keepEnd) {
+                var start = 0
+                while (start < text.length - 1 && width(shown, size) > maxWidth) {
+                    start++
+                    shown = AnnotatedString("…") + text.subSequence(start, text.length)
+                }
             }
-            size.sp
+            size.sp to shown
         }
         Text(
-            text = text,
+            text = shown,
             style = style.copy(fontSize = fontSize),
             color = color,
             textAlign = textAlign,
@@ -951,91 +1074,5 @@ private fun AutoSizeText(
             overflow = TextOverflow.Ellipsis,
             modifier = Modifier.fillMaxWidth()
         )
-    }
-}
-
-@Composable
-private fun Keypad(onKey: (String) -> Unit, modifier: Modifier = Modifier) {
-    val palette = LocalPalette.current
-    val haptics = LocalHapticFeedback.current
-    val press: (String) -> Unit = { key ->
-        haptics.performHapticFeedback(HapticFeedbackType.TextHandleMove)
-        onKey(key)
-    }
-    val digitRows = listOf(
-        listOf("7", "8", "9"),
-        listOf("4", "5", "6"),
-        listOf("1", "2", "3"),
-        listOf(".", "0", "00")
-    )
-
-    // Numbers keep the familiar left-to-right keypad order inside the RTL app.
-    CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Ltr) {
-        Column(modifier = modifier, verticalArrangement = Arrangement.spacedBy(10.dp)) {
-            // Clear and backspace share one slim row, so the digits get the full width.
-            Row(
-                modifier = Modifier
-                    .weight(0.62f)
-                    .fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(10.dp)
-            ) {
-                KeyButton(
-                    color = palette.accent,
-                    modifier = Modifier
-                        .weight(1f)
-                        .fillMaxHeight(),
-                    onClick = { press("C") }
-                ) {
-                    Text("C", style = MaterialTheme.typography.titleLarge, color = palette.onAccent)
-                }
-                KeyButton(
-                    color = palette.highlight,
-                    modifier = Modifier
-                        .weight(1f)
-                        .fillMaxHeight(),
-                    onClick = { press("⌫") }
-                ) {
-                    Icon(Icons.AutoMirrored.Rounded.Backspace, contentDescription = stringResource(R.string.backspace), tint = palette.ink)
-                }
-            }
-            digitRows.forEach { row ->
-                Row(
-                    modifier = Modifier
-                        .weight(1f)
-                        .fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(10.dp)
-                ) {
-                    row.forEach { key ->
-                        KeyButton(
-                            color = palette.cardSoft,
-                            modifier = Modifier
-                                .weight(1f)
-                                .fillMaxHeight(),
-                            onClick = { press(key) }
-                        ) {
-                            Text(key, style = MaterialTheme.typography.headlineSmall.copy(fontSize = 26.sp), color = palette.ink)
-                        }
-                    }
-                }
-            }
-        }
-    }
-}
-
-@Composable
-private fun KeyButton(
-    color: Color,
-    modifier: Modifier = Modifier,
-    onClick: () -> Unit,
-    content: @Composable () -> Unit,
-) {
-    Box(
-        modifier = modifier
-            .clip(RoundedCornerShape(22.dp))
-            .background(color)
-            .clickable(role = Role.Button, onClick = onClick),
-        contentAlignment = Alignment.Center
-    ) {
-        content()
     }
 }

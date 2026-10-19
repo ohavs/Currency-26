@@ -22,6 +22,15 @@
     <string name="drag_to_remove">Faites glisser ici pour retirer</string>
     <string name="release_to_remove">Relâchez pour retirer</string>
     <string name="backspace">Effacer</string>
+    <string name="calculator">Calculatrice</string>
+    <string name="close_calculator">Fermer la calculatrice</string>
+    <string name="equals">Égal</string>
+    <string name="history">Historique</string>
+    <string name="history_clear">Effacer</string>
+    <string name="history_clear_confirm">Tout effacer ?</string>
+    <string name="history_empty">Aucun historique pour l\'instant</string>
+    <string name="history_empty_hint">Les montants que vous convertissez et vos calculs apparaîtront ici. Touchez-en un pour le retrouver.</string>
+    <string name="back_to_keypad">Retour au clavier</string>
     <string name="choose_currency">Choisir une devise</string>
     <string name="slot_source">Devise d\'origine</string>
     <string name="slot_target">Devise cible</string>
@@ -108,4 +117,7 @@
     <string name="tip_select_title">Convertissez depuis n\'importe quelle app</string>
     <string name="tip_select_body">Sélectionnez un prix dans n\'importe quelle app et choisissez \"Convertir la devise\" dans le menu (ou Partager → \"Convertir la devise\"). Le résultat s\'affiche aussitôt, sans quitter ce que vous faites.</string>
     <string name="tip_offer_action">Voir</string>
+    <string name="tip_calc_title">Calculatrice, historique et montants rapides</string>
+    <string name="tip_calc_body">La touche calculatrice de la rangée du bas ajoute + − × ÷ pour des calculs comme %1$s, et le résultat est aussitôt converti dans toutes les devises. Touchez le montant pour voir l\'historique ; après C, la rangée du haut propose des montants ronds.</string>
+    <string name="tip_calc_action">Essayer</string>
 </resources>

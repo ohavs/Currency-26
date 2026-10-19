@@ -22,6 +22,15 @@
     <string name="drag_to_remove">Trascina qui per rimuovere</string>
     <string name="release_to_remove">Rilascia per rimuovere</string>
     <string name="backspace">Cancella</string>
+    <string name="calculator">Calcolatrice</string>
+    <string name="close_calculator">Chiudi calcolatrice</string>
+    <string name="equals">Uguale</string>
+    <string name="history">Cronologia</string>
+    <string name="history_clear">Cancella</string>
+    <string name="history_clear_confirm">Cancellare tutto?</string>
+    <string name="history_empty">Nessuna cronologia per ora</string>
+    <string name="history_empty_hint">Qui compariranno gli importi che converti e i calcoli che fai. Toccane uno per recuperarlo.</string>
+    <string name="back_to_keypad">Torna al tastierino</string>
     <string name="choose_currency">Scegli valuta</string>
     <string name="slot_source">Valuta di partenza</string>
     <string name="slot_target">Valuta di arrivo</string>
@@ -108,4 +117,7 @@
     <string name="tip_select_title">Converti da qualsiasi app</string>
     <string name="tip_select_body">Seleziona un prezzo in qualsiasi app e scegli \"Converti valuta\" dal menu (o Condividi → \"Converti valuta\"). Il risultato appare subito, senza lasciare ciò che stai facendo.</string>
     <string name="tip_offer_action">Mostra</string>
+    <string name="tip_calc_title">Calcolatrice, cronologia e importi rapidi</string>
+    <string name="tip_calc_body">Il tasto calcolatrice nella riga in basso aggiunge + − × ÷ per calcoli come %1$s, e il risultato viene convertito subito in tutte le valute. Tocca l\'importo per vedere la cronologia; dopo C, la riga in alto propone importi tondi.</string>
+    <string name="tip_calc_action">Prova</string>
 </resources>

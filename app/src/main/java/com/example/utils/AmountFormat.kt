@@ -33,6 +33,8 @@ fun formatRate(rate: Double): String {
 /** Groups the integer part of what the user typed while keeping the fraction exactly as typed: "1250.5" -> "1,250.5". */
 fun formatAmountInput(raw: String): String {
     if (raw.isEmpty()) return "0"
+    // A calculation can leave a negative amount.
+    if (raw.startsWith('-')) return "-" + formatAmountInput(raw.drop(1))
     val integerPart = raw.substringBefore('.')
     val groupedInteger = integerPart.toBigIntegerOrNull()?.let { String.format(Locale.US, "%,d", it) } ?: integerPart
     return if (raw.contains('.')) "$groupedInteger.${raw.substringAfter('.')}" else groupedInteger
@@ -48,7 +50,7 @@ fun applyKeypadKey(current: String, key: String): String {
     val amount = current.ifEmpty { "0" }
     return when (key) {
         "C" -> "0"
-        "⌫" -> if (amount.length <= 1) "0" else amount.dropLast(1)
+        "⌫" -> amount.dropLast(1).let { if (it.isEmpty() || it == "-") "0" else it }
         "." -> if (amount.contains('.')) amount else "$amount."
         else -> {
             if (key.isEmpty() || !key.all { it.isDigit() }) return amount
