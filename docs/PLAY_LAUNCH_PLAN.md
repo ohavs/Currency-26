@@ -1,85 +1,214 @@
 # תוכנית השקה ב־Google Play ומונטיזציה
 
-סטטוס: **מתוכנן, טרם יושם.** ההחלטות סוכמו עם אוהב (15.10.2026). לא לעדכן קוד או לשחרר גרסה עד שיאשר להתחיל.
+**סטטוס (20.10.2026): הקוד וחומרי החנות מוכנים. ההמשך תלוי בצעדים של אוהב בקונסולות (הרשימה למטה).**
 
-מצב נוכחי: גרסה 5.0.11, ‏`applicationId = com.ohav.currency`, ‏targetSdk 36, ‏minSdk 24.
-- כל מיזוג ל־`main` משחרר גרסה ב־GitHub Releases, והאפליקציה מתעדכנת ממנה.
-- גרסאות נחתמות כרגע ב־`debug.keystore` הציבורי שבריפו.
+- `applicationId = com.ohav.currency`, ‏targetSdk 36, ‏minSdk 24. גרסה אחרונה בגיטהאב: 5.0.20.
+- כל מיזוג ל־`main` עושה שני דברים:
+  - משחרר את גרסת **github** ל־GitHub Releases. היא מתעדכנת מעצמה, בלי פרסומות, והכול בה פתוח.
+  - בונה את גרסת **play** (AAB) באותו מספר גרסה. כשיהיו ה־secrets, היא תעלה לבד למסלול הבדיקה הפנימית ב־Play.
 
-## החלטות מונטיזציה
+## מה נשאר לאוהב (לפי הסדר)
+הכול חוץ מזה כבר נעשה. כל צעד כתוב כך שאפשר לעשות אותו מהטלפון. אחרי כל צעד אפשר להודיע לי ולהמשיך.
 
-| נושא | החלטה |
+### 1. גיטהאב (5 דקות)
+1. **Settings ← Pages ← Build and deployment ← Source: "GitHub Actions"**.
+   - זה מפרסם את מדיניות הפרטיות בכתובת `https://ohavs.github.io/Currency-26/privacy.html`.
+   - אחרי השינוי אני מריץ את ה־workflow ‏Pages.
+2. **Settings ← Secrets and variables ← Actions ← New repository secret**, פעמיים:
+   - `UPLOAD_KEYSTORE_PASSWORD` ו־`UPLOAD_KEYSTORE_BASE64`.
+   - שני הערכים בקובץ `play-upload-key-secrets.txt` ששלחתי.
+   - **לשמור את הקובץ ואת `upload-key.jks` במקום בטוח, לא בגיט.** זה מפתח ההעלאה ל־Play. אם הוא אובד, אפשר לאפס אותו דרך התמיכה של Play, אבל זה לוקח כמה ימים.
+
+### 2. AdMob (10 דקות)
+1. **Apps ← Add app ← Android**. לשאלה "Is the app listed?" עונים No. השם: Currency Converter + Widget.
+2. ליצור שלוש יחידות פרסום: **Banner**, **Interstitial**, **Rewarded**.
+   - ב־Rewarded: ‏reward amount ‏1, ‏reward item "video".
+3. **Privacy & messaging**: ליצור הודעת GDPR (European regulations) ולפרסם אותה. אם מוצע, גם הודעה ל־US state regulations.
+4. **לשלוח לי:**
+   - App ID (‏`ca-app-pub-…~…`) ושלושת מזהי היחידות.
+   - Publisher ID (‏`pub-…`), בשביל app-ads.txt.
+
+   אני שם את המזהים ב־`gradle.properties` (הם לא סודיים). עד אז הגרסה מציגה פרסומות בדיקה של גוגל.
+
+### 3. Google Play Console
+1. **בדיקות חשבון:**
+   - חשבון אישי או ארגוני.
+   - שאימות הזהות עבר.
+   - **פרופיל תשלומים** (Settings ← Payments profile). בלעדיו אי אפשר למכור את "פרימיום לתמיד".
+2. **יצירת האפליקציה** (Create app):
+   - שם: Currency Converter + Widget.
+   - שפת ברירת מחדל: English (United States).
+   - App, ‏Free.
+3. **העלאה ראשונה, ידנית (פעם אחת בלבד):**
+   - Testing ← Internal testing ← Create new release.
+   - להשאיר את Play App Signing (ברירת המחדל).
+   - להעלות את ה־AAB מה־artifact ‏`currency-26-play-bundle` של ריצת ה־Release האחרונה (Actions ← Release ← הריצה ← Artifacts).
+   - ההעלאה נועלת את `com.ohav.currency`. מכאן והלאה ההעלאות אוטומטיות.
+4. **בודקים פנימיים:**
+   - להוסיף את עצמך ב־Internal testing ← Testers.
+   - להוסיף את עצמך גם ב־Settings ← License testing, כדי שרכישות בדיקה יהיו בחינם.
+   - להתקין מהקישור. **קודם להסיר את גרסת הגיטהאב**: החתימה שונה. ההגדרות וההיסטוריה ייאבדו.
+5. **המוצר:**
+   - Monetize ← Products ← In-app products ← Create product.
+   - ID ‏`premium_forever`, שם "Premium forever", מחיר ₪14.90 (שאר המחירים מומרים אוטומטית).
+   - Activate.
+6. **חשבון שירות (15 דקות, פעם אחת).** זה מה שמאפשר לי להעלות גרסאות, טקסטים ותמונות בלי שתיגע:
+   1. ב־console.cloud.google.com: פרויקט חדש ← APIs ← להפעיל את **Google Play Android Developer API**.
+   2. IAM ← Service accounts ← Create. לשונית Keys ← Add key ← JSON. הקובץ יורד למכשיר.
+   3. ב־Play Console: Users and permissions ← Invite new users.
+      - האימייל של חשבון השירות.
+      - הרשאות: Release apps to testing tracks, ‏Manage store presence, ‏View app information.
+      - ובשביל ההפקה אחר כך: Release to production.
+   4. בגיטהאב: secret בשם `PLAY_SERVICE_ACCOUNT_JSON`, עם כל התוכן של קובץ ה־JSON.
+
+   אחרי זה אני מריץ את **Play listing**. הוא מעלה את דף החנות בכל 13 השפות, עם צילומי מסך, feature graphic ואייקון.
+7. **App content:** למלא לפי התשובות המוכנות למטה. זה רק בממשק, כ־20 דקות.
+8. **Store settings:**
+   - קטגוריה: Finance.
+   - אימייל ליצירת קשר: חובה, והוא מוצג בחנות. לבחירתך.
+   - אתר: `https://ohavs.github.io/Currency-26/`.
+9. **בדיקה סגורה.** לחשבון אישי שנפתח אחרי 13.11.2023 זה חובה לפני Production:
+   - מינימום **12 בודקים שמצטרפים ונשארים 14 ימים ברצף**.
+   - Testing ← Closed testing ← Create track.
+   - רשימת אימיילים, או Google Group.
+   - לשלוח להם את קישור ההצטרפות. הם מתקינים ולא מסירים.
+   - חשבון ארגוני פטור מזה.
+10. **Apply for production:**
+    - אחרי 14 הימים.
+    - השאלון: טיוטת תשובות למטה.
+    - ואז release ל־Production. אחרי האישור הראשון אני מחליף ב־`release.yml` את ‏`PLAY_STATUS` מ־`draft` ל־`completed`.
+
+### 4. אחרי שהאפליקציה מתפרסמת
+- **AdMob ← App settings:** לקשר את האפליקציה לדף החנות. AdMob בודק אותה, ועד האישור מוגשות מעט פרסומות.
+- **app-ads.txt:** צריך להיות בשורש הדומיין של "אתר המפתח".
+  - אני יכול ליצור (באישורך) ריפו `ohavs/ohavs.github.io` עם הקובץ.
+  - ולהגדיר אתר מפתח `https://ohavs.github.io`.
+  - בלי הקובץ הפרסומות עובדות, אבל חלק מהמפרסמים לא מציעים מחיר.
+
+## החלטות מונטיזציה (מעודכן 20.10.2026, לפי אוהב)
+העיקרון: מרוויחים מפרסומות, אבל האפליקציה שמישה לגמרי בלי לשלם. הבסיס חינמי תמיד, ופרימיום הוא תוספת שאפשר לקבל גם בחינם.
+
+| | |
 |---|---|
-| מודל | Freemium: הליבה חינמית (המרה, חיפוש, ערכות צבעים) עם פרסומות |
-| פרימיום | רכישה **חד־פעמית** "פרימיום לתמיד", ‏₪14.90 / ‏$3.99. כוללת ביטול פרסומות, ווידג'ט ומטבע שלישי |
-| וידאו בתמורה לפרס | **סרטון אחד ← 24 שעות** של פיצ'רי הפרימיום (ווידג'ט + מטבע שלישי) |
-| ניסיון חינם | **3 ימי** פיצ'רי פרימיום חינם למשתמשים חדשים |
-| באנר | באנר adaptive קבוע בתחתית המסך הראשי, מתחת למקלדת, **עם רווח ברור מהמקשים** (מדיניות AdMob נגד לחיצות בטעות). נעלם לרוכשי פרימיום |
-| פרסומת מסך מלא | **לא בפתיחת האפליקציה.** רק אחרי שהמשתמש ביצע המרה או שתיים בסשן. מגבלת תדירות (פעם ב־15 דק' לכל היותר), לא באמצע הקלדה, לא לרוכשי פרימיום |
-| App Open ads | לא |
+| **חינם תמיד** | המרה, חיפוש, מטבע נוסף (שלישי), היסטוריה, "סמן והמר" מכל אפליקציה, מצב כהה/בהיר, כל השפות |
+| **פרימיום** | **ווידג'ט**, **החלפת ערכות צבעים**, **מחשבון** (אופרטורים, אחוזים, סוגריים) |
+| **ניסיון** | משתמש חדש מקבל 3 ימי פרימיום |
+| **סרטונים** | **2 סרטונים ← 24 שעות פרימיום**. כל זוג נוסף מוסיף יום, עד 72 שעות קדימה. סרטון אחד נשמר עד 24 שעות עד שרואים את השני |
+| **רכישה** | "פרימיום לתמיד", חד־פעמית, ₪14.90 (`premium_forever`): כל הפיצ'רים, **בלי שום פרסומות** |
+| **באנר** | Anchored adaptive בתחתית המסך הראשי, מתחת למקלדת, עם רווח של 12dp. הגובה שמור מההתחלה, כך שהמקשים לא זזים. עד שהפרסומת נטענת (או כשאין), במקום שלה מופיע קו "פרימיום: בלי פרסומות…" שפותח את המסך של פרימיום |
+| **מסך מלא** | רק בהפסקות טבעיות: חזרה מבחירת מטבע, מההגדרות או מההיסטוריה. לא ביום הראשון, רק אחרי 2 המרות בסשן, אחת לסשן, 15 דקות לפחות בין שתיים, עד 3 ביום. לא בזמן פתיחה בסרטונים. כן בזמן הניסיון |
+| **לא** | פרסומת פתיחה, פרסומות בבועת "סמן והמר", פרסומת בזמן הקלדה |
+| **דירוג** | בקשת דירוג אחת (In-App Review) אחרי 4 ימים ו־5 סשנים, בהפסקה טבעית שלא הוצגה בה פרסומת |
 
-הנחה לאימות לפני יישום: הסרטון והניסיון פותחים את **פיצ'רי** הפרימיום (ווידג'ט ומטבע שלישי), והפרסומות נשארות. ביטול הפרסומות רק ברכישה.
+- **נעילה:** מקש המחשבון וערכות הצבעים מקבלים מנעול קטן. לחיצה פותחת את גיליון הפרימיום, והפיצ'ר שנלחץ מופיע בו ראשון.
+- **אחרי פתיחה (סרטונים או רכישה):** הפעולה שהמשתמש ביקש מתבצעת לבד: המחשבון נפתח, הערכה שנבחרה מוחלת, או מתחילה הוספת ווידג'ט.
+- **כשהפרימיום נגמר:**
+  - המחשבון נסגר, והתוצאה נשארת כסכום.
+  - הצבעים חוזרים לקלאסי, והבחירה נשמרת לפעם הבאה.
+  - הווידג'ט מציג כרטיס נעול עם "פתיחה" ו"2 סרטונים קצרים פותחים 24 שעות". הוא מתרענן גם כשהאפליקציה סגורה (`PremiumExpiryWorker`).
+- **הסכמה:**
+  - UMP של גוגל לפני כל פרסומת: באירופה, בבריטניה ובשווייץ, ובמדינות בארה"ב אם הוגדרה הודעה.
+  - "פרטיות בפרסומות" נמצא בהגדרות ← אודות.
+  - למי שקנה לא נשאלת שאלת הסכמה בכלל.
+- **גרסת הגיטהאב:** הכול פתוח ואין בה פרסומות. זו הגרסה של אוהב.
 
-### ווידג'ט נעול
-כשאין פרימיום, הווידג'ט מציג מסך נעול נקי עם "פתח פרימיום". לחיצה פותחת את מסך הפרימיום באפליקציה (רכישה או סרטון). צריך גם רענון מתוזמן של הווידג'ט כשתוקף ה־24 שעות או הניסיון פג.
+## מה נבנה (5.0.21)
+- **שני flavors** (`app/build.gradle.kts`):
+  - `github`: מעדכן מגיטהאב, הרשאות התקנה והסרה, מפתח ה־debug המשותף, בלי R8.
+  - `play`:
+    - בלי המעדכן ובלי ההרשאות האלה (`src/play/.../update` הם stubs).
+    - R8 ו־shrinkResources.
+    - מזהי AdMob מ־`gradle.properties` (‏`admobAppId`, ‏`admobBanner`, ‏`admobInterstitial`, ‏`admobRewarded`). אם חסרים, נכנסים מזהי הבדיקה.
+    - נחתם במפתח ההעלאה כשהוא קיים.
+  - ב־AAB אין פיצול לפי שפה, כי האפליקציה מחליפה שפה בעצמה.
+- **`premium/`**:
+  - `Premium.kt`: כללים טהורים, עם בדיקות ב־`PremiumRulesTest`:
+    - `PremiumState`
+    - `Access`
+    - `PremiumRules`
+    - `InterstitialPolicy`
+    - `ReviewPolicy`
+  - `PremiumStore`: ‏SharedPreferences ‏"premium". שם מתחיל הניסיון, ושם הטיימר שנועל מחדש כשהזמן נגמר.
+  - `Monetization`: הממשק. המימושים:
+    - `src/play/.../PlayMonetization.kt`: ‏Billing 8, ‏AdMob 24, ‏UMP 3, ‏Review.
+    - `src/github/.../CreateMonetization.kt`: הכול פתוח.
+- **UI:**
+  - `PremiumSheet` (וגם `PremiumPromo` ו־`LockBadge`).
+  - מנעולים במקלדת ובערכות הצבעים.
+  - בהגדרות: שורת פרימיום בראש, וקטע **אודות**. באודות יש:
+    - קרדיט חובה ל־ExchangeRate-API
+    - הסתייגות על השערים
+    - מדיניות פרטיות
+    - פרטיות בפרסומות
+    - גרסה
+  - ווידג'ט נעול (`WidgetLocked.kt`).
+  - כל המחרוזות קיימות ב־13 שפות.
+- **CI:**
+  - `android.yml` בונה את שני ה־flavors ומריץ את הבדיקות של שניהם.
+  - `release.yml`: ‏job ‏`release` (גיטהאב) ו־job ‏`play` (‏AAB, ‏artifact, והעלאה ל־internal כשיש secrets).
+  - `play-listing.yml` (ידני): fastlane supply מ־`store/listing`.
+  - `pages.yml`: מפרסם את `site/` (מדיניות פרטיות ודף בית).
+- **חומרי חנות** (`store/listing/<locale>`):
+  - טקסטים ב־13 שפות (`tools/store/listing.py`). שם, תיאור קצר ותיאור מלא. אותו טקסט גם ל־en-GB, ‏es-419, ‏fr-CA ו־pt-PT.
+  - 5 צילומי מסך ו־feature graphic לכל שפה (`tools/store/screenshots.mjs`, מרינדורי `ONLY=store_` של tools/preview), ואייקון 512.
+  - שמות בחנות:
+    - "Currency Converter + Widget"
+    - "ממיר מטבעות + וידג'ט"
+    - בצרפתית בלי "+ widget", כי השם המלא חורג מ־30 התווים.
 
-## שם בחנות
-- עברית: "ממיר מטבעות + ווידג'ט". אנגלית: "Currency Converter + Widget" (27 תווים, המגבלה היא 30).
-- להוסיף "ווידג'ט" לשם זה מקובל ומותר, כי לאפליקציה באמת יש ווידג'ט. אסור רק מילות מפתח מטעות או ריפוד מילים.
+## תשובות מוכנות לטפסים (Play Console ← App content)
+- **Privacy policy:** `https://ohavs.github.io/Currency-26/privacy.html`.
+- **App access:** "All functionality is available without special access". הפרימיום נפתח בניסיון או בסרטונים.
+- **Ads:** Yes, my app contains ads.
+- **Content rating (IARC):**
+  - קטגוריה: "Utility, Productivity, Communication, or Other".
+  - על אלימות, מין, שפה, סמים והימורים: No.
+  - האם משתמשים מתקשרים או משתפים תוכן: No.
+  - האם האפליקציה משתפת מיקום: No.
+  - **Digital purchases: Yes**.
+  - דפדפן לא מוגבל: No.
+  - צפוי: Everyone / PEGI 3.
+- **Target audience:** ‏18 and over בלבד. "Appeals to children": No.
+- **News app:** No. ‏**Government app:** No. ‏**Health:** No.
+- **Financial features:** "My app doesn't provide any financial features" (ממיר שערים בלבד, בלי כסף אמיתי).
+- **Advertising ID:** Yes. המטרות: Advertising or marketing ו־Analytics. הוא מגיע מ־SDK הפרסומות.
+- **Data safety:**
+  - **Collect or share:** Yes, בגלל AdMob.
+  - **Encrypted in transit:** Yes.
+  - **Deletion request:** No. אין חשבונות, והנתונים נשמרים במכשיר.
+  - **Location → Approximate location:** Collected + Shared. המטרות: Advertising, Analytics, Fraud prevention. המקור: כתובת IP.
+  - **App activity → App interactions:** Collected + Shared. אותן מטרות.
+  - **App info and performance → Crash logs, Diagnostics:** Collected + Shared. המטרות: Analytics ו־Fraud prevention.
+  - **Device or other IDs:** Collected + Shared. המטרות: Advertising, Analytics, Fraud prevention.
+  - בכולם: לא ephemeral, ו־Required.
+  - **לא מסמנים:**
+    - שם, אימייל, אנשי קשר, תמונות.
+    - הטקסט מ"סמן והמר": מעובד במכשיר בלבד.
+    - ההיסטוריה: במכשיר בלבד.
+    - פרטי התשלום: Google Play מטפל בהם.
+- **טיוטת תשובות לשאלון Production** (באנגלית, להעתקה):
+  - *How did you recruit testers?* Friends, family and colleagues who convert currencies when travelling or shopping online.
+  - *How easy was it?* Easy: they joined through the opt-in link and used the app on their own phones.
+  - *Engagement:* Testers used the converter, the home-screen widget, "select text → convert currency" and the calculator during the 14 days.
+  - *Feedback and changes:* (למלא לפי מה שהבודקים אמרו. אני מתקן ומשחרר גרסה לפני ההגשה.)
+  - *Intended audience:* Travellers and online shoppers who need quick conversions, in 13 languages.
+  - *Value:* Fast offline conversion, a home-screen widget and converting prices selected in any app.
+  - *Expected installs in the first year:* 1,000–10,000.
 
-## שפות נוספות (בהגדרות, בווידג'ט ובדף החנות)
-**יושם בגרסה 5.0.12** באפליקציה, בווידג'ט ובחיפוש. דף החנות עדיין לא. הכלי: `tools/i18n/generate.py`.
-
-קיימות: עברית (ברירת מחדל), אנגלית, ספרדית ו"אוטומטי".
-
-להוסיף שפות פופולריות:
-- ערבית (RTL, תשתית ה־RTL כבר קיימת)
-- רוסית
-- צרפתית
-- גרמנית
-- פורטוגזית (ברזיל)
-- איטלקית
-- טורקית
-- סינית מפושטת
-- יפנית
-- הינדי
-
-המחרוזות נוצרות מ־`gen.py` (טבלת תרגומים), וצריך להרחיב אותו לעמודות נוספות. שמות מטבעות ומדינות מגיעים מ־`java.util.Currency` ו־`Locale`, ולכן מתורגמים אוטומטית. החיפוש (`CurrencySearch`) צריך לכלול גם את השפות החדשות.
-
-## עבודה טכנית ליישום
-1. **שני flavors:**
-   - `play`: בלי המעדכן מגיטהאב, בלי `REQUEST_INSTALL_PACKAGES`, בלי באנר הסרת הגרסה הישנה ו־`REQUEST_DELETE_PACKAGES`, עם Billing ו־Ads.
-   - `github`: כמו היום, לבדיקות.
-
-   הסיבה: מדיניות Play אוסרת עדכון עצמי מחוץ לחנות.
-2. **Google Play Billing:** מוצר חד־פעמי `premium_forever`, כולל שחזור רכישה ואימות.
-3. **AdMob:** באנר, Rewarded ו־Interstitial. עד שיגיעו מזהים אמיתיים, מזהי בדיקה של גוגל. מזהים אמיתיים יגיעו דרך gradle properties או secrets.
-4. **UMP:** מסך הסכמה (GDPR באירופה), חובה עם AdMob.
-5. **מצב זכאות:** רכישה, `rewardUntil` ו־`trialUntil`. נקרא באפליקציה ובווידג'ט, כולל מסך פרימיום.
-6. **מדיניות פרטיות:** עמוד ב־GitHub Pages של הריפו. חובה עם פרסומות.
-7. **חתימה:** מפתח העלאה פרטי חדש (לא ה־debug), שנשמר כ־GitHub secrets, ו־`bundlePlayRelease` (AAB) ב־CI.
-8. **נכסי חנות:**
-   - אייקון 512
-   - Feature graphic בגודל 1024×500
-   - צילומי מסך (מרונדרים ב־harness)
-   - טקסטים לכל השפות
-9. **טפסים:** תשובות מוכנות ל־Data safety (מזהה פרסום, נתוני אבחון), לדירוג תוכן, לקהל יעד ולהצהרת פרסומות.
-10. **app-ads.txt:** דורש דומיין מפתח, למשל `ohavs.github.io`, שמוגדר כאתר המפתח ב־Play.
-
-## מה צריך מאוהב
-- **בדיקות בקונסול:**
-  - סוג החשבון (אישי/ארגוני) ומתי נפתח.
-  - האם עבר אימות זהות.
-  - האם יש פרופיל תשלומים (merchant).
-  - האם כבר נוצרה אפליקציה, ועם איזה Package name. אם כן, להמשיך איתה, כי ה־Package name ננעל אחרי העלאה ראשונה.
-- **AdMob:** יש לו חשבון. להוסיף אפליקציה ו־3 יחידות פרסום (Banner, Rewarded, Interstitial) ולמסור את המזהים.
-- **חשבון שירות:** חשבון שירות ב־Google Cloud עם מפתח JSON, מקושר ב־Play Console תחת Users & permissions עם הרשאות שחרור. ה־JSON יישמר כ־secret בסביבה. איתו אני מעלה גרסאות, טקסטים, תמונות ו־Data safety דרך Play Developer API.
-- **טפסים בממשק בלבד:** יצירת האפליקציה, דירוג תוכן וקהל יעד. אכין תשובות להעתקה.
-
-## מגבלות ידועות
-- לפי דיווחים: חשבון **אישי** שנפתח אחרי 13.11.2023 צריך **בדיקה סגורה עם 12 בודקים במשך 14 ימים רצופים** לפני Production. חשבון ארגוני פטור. בשלב הזה העבודה שלי נעצרת עד שהבודקים מצטרפים.
-- אחרי ההשקה אוהב צריך להסיר את גרסת הגיטהאב ולהתקין מהחנות, כי החתימות שונות.
-- AdMob מגיש פרסומות מלאות רק אחרי שהאפליקציה מקושרת לחנות.
+## מגבלות וסיכונים
+- **בדיקה סגורה:** חשבון אישי חדש צריך 12 בודקים × 14 ימים. החלק הזה רק בידיים של אוהב.
+- **Billing:** עובד רק בגרסה שהותקנה מ־Play, כלומר ממסלול בדיקה. בגרסת הגיטהאב אין רכישות.
+- **AdMob:** עד שהאפליקציה מקושרת לחנות ומאושרת, הפרסומות מוגבלות. עד שיגיעו המזהים, כל הבילדים מציגים פרסומות בדיקה. ה־workflow מזהיר על זה.
+- **ExchangeRate-API (open access):**
+  - חינמי, עם חובת קרדיט, שקיים עכשיו באודות ובתיאור.
+  - מתעדכן פעם ביום.
+  - הגבלה לפי IP, שמתאימה לאפליקציה.
+  - אם האפליקציה תגדל מאוד: מנוי בתשלום או proxy משלנו.
+- **R8 בגרסת play:** כללי keep ב־`proguard-rules.pro`. רק בדיקה במכשיר (מסלול internal) מאמתת שלא נשבר כלום.
+- **מעבר מגרסת הגיטהאב:**
+  - אחרי ההשקה אוהב מסיר את גרסת הגיטהאב ומתקין מ־Play.
+  - גרסת הגיטהאב ממשיכה להתקיים לבדיקות.
+  - **2027:** ‏Android ידרוש אימות מפתח גם להתקנות מחוץ לחנות. כנראה יהיה צריך לרשום את החבילה ומפתח ה־debug, או לעבור ל־Play בלבד.
 
 ## הדרכה קצרה (feature tour)
 **יושם בגרסה 5.0.12.** גיליון עם שני כרטיסים:

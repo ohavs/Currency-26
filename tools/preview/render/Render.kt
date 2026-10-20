@@ -111,7 +111,76 @@ private fun calcState(expression: String?, last: String? = null, raw: String = "
 private fun Calc(s: com.example.ui.CalculatorState, offer: com.example.ui.FeatureTip? = null) =
     CalculatorContent(s, onSwap = {}, onCurrencyClick = {}, onKeypad = {}, onOpenSettings = {}, onRefresh = {}, tourOffer = offer)
 
+/** Google Play screenshots: the app in each listing language, with currencies people there would use. */
+private data class StoreLang(val lang: String, val src: String, val tgt: String, val extra: String, val quote: String)
+private val storeLangs = listOf(
+    StoreLang("iw", "USD", "ILS", "EUR", "€189"), StoreLang("en", "USD", "EUR", "GBP", "€189"),
+    StoreLang("es", "EUR", "USD", "MXN", "$189"), StoreLang("ar", "USD", "SAR", "AED", "€189"),
+    StoreLang("ru", "USD", "RUB", "EUR", "€189"), StoreLang("fr", "EUR", "USD", "GBP", "$189"),
+    StoreLang("de", "EUR", "USD", "CHF", "$189"), StoreLang("pt", "USD", "BRL", "EUR", "€189"),
+    StoreLang("it", "EUR", "USD", "GBP", "$189"), StoreLang("tr", "EUR", "TRY", "USD", "€189"),
+    StoreLang("zh", "USD", "CNY", "JPY", "€189"), StoreLang("ja", "USD", "JPY", "EUR", "€189"),
+    StoreLang("hi", "USD", "INR", "EUR", "€189"),
+)
+private val storeRates = mapOf(
+    "USD" to 1.0, "EUR" to 0.9191, "GBP" to 0.7874, "ILS" to 3.7123, "MXN" to 18.31, "SAR" to 3.75, "AED" to 3.6725,
+    "RUB" to 92.48, "CHF" to 0.8812, "BRL" to 5.418, "TRY" to 34.27, "CNY" to 7.214, "JPY" to 151.24, "INR" to 84.07,
+    "THB" to 35.81, "CAD" to 1.3644,
+)
+
+private fun storeShots() {
+    for (l in storeLangs) {
+        val rtl = l.lang == "iw" || l.lang == "ar"
+        val base = state.copy(sourceCurrency = l.src, targetCurrency = l.tgt, rates = storeRates, recentCurrencies = listOf(l.extra, l.tgt))
+        render("store_${l.lang}_1_main") { Frame(false, "sage", l.lang) { Calc(base.copy(sourceAmountRaw = "250", extraTargetCurrency = l.extra)) } }
+        render("store_${l.lang}_3_calc") { Frame(false, "ocean", l.lang) { Calc(base.copy(sourceAmountRaw = "138", expression = "120+15%")) } }
+        render("store_${l.lang}_5a_theme") { Frame(true, "lavender", l.lang) { Calc(base.copy(sourceAmountRaw = "250")) } }
+        render("store_${l.lang}_5b_theme") { Frame(false, "gold", l.lang) { Calc(base.copy(sourceAmountRaw = "250")) } }
+        render("store_${l.lang}_5c_theme") { Frame(false, "rose", l.lang) { Calc(base.copy(sourceAmountRaw = "250")) } }
+        renderTapped("store_${l.lang}_4_quick", emptyList(), frames = 40) {
+            androidx.compose.ui.res.HarnessStrings.language = l.lang
+            val locale = java.util.Locale.forLanguageTag(if (l.lang == "iw") "he" else l.lang)
+            MyApplicationTheme(themeMode = "light", colorThemeStr = "sage") {
+                CompositionLocalProvider(
+                    LocalLayoutDirection provides if (rtl) LayoutDirection.Rtl else LayoutDirection.Ltr,
+                    com.example.ui.LocalAppLocale provides locale
+                ) {
+                    Box(Modifier.fillMaxSize().background(androidx.compose.ui.graphics.Color(0xFFF4F4F6))) {
+                        FakeBrowserPage(l.quote, false)
+                        com.example.ui.QuickConvertSheet(
+                            conversion = com.example.utils.QuickConvert.convert(l.quote, storeRates, l.src, l.tgt, null, null),
+                            colorTheme = "sage", offline = false, canReplace = false, copied = false,
+                            onCopy = {}, onReplace = {}, onOpenApp = {}, onDismiss = {}
+                        )
+                    }
+                }
+            }
+        }
+        val strings = { key: String -> androidx.compose.ui.res.HarnessStrings.get(l.lang, key) }
+        val time = String.format(strings("today_at"), "09:41")
+        val locale = java.util.Locale.forLanguageTag(if (l.lang == "iw") "he" else l.lang)
+        val rate = storeRates.getValue(l.tgt) / storeRates.getValue(l.src)
+        val p = com.example.ui.theme.Palettes.resolve("sunset", false)
+        render("store_${l.lang}_2a_widget", widthDp = 300, heightDp = 380) {
+            com.example.widget.LargeWidgetMock2(
+                p, 300f, 380f, rtl, locale, amountRaw = "250", src = l.src, tgt = l.tgt, rate = rate, extra = null, extraRate = 0.0,
+                updatedTime = time, updatedLabel = String.format(strings("updated_at"), time), launcherRtl = rtl, theme = "sunset"
+            )
+        }
+        render("store_${l.lang}_2b_widget", widthDp = 300, heightDp = 130) {
+            com.example.widget.SmallWidgetMock2(
+                com.example.ui.theme.Palettes.resolve("ocean", false), 300f, 130f, rtl, "250", l.src, l.extra,
+                storeRates.getValue(l.extra) / storeRates.getValue(l.src), null, 0.0, launcherRtl = rtl, theme = "ocean"
+            )
+        }
+    }
+}
+
 fun main() {
+    if (System.getenv("ONLY")?.startsWith("store_") == true) {
+        storeShots()
+        System.exit(0)
+    }
     // v5.0.21 (Play build): Premium sheet, the locked calculator key, the ad strip, Settings and the locked widget.
     val hourMs = 3_600_000L
     val freeState = com.example.premium.PremiumState()

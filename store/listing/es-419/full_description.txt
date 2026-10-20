@@ -1,0 +1,26 @@
+Convierte cualquier moneda con un toque, incluso sin conexión. Escribe un importe y míralo al instante en tu moneda, con tasas de más de 160 monedas que se actualizan solas.
+
+★ Simple y rápido
+• Un teclado grande y claro: el resultado cambia mientras escribes
+• Intercambia monedas con un toque o añade una tercera para convertir a dos a la vez
+• Busca una moneda por país, nombre, símbolo o código, en cualquier idioma
+• Funciona sin conexión con las últimas tasas descargadas
+
+★ Convierte desde cualquier app
+Selecciona un precio en el navegador, una app de reservas o un chat y elige "Convertir moneda" (o Compartir → "Convertir moneda"). El resultado aparece sobre la app en la que estás. Entiende $, €, ₪, "1.250,00", "1.5k" y más.
+
+★ Historial
+Cada importe y cada cálculo se guardan. Toca uno para recuperarlo con sus monedas.
+
+★ Premium
+• Widget en la pantalla de inicio: escribe un importe y míralo convertido sin abrir la app
+• Calculadora con porcentajes: 120 + 15%, 3 × 800 y más, convertidos mientras escribes
+• 6 temas de color, cada uno en claro y oscuro
+
+Los usuarios nuevos tienen Premium gratis durante 3 días. Después, mira 2 vídeos cortos para abrirlo durante 24 horas, o consigue Premium para siempre con un solo pago, que además quita los anuncios. La conversión, la búsqueda, la moneda adicional, el historial y la conversión desde otras apps siempre son gratis.
+
+★ 13 idiomas
+Español, inglés, hebreo, árabe, ruso, francés, alemán, portugués, italiano, turco, chino, japonés e hindi.
+
+Las tasas son solo informativas y se actualizan aproximadamente una vez al día. Tu banco o casa de cambio puede aplicar otra tasa.
+Rates By Exchange Rate API (https://www.exchangerate-api.com)

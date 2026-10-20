@@ -1,0 +1,26 @@
+Rechne jede Währung mit einem Tippen um, auch offline. Gib einen Betrag ein und sieh ihn sofort in deiner Währung – mit Kursen für über 160 Währungen, die sich selbst aktualisieren.
+
+★ Einfach und schnell
+• Große, klare Tastatur: Das Ergebnis ändert sich schon beim Tippen
+• Währungen mit einem Tippen tauschen oder eine dritte hinzufügen und in zwei auf einmal umrechnen
+• Währungen nach Land, Name, Symbol oder Code suchen, in jeder Sprache
+• Funktioniert offline mit den zuletzt geladenen Kursen
+
+★ Aus jeder App umrechnen
+Markiere einen Preis im Browser, in einer Buchungs-App oder im Chat und wähle „Währung umrechnen“ (oder Teilen → „Währung umrechnen“). Das Ergebnis erscheint über der App, in der du gerade bist. Versteht $, €, ₪, „1.250,00“, „1.5k“ und mehr.
+
+★ Verlauf
+Jeder Betrag und jede Rechnung wird gespeichert. Tippe darauf, um sie mit ihren Währungen zurückzuholen.
+
+★ Premium
+• Widget auf dem Startbildschirm: Betrag eingeben und das Ergebnis sehen, ohne die App zu öffnen
+• Rechner mit Prozenten: 120 + 15 %, 3 × 800 und mehr, umgerechnet beim Tippen
+• 6 Farbschemas, jeweils hell und dunkel
+
+Neue Nutzer bekommen Premium 3 Tage gratis. Danach schalten 2 kurze Videos es für 24 Stunden frei – oder du holst dir Premium für immer mit einer Zahlung, die auch die Werbung entfernt. Umrechnen, Suche, zusätzliche Währung, Verlauf und das Umrechnen aus anderen Apps bleiben immer kostenlos.
+
+★ 13 Sprachen
+Deutsch, Englisch, Hebräisch, Arabisch, Spanisch, Russisch, Französisch, Portugiesisch, Italienisch, Türkisch, Chinesisch, Japanisch und Hindi.
+
+Die Kurse dienen nur zur Information und werden etwa einmal täglich aktualisiert. Deine Bank oder Wechselstube kann einen anderen Kurs verwenden.
+Rates By Exchange Rate API (https://www.exchangerate-api.com)

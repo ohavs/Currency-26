@@ -29,6 +29,15 @@ jobs:
       - name: Build the GitHub APKs and the Play bundle
         run: ./gradlew assembleGithubDebug assembleGithubRelease assemblePlayRelease bundlePlayRelease
 
+      - name: Permissions and sizes
+        run: |
+          AAPT=$(ls "$ANDROID_HOME"/build-tools/*/aapt2 | sort -V | tail -1)
+          for apk in app/build/outputs/apk/*/release/*.apk; do
+            echo "== $apk $(du -h "$apk" | cut -f1)"
+            "$AAPT" dump permissions "$apk"
+          done
+          ls -la app/build/outputs/bundle/playRelease/
+
       - name: Upload APKs
         uses: actions/upload-artifact@v4
         with:
