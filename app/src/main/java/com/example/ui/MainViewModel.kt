@@ -8,6 +8,10 @@ import com.example.data.AppRelease
 import com.example.data.AutoUpdateSettings
 import com.example.data.CurrencyRepository
 import com.example.data.CurrencySlot
+import com.example.premium.Access
+import com.example.premium.FREE_COLOR_THEME
+import com.example.premium.Monetization
+import com.example.premium.PremiumReason
 import com.example.update.AppUpdater
 import com.example.utils.AppLanguage
 import com.example.utils.CalcHistory
@@ -115,19 +119,31 @@ data class LanguageSuggestion(val language: String, val title: String, val actio
 class MainViewModel(
     private val repository: CurrencyRepository,
     private val updater: AppUpdater,
+    private val monetization: Monetization,
 ) : ViewModel() {
     private val _state = MutableStateFlow(CalculatorState(
         sourceCurrency = repository.getSourceCurrency(),
         targetCurrency = repository.getTargetCurrency(),
         extraTargetCurrency = repository.getExtraTargetCurrency(),
         sourceAmountRaw = repository.getAmount(),
-        expression = if (repository.calculatorOpen()) repository.getAmount() else null,
+        expression = if (repository.calculatorOpen() && monetization.access.value.unlocked) repository.getAmount() else null,
         history = repository.getHistory(),
     ))
     val state: StateFlow<CalculatorState> = _state.asStateFlow()
 
     val themeMode = repository.themeMode
     val colorTheme = repository.colorTheme
+    val access: StateFlow<Access> = monetization.access
+
+    /** The colour set on screen: the chosen one, or Classic while Premium is locked (the choice is kept). */
+    val effectiveColorTheme: StateFlow<String> = combine(repository.colorTheme, monetization.access, ::effectiveTheme)
+        .stateIn(viewModelScope, SharingStarted.Eagerly, effectiveTheme(repository.colorTheme.value, monetization.access.value))
+
+    private val _premiumSheet = MutableStateFlow<PremiumReason?>(null)
+    /** The Premium sheet is open, for this reason; null = closed. */
+    val premiumSheet: StateFlow<PremiumReason?> = _premiumSheet.asStateFlow()
+    /** A colour set tapped while locked: applied once the user unlocks. */
+    private var pendingColorTheme: String? = null
     val autoUpdate: StateFlow<AutoUpdateSettings> = repository.autoUpdate
     val checkAppUpdates: StateFlow<Boolean> = repository.checkAppUpdates
     val language: StateFlow<String> = repository.language
@@ -168,10 +184,44 @@ class MainViewModel(
                 refreshRates()
             }
         }
-        if (repository.checkAppUpdates.value) {
+        if (BuildConfig.SELF_UPDATE && repository.checkAppUpdates.value) {
             checkForAppUpdate()
         }
         if (repository.languageSuggestionPending()) findLanguageSuggestion()
+        viewModelScope.launch {
+            var wasUnlocked = monetization.access.value.unlocked
+            monetization.access.collect { access ->
+                if (!access.unlocked) {
+                    // Premium ran out with the calculator open: its result stays as the amount.
+                    if (_state.value.expression != null) closeCalculator()
+                } else if (!wasUnlocked) {
+                    onUnlocked()
+                }
+                wasUnlocked = access.unlocked
+            }
+        }
+    }
+
+    fun openPremium(reason: PremiumReason) {
+        _premiumSheet.value = reason
+    }
+
+    fun closePremium() {
+        _premiumSheet.value = null
+        pendingColorTheme = null
+    }
+
+    /** Just unlocked from the sheet: finish what the user was reaching for. */
+    private fun onUnlocked() {
+        val reason = _premiumSheet.value ?: return
+        val theme = pendingColorTheme
+        closePremium()
+        when (reason) {
+            PremiumReason.CALCULATOR -> if (_state.value.expression == null) toggleCalculator()
+            PremiumReason.COLORS -> if (theme != null) setColorTheme(theme)
+            PremiumReason.WIDGET -> addWidgetToHomeScreen()
+            else -> Unit
+        }
     }
 
     private fun findLanguageSuggestion() {
@@ -391,6 +441,11 @@ class MainViewModel(
 
     /** The widgets switch to the new colors right away, like the app. */
     fun setColorTheme(theme: String) {
+        if (!monetization.access.value.unlocked && theme != FREE_COLOR_THEME) {
+            pendingColorTheme = theme
+            openPremium(PremiumReason.COLORS)
+            return
+        }
         repository.setColorTheme(theme)
         notifyWidgets(settle = true)
     }
@@ -410,6 +465,7 @@ class MainViewModel(
     fun setRefreshOnOpen(refreshOnOpen: Boolean) = updateAutoUpdate { it.copy(refreshOnOpen = refreshOnOpen) }
 
     fun addWidgetToHomeScreen() {
+        if (!monetization.access.value.unlocked) return openPremium(PremiumReason.WIDGET)
         val appWidgetManager = android.appwidget.AppWidgetManager.getInstance(repository.context)
         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
             if (appWidgetManager.isRequestPinAppWidgetSupported) {
@@ -431,6 +487,7 @@ class MainViewModel(
         val next = applyKeypadKey(if (startsOver) "0" else current.sourceAmountRaw, key)
         _state.update { it.copy(freshAmount = false, lastExpression = null) }
         if (next == current.sourceAmountRaw) return
+        if (!amountEdited) monetization.noteConversion()
         amountEdited = true
         setAmount(next)
     }
@@ -441,6 +498,7 @@ class MainViewModel(
         val next = applyCalcKey(expression, key, fresh = _state.value.freshAmount)
         _state.update { it.copy(expression = next, freshAmount = false, lastExpression = null) }
         if (next == expression) return
+        if (!amountEdited) monetization.noteConversion()
         amountEdited = true
         // The amount follows the live result, so the widget and the next launch see it too.
         previewExpression(next)?.let(::toRawAmount)?.let(::setAmount)
@@ -477,13 +535,18 @@ class MainViewModel(
     fun toggleCalculator() {
         val current = _state.value
         if (current.expression == null) {
+            if (!monetization.access.value.unlocked) return openPremium(PremiumReason.CALCULATOR)
             repository.setCalculatorOpen(true)
             _state.update { it.copy(expression = it.sourceAmountRaw, freshAmount = true, showHistory = false) }
         } else {
-            if (current.calculating) evaluate()
-            repository.setCalculatorOpen(false)
-            _state.update { it.copy(expression = null) }
+            closeCalculator()
         }
+    }
+
+    private fun closeCalculator() {
+        if (_state.value.calculating) evaluate()
+        repository.setCalculatorOpen(false)
+        _state.update { it.copy(expression = null) }
     }
 
     fun openHistory() {
@@ -622,6 +685,7 @@ class MainViewModel(
         viewModelScope.launch {
             repository.markCurrencyUsed(currencyCode)
         }
+        monetization.noteConversion()
         applySlots(slots)
     }
 
@@ -635,3 +699,5 @@ class MainViewModel(
         _state.update { it.copy(searchQuery = query) }
     }
 }
+
+private fun effectiveTheme(theme: String, access: Access) = if (access.unlocked) theme else FREE_COLOR_THEME

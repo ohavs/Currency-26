@@ -1,7 +1,8 @@
 name: Release
 
-# Every push to main publishes a numbered release with the APK.
-# The app's in-app updater installs the latest one.
+# Every push to main publishes a numbered GitHub release with the APK (the GitHub build: the app's in-app
+# updater installs the latest one), and builds the Google Play bundle with the same version. Once the Play
+# secrets are in place (see docs/PLAY_LAUNCH_PLAN.md) the bundle also goes to Google Play's internal test track.
 on:
   push:
     branches: [main]
@@ -36,7 +37,7 @@ jobs:
 
       - name: Test and build release APK
         run: >
-          ./gradlew testDebugUnitTest assembleRelease
+          ./gradlew testGithubDebugUnitTest testPlayDebugUnitTest assembleGithubRelease
           -PappVersionCode=${{ steps.version.outputs.code }}
           -PappVersionName=${{ steps.version.outputs.name }}
 
@@ -45,8 +46,77 @@ jobs:
           GH_TOKEN: ${{ github.token }}
           VERSION: ${{ steps.version.outputs.name }}
         run: |
-          cp app/build/outputs/apk/release/app-release.apk "currency-26-$VERSION.apk"
+          cp app/build/outputs/apk/github/release/app-github-release.apk "currency-26-$VERSION.apk"
           gh release create "v$VERSION" "currency-26-$VERSION.apk" \
             --target "$GITHUB_SHA" \
             --title "גרסה $VERSION" \
             --generate-notes
+
+  play:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      # Draft until the app's first release is reviewed (Google Play only accepts drafts for a new app);
+      # then "completed", so each push to main reaches the internal testers by itself.
+      PLAY_TRACK: internal
+      PLAY_STATUS: draft
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Upload key
+        id: key
+        env:
+          UPLOAD_KEYSTORE_BASE64: ${{ secrets.UPLOAD_KEYSTORE_BASE64 }}
+          PLAY_SERVICE_ACCOUNT_JSON: ${{ secrets.PLAY_SERVICE_ACCOUNT_JSON }}
+        run: |
+          if [ -z "$UPLOAD_KEYSTORE_BASE64" ]; then
+            echo "::notice::No UPLOAD_KEYSTORE_BASE64 secret yet: the Play bundle is not built (see docs/PLAY_LAUNCH_PLAN.md)."
+            echo "ready=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          echo "$UPLOAD_KEYSTORE_BASE64" | base64 -d > "$RUNNER_TEMP/upload-key.jks"
+          echo "UPLOAD_KEYSTORE=$RUNNER_TEMP/upload-key.jks" >> "$GITHUB_ENV"
+          echo "ready=true" >> "$GITHUB_OUTPUT"
+          if [ -n "$PLAY_SERVICE_ACCOUNT_JSON" ]; then echo "upload=true" >> "$GITHUB_OUTPUT"; fi
+          if ! grep -q '^admobAppId=' gradle.properties; then
+            echo "::warning::gradle.properties has no AdMob ids: this bundle shows Google's test ads."
+          fi
+
+      - uses: actions/setup-java@v4
+        if: steps.key.outputs.ready == 'true'
+        with:
+          distribution: temurin
+          java-version: 21
+
+      - uses: gradle/actions/setup-gradle@v4
+        if: steps.key.outputs.ready == 'true'
+
+      - name: Build the Play bundle
+        if: steps.key.outputs.ready == 'true'
+        env:
+          UPLOAD_KEYSTORE_PASSWORD: ${{ secrets.UPLOAD_KEYSTORE_PASSWORD }}
+        run: >
+          ./gradlew bundlePlayRelease
+          -PappVersionCode=$((500 + GITHUB_RUN_NUMBER))
+          -PappVersionName=5.0.${GITHUB_RUN_NUMBER}
+
+      - name: Keep the bundle
+        if: steps.key.outputs.ready == 'true'
+        uses: actions/upload-artifact@v4
+        with:
+          name: currency-26-play-bundle
+          path: |
+            app/build/outputs/bundle/playRelease/*.aab
+            app/build/outputs/mapping/playRelease/mapping.txt
+
+      - name: Send to Google Play
+        if: steps.key.outputs.upload == 'true'
+        uses: r0adkll/upload-google-play@v1.1.3
+        with:
+          serviceAccountJsonPlainText: ${{ secrets.PLAY_SERVICE_ACCOUNT_JSON }}
+          packageName: com.ohav.currency
+          releaseFiles: app/build/outputs/bundle/playRelease/app-play-release.aab
+          mappingFile: app/build/outputs/mapping/playRelease/mapping.txt
+          releaseName: 5.0.${{ github.run_number }}
+          track: ${{ env.PLAY_TRACK }}
+          status: ${{ env.PLAY_STATUS }}

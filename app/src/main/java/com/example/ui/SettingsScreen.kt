@@ -37,7 +37,14 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.ArrowBack
+import androidx.compose.material.icons.automirrored.rounded.KeyboardArrowRight
 import androidx.compose.material.icons.rounded.Check
+import androidx.compose.material.icons.rounded.Info
+import androidx.compose.material.icons.rounded.WorkspacePremium
+import androidx.compose.ui.platform.LocalUriHandler
+import com.example.premium.Access
+import com.example.premium.FREE_COLOR_THEME
+import com.example.premium.PremiumRules
 import androidx.compose.material.icons.rounded.Language
 import androidx.compose.material.icons.rounded.Palette
 import androidx.compose.material.icons.rounded.Refresh
@@ -103,6 +110,14 @@ fun SettingsScreen(
     onShowTour: () -> Unit = {},
     /** Walks the user to "add widget": the widget section opens, scrolls into view and gets a spotlight. */
     highlightAddWidget: Boolean = false,
+    showAppUpdates: Boolean = true,
+    /** The Play build's Premium row; null in the GitHub build. */
+    premium: PremiumSummary? = null,
+    onOpenPremium: () -> Unit = {},
+    /** Colour sets other than Classic carry a lock and open Premium. */
+    colorsLocked: Boolean = false,
+    adPrivacyOptions: Boolean = false,
+    onAdPrivacyOptions: () -> Unit = {},
     onWidgetGuideDone: () -> Unit = {},
 ) {
     BackHandler(onBack = onClose)
@@ -140,6 +155,8 @@ fun SettingsScreen(
                     .padding(bottom = 24.dp),
                 verticalArrangement = Arrangement.spacedBy(10.dp)
             ) {
+                if (premium != null) PremiumRow(premium, onOpenPremium)
+
                 // Every section starts closed: its title and a one-line summary of the current values.
                 val languageSummary = if (language == AppLanguage.SYSTEM) {
                     stringResource(R.string.language_system)
@@ -185,6 +202,7 @@ fun SettingsScreen(
                                     ThemeIconTile(
                                         option = option,
                                         selected = option.key == selectedKey,
+                                        locked = colorsLocked && option.key != FREE_COLOR_THEME,
                                         onClick = { onColorThemeChange(option.key) },
                                         modifier = Modifier.weight(1f)
                                     )
@@ -196,7 +214,8 @@ fun SettingsScreen(
 
                 val updatesSummary = appUpdate.available?.let { stringResource(R.string.update_available, it.versionName) }
                     ?: stringResource(R.string.installed_version, appUpdate.installedVersion)
-                SettingsSection(title = stringResource(R.string.app_updates), icon = Icons.Rounded.SystemUpdate, summary = updatesSummary) {
+                // Google Play updates the app by itself; only the GitHub build has its own updater.
+                if (showAppUpdates) SettingsSection(title = stringResource(R.string.app_updates), icon = Icons.Rounded.SystemUpdate, summary = updatesSummary) {
                     SwitchRow(
                         title = stringResource(R.string.auto_check_updates),
                         subtitle = stringResource(R.string.auto_check_updates_desc),
@@ -361,6 +380,28 @@ fun SettingsScreen(
                         Spacer(Modifier.width(8.dp))
                         Text(stringResource(R.string.show_tips), style = MaterialTheme.typography.labelLarge, color = palette.ink)
                     }
+                }
+
+                val uriHandler = LocalUriHandler.current
+                SettingsSection(
+                    title = stringResource(R.string.about),
+                    icon = Icons.Rounded.Info,
+                    summary = stringResource(R.string.installed_version, appUpdate.installedVersion)
+                ) {
+                    // The free rates API asks for this credit wherever its rates are shown.
+                    LinkRow(stringResource(R.string.rates_source)) { runCatching { uriHandler.openUri(AppLinks.RATES_SOURCE) } }
+                    Text(
+                        text = stringResource(R.string.rates_disclaimer),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = palette.inkMuted
+                    )
+                    LinkRow(stringResource(R.string.privacy_policy)) { runCatching { uriHandler.openUri(AppLinks.PRIVACY_POLICY) } }
+                    if (adPrivacyOptions) LinkRow(stringResource(R.string.ad_privacy), onClick = onAdPrivacyOptions)
+                    Text(
+                        text = stringResource(R.string.installed_version, appUpdate.installedVersion),
+                        style = MaterialTheme.typography.labelMedium,
+                        color = palette.inkMuted
+                    )
                 }
             }
         }
@@ -536,29 +577,87 @@ private fun SwitchRow(title: String, subtitle: String?, checked: Boolean, onChec
 
 /** A colour set as the app icon drawn in its colours and motif, named after it; the chosen one is framed. */
 @Composable
-private fun ThemeIconTile(option: ColorThemeOption, selected: Boolean, onClick: () -> Unit, modifier: Modifier = Modifier) {
+private fun ThemeIconTile(option: ColorThemeOption, selected: Boolean, locked: Boolean, onClick: () -> Unit, modifier: Modifier = Modifier) {
     val palette = LocalPalette.current
-    Column(
-        horizontalAlignment = Alignment.CenterHorizontally,
-        modifier = modifier
-            .clip(RoundedCornerShape(16.dp))
-            .background(if (selected) palette.cardSoft else Color.Transparent)
-            .border(2.dp, if (selected) palette.accent else Color.Transparent, RoundedCornerShape(16.dp))
-            .clickable(role = Role.RadioButton, onClick = onClick)
-            .padding(vertical = 8.dp, horizontal = 2.dp)
-    ) {
-        Image(
-            painter = painterResource(option.iconRes),
-            contentDescription = null,
-            modifier = Modifier.size(56.dp)
-        )
-        Spacer(Modifier.height(6.dp))
-        Text(
-            text = stringResource(option.labelRes),
-            style = MaterialTheme.typography.labelMedium,
-            color = if (selected) palette.ink else palette.inkMuted,
-            maxLines = 1
-        )
+    Box(modifier = modifier) {
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally,
+            modifier = Modifier
+                .fillMaxWidth()
+                .clip(RoundedCornerShape(16.dp))
+                .background(if (selected) palette.cardSoft else Color.Transparent)
+                .border(2.dp, if (selected) palette.accent else Color.Transparent, RoundedCornerShape(16.dp))
+                .clickable(role = Role.RadioButton, onClick = onClick)
+                .padding(vertical = 8.dp, horizontal = 2.dp)
+        ) {
+            Image(
+                painter = painterResource(option.iconRes),
+                contentDescription = null,
+                modifier = Modifier.size(56.dp)
+            )
+            Spacer(Modifier.height(6.dp))
+            Text(
+                text = stringResource(option.labelRes),
+                style = MaterialTheme.typography.labelMedium,
+                color = if (selected) palette.ink else palette.inkMuted,
+                maxLines = 1
+            )
+        }
+        if (locked) LockBadge()
     }
 }
 
+/** Premium as the Settings row shows it: what is unlocked now and until when. */
+data class PremiumSummary(val access: Access, val purchasePending: Boolean)
+
+/** The first row of Settings in the Play build: Premium's state; tapping it opens the Premium sheet. */
+@Composable
+private fun PremiumRow(premium: PremiumSummary, onClick: () -> Unit) {
+    val palette = LocalPalette.current
+    val summary = when {
+        premium.access.purchased -> stringResource(R.string.premium_owned)
+        else -> premiumStatus(premium.access, premium.purchasePending)
+            ?: stringResource(R.string.premium_settings_free, PremiumRules.VIDEOS_PER_UNLOCK, PremiumRules.REWARD_HOURS)
+    }
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(28.dp))
+            .background(palette.highlight)
+            .clickable(role = Role.Button, onClick = onClick)
+            .padding(horizontal = 18.dp, vertical = 16.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Box(
+            modifier = Modifier
+                .size(36.dp)
+                .clip(RoundedCornerShape(12.dp))
+                .background(palette.accent),
+            contentAlignment = Alignment.Center
+        ) {
+            Icon(Icons.Rounded.WorkspacePremium, contentDescription = null, tint = palette.onAccent, modifier = Modifier.size(20.dp))
+        }
+        Spacer(Modifier.width(12.dp))
+        Column(modifier = Modifier.weight(1f)) {
+            Text(stringResource(R.string.premium), style = MaterialTheme.typography.titleMedium, color = palette.ink)
+            Text(summary, style = MaterialTheme.typography.labelMedium, color = palette.inkMuted, maxLines = 2, overflow = TextOverflow.Ellipsis)
+        }
+        Icon(Icons.AutoMirrored.Rounded.KeyboardArrowRight, contentDescription = null, tint = palette.inkMuted)
+    }
+}
+
+@Composable
+private fun LinkRow(text: String, onClick: () -> Unit) {
+    val palette = LocalPalette.current
+    Text(
+        text = text,
+        style = MaterialTheme.typography.bodyLarge,
+        color = palette.ink,
+        modifier = Modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(14.dp))
+            .background(palette.cardSoft)
+            .clickable(role = Role.Button, onClick = onClick)
+            .padding(horizontal = 16.dp, vertical = 12.dp)
+    )
+}

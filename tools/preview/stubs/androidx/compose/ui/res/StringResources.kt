@@ -20,6 +20,8 @@ object HarnessStrings {
         }
     }
 
+    fun get(lang: String, name: String): String = load(lang)[name] ?: error("missing string $name for $lang")
+
     fun get(id: Int): String {
         val name = R.string.names[id - 0x7f100000]
         return load(language)[name] ?: error("missing string $name for $language")

@@ -3,6 +3,8 @@ package render
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.ui.unit.dp
 import androidx.compose.runtime.Composable
@@ -110,6 +112,73 @@ private fun Calc(s: com.example.ui.CalculatorState, offer: com.example.ui.Featur
     CalculatorContent(s, onSwap = {}, onCurrencyClick = {}, onKeypad = {}, onOpenSettings = {}, onRefresh = {}, tourOffer = offer)
 
 fun main() {
+    // v5.0.21 (Play build): Premium sheet, the locked calculator key, the ad strip, Settings and the locked widget.
+    val hourMs = 3_600_000L
+    val freeState = com.example.premium.PremiumState()
+    val trialState = com.example.premium.PremiumState(trialUntil = now + 50 * hourMs)
+    val halfState = com.example.premium.PremiumState(videosWatched = 1, lastVideoAt = now - 60_000)
+    val rewardState = com.example.premium.PremiumState(rewardUntil = now + 23 * hourMs)
+    fun sheet(reason: com.example.premium.PremiumReason, st: com.example.premium.PremiumState, video: com.example.premium.VideoStatus = com.example.premium.VideoStatus.IDLE): @Composable () -> Unit = {
+        com.example.ui.PremiumSheet(
+            reason = reason, access = st.access(now), videosNeeded = st.videosNeeded(now), price = "₪14.90", video = video,
+            purchasePending = false, onWatch = {}, onBuy = {}, onRestore = {}, onDismiss = {}, now = now
+        )
+    }
+    val promo: @Composable () -> Unit = {
+        Box(Modifier.fillMaxWidth().height(56.dp)) { com.example.ui.PremiumPromo(onClick = {}) }
+    }
+    @Composable fun LockedCalc(s: com.example.ui.CalculatorState = calcState(null)) =
+        CalculatorContent(s, onSwap = {}, onCurrencyClick = {}, onKeypad = {}, onOpenSettings = {}, onRefresh = {}, calculatorLocked = true, adSlot = promo)
+    for ((lang, dark, theme) in listOf(Triple("iw", false, "sage"), Triple("en", false, "sage"), Triple("iw", true, "sage"), Triple("ar", false, "sage"), Triple("ru", false, "sage"))) {
+        val tag = "${lang}_${if (dark) "dark" else "light"}"
+        render("v21_a_locked_calc_$tag") { Frame(dark, theme, lang) { LockedCalc() } }
+        renderTapped("v21_b_sheet_calc_$tag", emptyList()) { Frame(dark, theme, lang) { LockedCalc(); sheet(com.example.premium.PremiumReason.CALCULATOR, freeState)() } }
+    }
+    renderTapped("v21_c_sheet_half_iw", emptyList()) { Frame(false, "sage", "iw") { LockedCalc(); sheet(com.example.premium.PremiumReason.CALCULATOR, halfState)() } }
+    renderTapped("v21_c_sheet_loading_iw", emptyList()) { Frame(false, "sage", "iw") { LockedCalc(); sheet(com.example.premium.PremiumReason.WIDGET, halfState, com.example.premium.VideoStatus.LOADING)() } }
+    renderTapped("v21_c_sheet_unavailable_iw", emptyList()) { Frame(false, "sage", "iw") { LockedCalc(); sheet(com.example.premium.PremiumReason.COLORS, freeState, com.example.premium.VideoStatus.UNAVAILABLE)() } }
+    renderTapped("v21_c_sheet_trial_iw", emptyList()) { Frame(false, "ocean", "iw") { Calc(calcState(null)); sheet(com.example.premium.PremiumReason.SETTINGS, trialState)() } }
+    renderTapped("v21_c_sheet_reward_iw", emptyList()) { Frame(false, "gold", "iw") { Calc(calcState(null)); sheet(com.example.premium.PremiumReason.NO_ADS, rewardState)() } }
+    renderTapped("v21_c_sheet_owned_iw", emptyList()) { Frame(false, "gold", "iw") { Calc(calcState(null)); sheet(com.example.premium.PremiumReason.SETTINGS, com.example.premium.PremiumState(purchased = true))() } }
+    render("v21_d_small_phone_iw", widthDp = 360, heightDp = 640) { Frame(false, "sage", "iw") { LockedCalc() } }
+    renderTapped("v21_d_small_phone_sheet_iw", emptyList(), widthDp = 360, heightDp = 640) { Frame(false, "sage", "iw") { LockedCalc(); sheet(com.example.premium.PremiumReason.CALCULATOR, freeState)() } }
+    for ((lang, st, tag) in listOf(Triple("iw", freeState, "free"), Triple("iw", trialState, "trial"), Triple("en", rewardState, "reward"))) {
+        // A tap on "Appearance" opens it, to show the locked colour sets.
+        renderTapped("v21_e_settings_${lang}_$tag", listOf(200f to 250f), frames = 40) {
+            Frame(false, "sage", lang) {
+                SettingsScreen(
+                    themeMode = "system", colorTheme = "sage", autoUpdate = AutoUpdateSettings(),
+                    lastUpdateTimestamp = state.lastUpdateTimestamp, isRefreshing = false, lastRefreshFailed = false,
+                    canPinWidget = true, onClose = {}, onThemeModeChange = {}, onColorThemeChange = {},
+                    onAutoUpdateEnabledChange = {}, onIntervalChange = {}, onWifiOnlyChange = {},
+                    onRefreshOnOpenChange = {}, onRefreshNow = {}, onAddWidget = {},
+                    appUpdate = com.example.ui.AppUpdateState(installedVersion = "5.0.21", checked = true),
+                    checkAppUpdates = true, onCheckAppUpdatesChange = {}, onCheckForAppUpdate = {}, onStartAppUpdate = {},
+                    language = if (lang == "iw") "he" else lang, onLanguageChange = {},
+                    showAppUpdates = false,
+                    premium = com.example.ui.PremiumSummary(st.access(now), false),
+                    colorsLocked = !st.access(now).unlocked,
+                    adPrivacyOptions = true
+                )
+            }
+        }
+    }
+    for ((lang, dark) in listOf("he" to false, "he" to true, "en" to false)) {
+        val p = com.example.ui.theme.Palettes.resolve("sage", dark)
+        val strings = { key: String -> androidx.compose.ui.res.HarnessStrings.get(if (lang == "he") "iw" else lang, key) }
+        render("v21_f_widget_locked_${lang}_${if (dark) "dark" else "light"}", widthDp = 560, heightDp = 420) {
+            Box(Modifier.fillMaxSize().background(androidx.compose.ui.graphics.Color(0xFF3B4E66)).padding(10.dp)) {
+                androidx.compose.foundation.layout.Row(horizontalArrangement = androidx.compose.foundation.layout.Arrangement.spacedBy(12.dp)) {
+                    com.example.widget.LockedWidgetMock(p, 300f, 380f, strings("widget_locked_title"), strings("widget_locked_action"),
+                        hint = String.format(strings("premium_settings_free"), 2, 24))
+                    androidx.compose.foundation.layout.Column(verticalArrangement = androidx.compose.foundation.layout.Arrangement.spacedBy(12.dp)) {
+                        com.example.widget.LockedWidgetMock(p, 220f, 120f, strings("widget_locked_title"), strings("widget_locked_action"))
+                        com.example.widget.LockedWidgetMock(p, 220f, 80f, strings("widget_locked_title"), strings("widget_locked_action"))
+                    }
+                }
+            }
+        }
+    }
     // v5.0.19: the history header keeps only its icon; the clear key matches the keypad key beside it.
     for ((lang, dark, theme) in listOf(Triple("iw", true, "sunset"), Triple("iw", false, "sage"), Triple("en", false, "ocean"), Triple("ru", false, "gold"))) {
         val tag = "${lang}_${theme}"

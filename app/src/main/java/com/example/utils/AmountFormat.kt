@@ -85,3 +85,24 @@ fun formatUpdatedAt(
         else -> "${SimpleDateFormat("dd.MM", Locale.US).format(Date(timestamp))} $time"
     }
 }
+
+/** When an unlock ends: "today 18:00", "tomorrow 09:30", or the weekday ("Thu 14:30") further ahead. */
+fun formatUntil(
+    timestamp: Long,
+    now: Long,
+    locale: Locale,
+    todayFormat: String,
+    tomorrowFormat: String,
+): String {
+    val time = SimpleDateFormat("HH:mm", Locale.US).format(Date(timestamp))
+    val then = Calendar.getInstance().apply { timeInMillis = timestamp }
+    val today = Calendar.getInstance().apply { timeInMillis = now }
+    val tomorrow = (today.clone() as Calendar).apply { add(Calendar.DAY_OF_YEAR, 1) }
+    fun Calendar.sameDayAs(other: Calendar) =
+        get(Calendar.YEAR) == other.get(Calendar.YEAR) && get(Calendar.DAY_OF_YEAR) == other.get(Calendar.DAY_OF_YEAR)
+    return when {
+        then.sameDayAs(today) -> String.format(todayFormat, time)
+        then.sameDayAs(tomorrow) -> String.format(tomorrowFormat, time)
+        else -> "${SimpleDateFormat("EEE", locale).format(Date(timestamp))} $time"
+    }
+}

@@ -10,11 +10,15 @@ rm -rf "$DIR/app" && mkdir -p "$DIR/app/com/example/data" "$DIR/app/com/example/
 cp -r "$SRC/ui" "$SRC/utils" "$DIR/app/com/example/"
 cp "$SRC/widget/WidgetSizing.kt" "$DIR/app/com/example/widget/"
 cp "$SRC/data/AutoUpdateSettings.kt" "$SRC/data/AppRelease.kt" "$SRC/data/CurrencySlot.kt" "$DIR/app/com/example/data/"
+# Premium rules and the Monetization interface (PremiumStore needs SharedPreferences: the stub has a fake).
+mkdir -p "$DIR/app/com/example/premium"
+cp "$SRC/premium/Premium.kt" "$SRC/premium/Monetization.kt" "$DIR/app/com/example/premium/"
 # The real fonts file loads Android resources; stubs/ has a desktop one.
 rm "$DIR/app/com/example/ui/theme/Fonts.kt"
 rm -rf "$DIR/apptest" && mkdir -p "$DIR/apptest/widget"
 cp -r "$TEST/utils" "$DIR/apptest/"
 cp "$TEST/widget/WidgetSizingTest.kt" "$DIR/apptest/widget/"
+mkdir -p "$DIR/apptest/premium" && cp "$TEST/premium/"*.kt "$DIR/apptest/premium/" 2>/dev/null || true
 # R.string ids from the default strings.xml, R.font, and R.drawable mapped to the files (PNG and XML).
 python3 - "$DIR" "$REPO" <<'PY'
 import os, re, sys
