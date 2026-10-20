@@ -15,7 +15,9 @@ Hebrew, and show rendered previews of visual changes (see `tools/preview`).
   `[skip ci]` in the merge commit title so no empty release goes out.
 - After a release, download the APK and check it: version in the manifest
   (`pyaxmlparser` or a UTF-16 search), new strings in `resources.arsc`.
-- Latest release: 5.0.18 (calculator display, history link; quick amounts removed). History and decisions: `docs/PLAY_LAUNCH_PLAN.md`
+- When a task is done, save what the next session needs (this file, `docs/PLAY_LAUNCH_PLAN.md`), merge it,
+  and tell the owner it is safe to `/clear`. The owner asked for this every time.
+- Latest release: 5.0.19 (history panel header: icon only, clear key the size of the keypad key). History and decisions: `docs/PLAY_LAUNCH_PLAN.md`
   (Hebrew).
 
 ## Where things are
@@ -65,9 +67,12 @@ Hebrew, and show rendered previews of visual changes (see `tools/preview`).
   instead of names while the calculator is open. Quick amounts were dropped; the history must not take a
   row of its own, so it is a link opposite "+ add currency" under the cards (in calculator mode the
   keypad's top row is full).
+- History panel (5.0.19): the header is just the clock icon (the link already says "History"); the clear key
+  is icon-only and exactly the size of the keypad key beside it, widening to "Clear all?" on the first tap.
+  The owner notices mismatched button sizes: keep neighbouring buttons the same height and shape.
 
 ## Next
-- The owner is checking 5.0.16-5.0.18 on a Samsung: share -> "Convert currency", the tour banner, then the
+- The owner is checking 5.0.16-5.0.19 on a Samsung: share -> "Convert currency", the tour banner, then the
   calculator display and the history link.
 - Then more features of the owner's choosing, and later monetization and Google Play publishing as planned
   in `docs/PLAY_LAUNCH_PLAN.md`.

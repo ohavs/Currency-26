@@ -110,6 +110,15 @@ private fun Calc(s: com.example.ui.CalculatorState, offer: com.example.ui.Featur
     CalculatorContent(s, onSwap = {}, onCurrencyClick = {}, onKeypad = {}, onOpenSettings = {}, onRefresh = {}, tourOffer = offer)
 
 fun main() {
+    // v5.0.19: the history header keeps only its icon; the clear key matches the keypad key beside it.
+    for ((lang, dark, theme) in listOf(Triple("iw", true, "sunset"), Triple("iw", false, "sage"), Triple("en", false, "ocean"), Triple("ru", false, "gold"))) {
+        val tag = "${lang}_${theme}"
+        render("v19_history_$tag") { Frame(dark, theme, lang) { Calc(calcState(null, raw = "1550", history = true)) } }
+        // A tap on the clear key (left of the header in Hebrew, right in English): the "Clear all?" step.
+        val x = if (lang == "iw") 134f else 266f
+        renderTapped("v19_confirm_$tag", listOf(x to 454f), frames = 40) { Frame(dark, theme, lang) { Calc(calcState(null, raw = "1550", history = true)) } }
+    }
+    render("v19_history_empty_iw") { Frame(false, "sage", "iw") { Calc(calcState(null, history = true).copy(history = emptyList())) } }
     // v5.0.18: no quick amounts, the history link under the cards, the calculation without the symbol.
     val huf = calcState("90*3").copy(sourceCurrency = "HUF")
     render("v18_owner_before_after") { Frame(true, "sunset", "iw") { Calc(huf) } }

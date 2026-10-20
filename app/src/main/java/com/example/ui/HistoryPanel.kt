@@ -1,6 +1,7 @@
 package com.example.ui
 
 import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -13,9 +14,9 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.DeleteOutline
@@ -78,17 +79,19 @@ internal fun HistoryPanel(
                 .height(52.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Icon(Icons.Rounded.History, contentDescription = null, tint = palette.accent, modifier = Modifier.padding(start = 6.dp).size(22.dp))
-            Spacer(Modifier.width(10.dp))
-            Text(
-                text = stringResource(R.string.history),
-                style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.SemiBold),
-                color = palette.ink,
-                modifier = Modifier.weight(1f)
+            // The link above the panel already says "History": the icon is enough here, in line with the flags.
+            Icon(
+                Icons.Rounded.History,
+                contentDescription = stringResource(R.string.history),
+                tint = palette.accent,
+                modifier = Modifier.padding(start = 14.dp).size(24.dp)
             )
-            if (history.isNotEmpty()) ClearButton(onClear)
-            Spacer(Modifier.width(8.dp))
-            KeyButton(palette.accent, Modifier.width(72.dp).fillMaxHeight(), onClick = onClose) {
+            Spacer(Modifier.weight(1f))
+            if (history.isNotEmpty()) {
+                ClearButton(onClear)
+                Spacer(Modifier.width(10.dp))
+            }
+            KeyButton(palette.accent, Modifier.width(HeaderKeyWidth).fillMaxHeight(), onClick = onClose) {
                 Icon(Icons.Rounded.Dialpad, contentDescription = stringResource(R.string.back_to_keypad), tint = palette.onAccent)
             }
         }
@@ -126,7 +129,12 @@ internal fun HistoryPanel(
     }
 }
 
-/** Clearing everything takes a second tap ("Clear all?"), so a stray tap does not lose the history. */
+private val HeaderKeyWidth = 72.dp
+
+/**
+ * A key the size of the one beside it, with just the bin. Clearing everything takes a second tap: the first
+ * one widens it to "Clear all?", so a stray tap does not lose the history.
+ */
 @Composable
 private fun ClearButton(onClear: () -> Unit) {
     val palette = LocalPalette.current
@@ -139,22 +147,34 @@ private fun ClearButton(onClear: () -> Unit) {
     }
     val background by animateColorAsState(if (confirming) palette.accent else palette.cardSoft, label = "clear")
     val content = if (confirming) palette.onAccent else palette.ink
-    Row(
+    KeyButton(
+        color = background,
         modifier = Modifier
-            .clip(CircleShape)
-            .background(background)
-            .clickable(role = Role.Button) { if (confirming) onClear() else confirming = true }
-            .padding(start = 10.dp, end = 14.dp, top = 8.dp, bottom = 8.dp),
-        verticalAlignment = Alignment.CenterVertically
+            .fillMaxHeight()
+            .widthIn(min = HeaderKeyWidth)
+            .animateContentSize(),
+        onClick = { if (confirming) onClear() else confirming = true }
     ) {
-        Icon(Icons.Rounded.DeleteOutline, contentDescription = null, tint = content, modifier = Modifier.size(18.dp))
-        Spacer(Modifier.width(4.dp))
-        Text(
-            stringResource(if (confirming) R.string.history_clear_confirm else R.string.history_clear),
-            style = MaterialTheme.typography.labelLarge,
-            color = content,
-            maxLines = 1
-        )
+        Row(
+            modifier = Modifier.padding(horizontal = if (confirming) 16.dp else 0.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Icon(
+                Icons.Rounded.DeleteOutline,
+                contentDescription = if (confirming) null else stringResource(R.string.history_clear),
+                tint = content,
+                modifier = Modifier.size(22.dp)
+            )
+            if (confirming) {
+                Spacer(Modifier.width(6.dp))
+                Text(
+                    stringResource(R.string.history_clear_confirm),
+                    style = MaterialTheme.typography.labelLarge,
+                    color = content,
+                    maxLines = 1
+                )
+            }
+        }
     }
 }
 
