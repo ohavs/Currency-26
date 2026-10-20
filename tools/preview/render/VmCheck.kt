@@ -5,7 +5,7 @@ import com.example.ui.MainViewModel
 import com.example.update.AppUpdater
 
 /**
- * Drives the real MainViewModel (on the stub repository) through the calculator, quick amounts and history:
+ * Drives the real MainViewModel (on the stub repository) through the calculator and the history:
  * gradle -q vmCheck. Android's Context comes from android-all, unused beyond being non-null.
  */
 fun main() {
@@ -26,11 +26,7 @@ fun main() {
     check("C keeps 250 in the history", s().history.map { it.amount } == listOf("250") && s().history[0].expression == null)
     check("zero after C", s().sourceAmountRaw == "0")
 
-    // A quick amount, then a digit starts a new amount instead of appending.
-    vm.applyQuickAmount(50)
-    check("quick amount 50", s().sourceAmountRaw == "50" && s().freshAmount)
     keys("7")
-    check("digit after quick amount starts over", s().sourceAmountRaw == "7")
 
     // Calculator: opens from the amount, a digit starts over, operators continue.
     vm.toggleCalculator()

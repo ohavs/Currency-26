@@ -117,7 +117,7 @@
     <string name="tip_select_title">Converta a partir de qualquer app</string>
     <string name="tip_select_body">Selecione um preço em qualquer app e escolha \"Converter moeda\" no menu (ou Compartilhar → \"Converter moeda\"). O resultado aparece na hora, sem sair do que você está fazendo.</string>
     <string name="tip_offer_action">Ver</string>
-    <string name="tip_calc_title">Calculadora, histórico e valores rápidos</string>
-    <string name="tip_calc_body">A tecla de calculadora na fileira de baixo adiciona + − × ÷ para contas como %1$s, e o resultado é convertido na hora para todas as moedas. Toque no valor para ver o histórico; depois do C, a fileira de cima oferece valores redondos.</string>
+    <string name="tip_calc_title">Calculadora e histórico</string>
+    <string name="tip_calc_body">A tecla de calculadora na fileira de baixo adiciona + − × ÷ para contas como %1$s, e o resultado é convertido na hora para todas as moedas. Valores e contas anteriores ficam no histórico, abaixo dos cartões.</string>
     <string name="tip_calc_action">Experimentar</string>
 </resources>

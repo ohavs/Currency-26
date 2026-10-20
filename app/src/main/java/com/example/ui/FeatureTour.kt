@@ -95,7 +95,7 @@ internal val FeatureTip.titleRes: Int
 
 /**
  * A short tour over the calculator: the home-screen widget, converting a price selected in another app, the
- * calculator keys (with the history and quick amounts) and the additional currency, with a way to try them
+ * calculator keys (and the history) and the additional currency, with a way to try them
  * where there is one ("show me how" walks to the widget button in Settings). Opened from the banner that offers it (first launch, then after a while while a feature is
  * still unused) or from Settings.
  */
@@ -854,10 +854,10 @@ private val CALC_TAP_KEYS = listOf("=", "+", "1", "5", "%", "=")
 private val CALC_STEPS = listOf(
     Triple("$ 120", null, "₪ 445.48"),
     Triple("$ 120", null, "₪ 445.48"),
-    Triple("$ 120 +", "= 120", "₪ 445.48"),
-    Triple("$ 120 + 1", "= 121", "₪ 449.19"),
-    Triple("$ 120 + 15", "= 135", "₪ 501.16"),
-    Triple("$ 120 + 15%", "= 138", "₪ 512.30"),
+    Triple("120 +", "= $ 120", "₪ 445.48"),
+    Triple("120 + 1", "= $ 121", "₪ 449.19"),
+    Triple("120 + 15", "= $ 135", "₪ 501.16"),
+    Triple("120 + 15%", "= $ 138", "₪ 512.30"),
     Triple("$ 138", "120 + 15% =", "₪ 512.30"),
 )
 private val CALC_WIDTH = 210.dp

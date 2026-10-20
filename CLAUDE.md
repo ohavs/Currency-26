@@ -15,7 +15,7 @@ Hebrew, and show rendered previews of visual changes (see `tools/preview`).
   `[skip ci]` in the merge commit title so no empty release goes out.
 - After a release, download the APK and check it: version in the manifest
   (`pyaxmlparser` or a UTF-16 search), new strings in `resources.arsc`.
-- Latest release: 5.0.17 (calculator, history, quick amounts). History and decisions: `docs/PLAY_LAUNCH_PLAN.md`
+- Latest release: 5.0.18 (calculator display, history link; quick amounts removed). History and decisions: `docs/PLAY_LAUNCH_PLAN.md`
   (Hebrew).
 
 ## Where things are
@@ -23,10 +23,10 @@ Hebrew, and show rendered previews of visual changes (see `tools/preview`).
   text selected in other apps: `PROCESS_TEXT` and `SEND`).
 - `data/`: `CurrencyRepository` - Room rates per USD from open.er-api.com, SharedPreferences
   `currency_prefs` for everything else.
-- `ui/`: `CalculatorScreen` (banners, cards), `Keypad` (calculator keys, quick amounts), `HistoryPanel`,
+- `ui/`: `CalculatorScreen` (banners, cards), `Keypad` (calculator keys), `HistoryPanel`,
   `SettingsScreen`, `CurrencyPicker`, `FeatureTour` and `Spotlight`, `QuickConvertSheet`; `theme/Color.kt`
   (palettes) and `theme/PaletteTexture.kt`.
-- `utils/`: `Calculator` (expression keys, parsing, `%` rules), `QuickAmounts`, `CalcHistory`, `PriceParser`
+- `utils/`: `Calculator` (expression keys, parsing, `%` rules), `CalcHistory`, `PriceParser`
   and `QuickConvert` (prices in free text), `CurrencySearch`, `AppLanguage`, `CountryLanguage`,
   `DeviceCountry`, `FeatureTourSchedule`, amount formatting, currency info.
 - `widget/`: Large/Small Glance widgets, `WidgetSizing` (pure, unit-tested), `WidgetColors` and
@@ -59,10 +59,15 @@ Hebrew, and show rendered previews of visual changes (see `tools/preview`).
   calculation inside Hebrew/Arabic prose needs LRM marks around it, or "120 + 15%" shows as "15% + 120".
 - Calculator (5.0.17): "00" became the calculator key; it shows "=" only while there is something to compute.
   The amount in prefs follows the live result (the widget reads it). Keys never change under a finger that
-  may still be typing: the quick-amount row (in place of C/⌫ at zero) ignores taps for 450 ms.
+  may still be typing.
+- Calculator display (5.0.18, the owner's feedback): a calculation carries no currency symbol ("90 × 3 Ft"
+  read as if only the 3 were forints); the symbol goes with the result under it, and the cards show codes
+  instead of names while the calculator is open. Quick amounts were dropped; the history must not take a
+  row of its own, so it is a link opposite "+ add currency" under the cards (in calculator mode the
+  keypad's top row is full).
 
 ## Next
-- The owner is checking 5.0.16-5.0.17 on a Samsung: share -> "Convert currency", the tour banner, then the
-  calculator, history and quick amounts.
+- The owner is checking 5.0.16-5.0.18 on a Samsung: share -> "Convert currency", the tour banner, then the
+  calculator display and the history link.
 - Then more features of the owner's choosing, and later monetization and Google Play publishing as planned
   in `docs/PLAY_LAUNCH_PLAN.md`.

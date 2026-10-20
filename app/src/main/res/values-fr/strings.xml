@@ -117,7 +117,7 @@
     <string name="tip_select_title">Convertissez depuis n\'importe quelle app</string>
     <string name="tip_select_body">Sélectionnez un prix dans n\'importe quelle app et choisissez \"Convertir la devise\" dans le menu (ou Partager → \"Convertir la devise\"). Le résultat s\'affiche aussitôt, sans quitter ce que vous faites.</string>
     <string name="tip_offer_action">Voir</string>
-    <string name="tip_calc_title">Calculatrice, historique et montants rapides</string>
-    <string name="tip_calc_body">La touche calculatrice de la rangée du bas ajoute + − × ÷ pour des calculs comme %1$s, et le résultat est aussitôt converti dans toutes les devises. Touchez le montant pour voir l\'historique ; après C, la rangée du haut propose des montants ronds.</string>
+    <string name="tip_calc_title">Calculatrice et historique</string>
+    <string name="tip_calc_body">La touche calculatrice de la rangée du bas ajoute + − × ÷ pour des calculs comme %1$s, et le résultat est aussitôt converti dans toutes les devises. Les montants et calculs précédents sont gardés dans l\'historique, sous les cartes.</string>
     <string name="tip_calc_action">Essayer</string>
 </resources>

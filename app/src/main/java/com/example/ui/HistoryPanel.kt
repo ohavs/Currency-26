@@ -60,7 +60,7 @@ import java.util.Locale
 
 /**
  * Past conversions and calculations, shown in place of the keypad (the cards above stay, so a tapped entry
- * shows up in them right away). Opened by tapping the amount, or from the row that offers quick amounts.
+ * shows up in them right away). Opened from the link under the cards, or by tapping the amount.
  */
 @Composable
 internal fun HistoryPanel(

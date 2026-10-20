@@ -117,7 +117,7 @@
     <string name="tip_select_title">המרה מכל אפליקציה</string>
     <string name="tip_select_body">סמנו מחיר בכל אפליקציה ובחרו \"המרת מטבע\" בתפריט (או \"שיתוף\" ← \"המרת מטבע\"). התוצאה קופצת מיד, בלי לעזוב את מה שאתם עושים.</string>
     <string name="tip_offer_action">הצגה</string>
-    <string name="tip_calc_title">מחשבון, היסטוריה וסכומים מהירים</string>
-    <string name="tip_calc_body">מקש המחשבון בשורה התחתונה מוסיף פעולות חשבון לחישובים כמו %1$s, והתוצאה מומרת מיד לכל המטבעות. נגיעה בסכום מציגה את ההיסטוריה, ואחרי C השורה העליונה מציעה סכומים עגולים.</string>
+    <string name="tip_calc_title">מחשבון והיסטוריה</string>
+    <string name="tip_calc_body">מקש המחשבון בשורה התחתונה מוסיף פעולות חשבון לחישובים כמו %1$s, והתוצאה מומרת מיד לכל המטבעות. סכומים וחישובים קודמים נשמרים בהיסטוריה, מתחת לכרטיסים.</string>
     <string name="tip_calc_action">לנסות</string>
 </resources>

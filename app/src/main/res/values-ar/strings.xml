@@ -117,7 +117,7 @@
     <string name="tip_select_title">حوّل من أي تطبيق</string>
     <string name="tip_select_body">حدّد سعرًا في أي تطبيق واختر \"تحويل العملة\" من القائمة (أو مشاركة ← \"تحويل العملة\"). تظهر النتيجة فورًا دون مغادرة ما تفعله.</string>
     <string name="tip_offer_action">عرض</string>
-    <string name="tip_calc_title">آلة حاسبة وسجل ومبالغ سريعة</string>
-    <string name="tip_calc_body">يضيف زر الآلة الحاسبة في الصف السفلي عمليات + − × ÷ لحسابات مثل %1$s، وتُحوَّل النتيجة فورًا إلى كل العملات. المس المبلغ لعرض السجل؛ وبعد C يعرض الصف العلوي مبالغ مقرّبة.</string>
+    <string name="tip_calc_title">آلة حاسبة وسجل</string>
+    <string name="tip_calc_body">يضيف زر الآلة الحاسبة في الصف السفلي عمليات + − × ÷ لحسابات مثل %1$s، وتُحوَّل النتيجة فورًا إلى كل العملات. تُحفظ المبالغ والحسابات السابقة في السجل، أسفل البطاقات.</string>
     <string name="tip_calc_action">جرّبه</string>
 </resources>

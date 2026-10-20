@@ -117,7 +117,7 @@
     <string name="tip_select_title">在任何应用中换算</string>
     <string name="tip_select_body">在任何应用中选中价格，然后在菜单中选择\"货币换算\"（或 分享 → \"货币换算\"）。结果立即弹出，无需离开当前应用。</string>
     <string name="tip_offer_action">查看</string>
-    <string name="tip_calc_title">计算器、历史记录和快捷金额</string>
-    <string name="tip_calc_body">底行的计算器键可加入 + − × ÷，用于 %1$s 这样的计算，结果会立即换算成所有货币。点按金额可查看历史记录；按 C 后，顶行会提供整数金额。</string>
+    <string name="tip_calc_title">计算器和历史记录</string>
+    <string name="tip_calc_body">底行的计算器键可加入 + − × ÷，用于 %1$s 这样的计算，结果会立即换算成所有货币。以前的金额和计算都保存在卡片下方的历史记录中。</string>
     <string name="tip_calc_action">试一试</string>
 </resources>

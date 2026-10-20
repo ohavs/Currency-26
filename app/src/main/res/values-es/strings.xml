@@ -117,7 +117,7 @@
     <string name="tip_select_title">Convierte desde cualquier app</string>
     <string name="tip_select_body">Selecciona un precio en cualquier app y elige \"Convertir moneda\" en el menú (o Compartir → \"Convertir moneda\"). El resultado aparece al instante, sin salir de lo que estás haciendo.</string>
     <string name="tip_offer_action">Ver</string>
-    <string name="tip_calc_title">Calculadora, historial e importes rápidos</string>
-    <string name="tip_calc_body">La tecla de calculadora de la fila inferior añade + − × ÷ para cuentas como %1$s, y el resultado se convierte al instante a todas las monedas. Toca el importe para ver tu historial; tras C, la fila superior ofrece importes redondos.</string>
+    <string name="tip_calc_title">Calculadora e historial</string>
+    <string name="tip_calc_body">La tecla de calculadora de la fila inferior añade + − × ÷ para cuentas como %1$s, y el resultado se convierte al instante a todas las monedas. Los importes y cálculos anteriores se guardan en Historial, bajo las tarjetas.</string>
     <string name="tip_calc_action">Probar</string>
 </resources>

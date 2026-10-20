@@ -117,7 +117,7 @@
     <string name="tip_select_title">Converti da qualsiasi app</string>
     <string name="tip_select_body">Seleziona un prezzo in qualsiasi app e scegli \"Converti valuta\" dal menu (o Condividi → \"Converti valuta\"). Il risultato appare subito, senza lasciare ciò che stai facendo.</string>
     <string name="tip_offer_action">Mostra</string>
-    <string name="tip_calc_title">Calcolatrice, cronologia e importi rapidi</string>
-    <string name="tip_calc_body">Il tasto calcolatrice nella riga in basso aggiunge + − × ÷ per calcoli come %1$s, e il risultato viene convertito subito in tutte le valute. Tocca l\'importo per vedere la cronologia; dopo C, la riga in alto propone importi tondi.</string>
+    <string name="tip_calc_title">Calcolatrice e cronologia</string>
+    <string name="tip_calc_body">Il tasto calcolatrice nella riga in basso aggiunge + − × ÷ per calcoli come %1$s, e il risultato viene convertito subito in tutte le valute. Gli importi e i calcoli precedenti restano nella cronologia, sotto le schede.</string>
     <string name="tip_calc_action">Prova</string>
 </resources>

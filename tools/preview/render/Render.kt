@@ -110,6 +110,40 @@ private fun Calc(s: com.example.ui.CalculatorState, offer: com.example.ui.Featur
     CalculatorContent(s, onSwap = {}, onCurrencyClick = {}, onKeypad = {}, onOpenSettings = {}, onRefresh = {}, tourOffer = offer)
 
 fun main() {
+    // v5.0.18: no quick amounts, the history link under the cards, the calculation without the symbol.
+    val huf = calcState("90*3").copy(sourceCurrency = "HUF")
+    render("v18_owner_before_after") { Frame(true, "sunset", "iw") { Calc(huf) } }
+    for ((lang, dark) in listOf("iw" to false, "en" to false, "iw" to true)) {
+        val tag = "${lang}_${if (dark) "dark" else "light"}"
+        render("v18_a_plain_$tag") { Frame(dark, "sage", lang) { Calc(calcState(null)) } }
+        render("v18_b_calc_$tag") { Frame(dark, "sage", lang) { Calc(calcState("1250+300*2", extra = "EUR")) } }
+        render("v18_c_equals_$tag") { Frame(dark, "sage", lang) { Calc(calcState("1850", last = "1250+300*2", raw = "1850", extra = "EUR")) } }
+        render("v18_d_history_$tag") { Frame(dark, "sage", lang) { Calc(calcState(null, raw = "1550", last = "1250+300", history = true)) } }
+        render("v18_e_extra_$tag") { Frame(dark, "sage", lang) { Calc(calcState(null, extra = "EUR")) } }
+    }
+    render("v18_f_long_iw") { Frame(false, "sage", "iw") { Calc(calcState("1250+300*2-(45.5+12)/3+999+12345+15%")) } }
+    render("v18_f_divzero_iw") { Frame(false, "sage", "iw") { Calc(calcState("5/0")) } }
+    render("v18_f_open_iw") { Frame(false, "sage", "iw") { Calc(calcState("1250")) } }
+    render("v18_f_operator_iw") { Frame(false, "sage", "iw") { Calc(calcState("1250+")) } }
+    render("v18_f_huf_light") { Frame(false, "sunset", "iw") { Calc(huf) } }
+    render("v18_g_small_calc_iw", widthDp = 360, heightDp = 640) { Frame(false, "sage", "iw") { Calc(calcState("1250+300", extra = "THB")) } }
+    render("v18_g_small_plain_iw", widthDp = 360, heightDp = 640) { Frame(false, "sage", "iw") { Calc(calcState(null, extra = "THB")) } }
+    render("v18_g_small_history_iw", widthDp = 360, heightDp = 640) { Frame(false, "sage", "iw") { Calc(calcState(null, extra = "THB", history = true)) } }
+    render("v18_g_ru_calc", widthDp = 360, heightDp = 640) { Frame(false, "sage", "ru") { Calc(calcState("1250+300").copy(targetCurrency = "ILS")) } }
+    for (theme in listOf("ocean", "sunset", "rose", "lavender", "gold")) {
+        render("v18_h_${theme}_calc") { Frame(theme == "lavender", theme, "iw") { Calc(calcState("1250+300", extra = "EUR")) } }
+    }
+    for (frames in listOf(30, 75, 140, 175, 220, 275)) {
+        renderTapped("v18_tour_iw_light_$frames", emptyList(), frames = frames) {
+            Frame(false, "sage", "iw") {
+                Calc(calcState(null))
+                com.example.ui.FeatureTour(
+                    tips = listOf(com.example.ui.FeatureTip.CALCULATOR),
+                    canPinWidget = true, onShowWidgetGuide = {}, onAddCurrency = {}, onDismiss = {}
+                )
+            }
+        }
+    }
     // v5.0.17: the calculator key, quick amounts and the history.
     for ((lang, dark) in listOf("iw" to false, "en" to false, "iw" to true)) {
         val tag = "${lang}_${if (dark) "dark" else "light"}"

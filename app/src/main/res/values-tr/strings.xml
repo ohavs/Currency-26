@@ -117,7 +117,7 @@
     <string name="tip_select_title">Her uygulamadan çevirin</string>
     <string name="tip_select_body">Herhangi bir uygulamada bir fiyatı seçin ve menüden \"Döviz çevir\"i seçin (veya Paylaş → \"Döviz çevir\"). Sonuç, yaptığınız işi bırakmadan hemen görünür.</string>
     <string name="tip_offer_action">Göster</string>
-    <string name="tip_calc_title">Hesap makinesi, geçmiş ve hızlı tutarlar</string>
-    <string name="tip_calc_body">Alt sıradaki hesap makinesi tuşu %1$s gibi hesaplar için + − × ÷ ekler ve sonuç anında tüm para birimlerine çevrilir. Geçmişi görmek için tutara dokunun; C\'den sonra üst sıra yuvarlak tutarlar sunar.</string>
+    <string name="tip_calc_title">Hesap makinesi ve geçmiş</string>
+    <string name="tip_calc_body">Alt sıradaki hesap makinesi tuşu %1$s gibi hesaplar için + − × ÷ ekler ve sonuç anında tüm para birimlerine çevrilir. Önceki tutarlar ve hesaplar, kartların altındaki Geçmiş\'te saklanır.</string>
     <string name="tip_calc_action">Dene</string>
 </resources>
