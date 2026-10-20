@@ -35,11 +35,11 @@ Hebrew, and show rendered previews of visual changes (see `tools/preview`).
   (`pyaxmlparser` or a UTF-16 search), new strings in `resources.arsc`.
 - When a task is done, save what the next session needs (this file, `docs/PLAY_LAUNCH_PLAN.md`), merge it,
   and tell the owner it is safe to `/clear`. The owner asked for this every time.
-- Latest release: 5.0.21 (the two builds, merged in PR #23; same key as 5.0.20, checked). Upload key secrets
-  are in and verified (fingerprint matches); the first Play bundle comes with the next app release. GitHub
-  Pages is still off (owner's step 1.1): after the owner enables it, Actions > Pages > Run workflow (or any
-  change to `site/`) publishes the privacy policy. History, decisions and the Play launch steps:
-  `docs/PLAY_LAUNCH_PLAN.md` (Hebrew).
+- Latest release: 5.0.22 (PR #28: "Convert from any app" in Settings with a sample price to long-press, and
+  the bubble's currency picker). Upload key secrets are in and verified (fingerprint matches); the first Play
+  bundle comes with this release. GitHub Pages is still off (owner's step 1.1): after the owner enables it,
+  Actions > Pages > Run workflow (or any change to `site/`) publishes the privacy policy. History, decisions and
+  the Play launch steps: `docs/PLAY_LAUNCH_PLAN.md` (Hebrew).
 
 ## Where things are
 - `MainActivity`, `CurrencyApp` (runs `AppLanguage.initialize` first), `QuickConvertActivity` (bubble for
