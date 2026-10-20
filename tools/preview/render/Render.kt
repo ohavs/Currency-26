@@ -11,6 +11,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.ImageComposeScene
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.LayoutDirection
@@ -207,6 +208,66 @@ fun main() {
     if (System.getenv("ONLY")?.startsWith("store_") == true) {
         storeShots()
         System.exit(0)
+    }
+    // v5.0.24: Samsung's one-time setup acted out (⋮ → "Manage apps" → switch on → Done), the tour card's "show me
+    // how", and the guide it opens: Settings on the sample price, in a spotlight.
+    for ((name, app, device, theme, dark) in listOf(
+        DemoCase("he_he", "iw", "iw", "sunset", false), DemoCase("en_en", "en", "en", "sage", false),
+        DemoCase("he_en_dark", "iw", "en", "lavender", true), DemoCase("ar_ar", "ar", "ar", "ocean", false),
+    )) {
+        val sample = com.example.utils.QuickConvert.convert(com.example.ui.SAMPLE_PRICE, rates, "USD", "ILS", null, null).lines.firstOrNull()
+        renderFrames("v24_setup_$name", emptyList(), heightDp = 240, durationMs = com.example.ui.SetupTimeline.LOOP_MS) {
+            com.example.ui.SelectionMenuHarness.deviceLanguage = device
+            com.example.ui.SelectionMenuHarness.samsung = true
+            Frame(dark, theme, app) {
+                Box(
+                    Modifier.padding(12.dp).fillMaxWidth()
+                        .clip(androidx.compose.foundation.shape.RoundedCornerShape(28.dp))
+                        .background(LocalPalette.current.card).padding(14.dp)
+                ) {
+                    com.example.ui.SelectionMenuDemo(com.example.ui.rememberSelectionMenuInfo(), com.example.ui.SAMPLE_PRICE, sample, setup = true)
+                }
+            }
+        }
+    }
+    for ((lang, dark) in listOf("iw" to false, "en" to false, "iw" to true)) {
+        renderTapped("v24_tour_select_${lang}_${if (dark) "dark" else "light"}", emptyList(), frames = 150) {
+            com.example.ui.SelectionMenuHarness.deviceLanguage = lang
+            Frame(dark, "sage", lang) {
+                CalculatorContent(state, onSwap = {}, onCurrencyClick = {}, onKeypad = {}, onOpenSettings = {}, onRefresh = {})
+                com.example.ui.FeatureTour(
+                    tips = listOf(com.example.ui.FeatureTip.WIDGET, com.example.ui.FeatureTip.SELECT_CONVERT, com.example.ui.FeatureTip.CALCULATOR),
+                    canPinWidget = true, onShowWidgetGuide = {}, onAddCurrency = {}, onDismiss = {}, initialPage = 1
+                )
+            }
+        }
+    }
+    for ((name, app, device, samsung, dark) in listOf(
+        MenuCase("he_en_samsung", "iw", "en", true, false), MenuCase("en_en_samsung", "en", "en", true, false),
+        MenuCase("he_he_pixel", "iw", "iw", false, false), MenuCase("he_he_samsung_dark", "iw", "iw", true, true),
+    )) {
+        val sample = com.example.utils.QuickConvert.convert(com.example.ui.SAMPLE_PRICE, rates, "USD", "ILS", null, null).lines.firstOrNull()
+        for ((suffix, guide) in listOf("guide" to true, "section" to false)) {
+            val tall = !guide
+            renderTapped("v24_${suffix}_$name", if (guide) emptyList() else listOf(200f to (System.getenv("MENU_TAP_Y")?.toFloat() ?: 400f)),
+                heightDp = if (tall) 1700 else 860, frames = 150) {
+                com.example.ui.SelectionMenuHarness.deviceLanguage = device
+                com.example.ui.SelectionMenuHarness.samsung = samsung
+                Frame(dark, "sage", app) {
+                    SettingsScreen(
+                        themeMode = "system", colorTheme = "sage", autoUpdate = AutoUpdateSettings(),
+                        lastUpdateTimestamp = state.lastUpdateTimestamp, isRefreshing = false, lastRefreshFailed = false,
+                        canPinWidget = true, onClose = {}, onThemeModeChange = {}, onColorThemeChange = {},
+                        onAutoUpdateEnabledChange = {}, onIntervalChange = {}, onWifiOnlyChange = {},
+                        onRefreshOnOpenChange = {}, onRefreshNow = {}, onAddWidget = {},
+                        appUpdate = com.example.ui.AppUpdateState(installedVersion = "5.0.24", checked = true),
+                        checkAppUpdates = true, onCheckAppUpdatesChange = {}, onCheckForAppUpdate = {}, onStartAppUpdate = {},
+                        language = if (app == "iw") "he" else app, onLanguageChange = {}, quickSample = sample,
+                        highlightSelectMenu = guide
+                    )
+                }
+            }
+        }
     }
     // v5.0.23: the "Convert from any app" demo on a loop, as frames (out/<name>/NNN.png; tools/preview/gif.py makes the GIF).
     for ((name, app, device, theme, dark) in listOf(

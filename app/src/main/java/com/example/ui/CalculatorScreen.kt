@@ -153,6 +153,7 @@ fun CalculatorScreen(viewModel: MainViewModel, monetization: Monetization, onRem
     val tour by viewModel.tour.collectAsState()
     val tourOffer by viewModel.tourOffer.collectAsState()
     val widgetGuide by viewModel.widgetGuide.collectAsState()
+    val selectGuide by viewModel.selectGuide.collectAsState()
     val palette = LocalPalette.current
 
     val screen = when {
@@ -256,6 +257,8 @@ fun CalculatorScreen(viewModel: MainViewModel, monetization: Monetization, onRem
                     adPrivacyOptions = privacyOptionsRequired,
                     onAdPrivacyOptions = { activity?.let(monetization::showPrivacyOptions) },
                     onWidgetGuideDone = viewModel::endWidgetGuide,
+                    highlightSelectMenu = selectGuide,
+                    onSelectGuideDone = viewModel::endSelectGuide,
                     quickSample = remember(state.rates, state.sourceCurrency, state.targetCurrency) {
                         QuickConvert.convert(SAMPLE_PRICE, state.rates, state.sourceCurrency, state.targetCurrency, null, null)
                             .lines.firstOrNull()
@@ -279,6 +282,7 @@ fun CalculatorScreen(viewModel: MainViewModel, monetization: Monetization, onRem
                     tips = tour,
                     canPinWidget = viewModel.canPinWidget,
                     onShowWidgetGuide = viewModel::startWidgetGuide,
+                    onShowSelectGuide = viewModel::startSelectGuide,
                     onAddCurrency = {
                         viewModel.dismissTour()
                         viewModel.openCurrencySelector(CurrencySlot.EXTRA_TARGET)

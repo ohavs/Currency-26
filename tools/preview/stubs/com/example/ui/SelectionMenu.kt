@@ -1,6 +1,13 @@
 package com.example.ui
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.gestures.detectTapGestures
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.rememberUpdatedState
+import androidx.compose.ui.geometry.Rect
+import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.layout.boundsInWindow
+import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -25,6 +32,8 @@ data class SelectionMenuInfo(
     val shareLabel: String?,
     val selectAllLabel: String,
     val rtl: Boolean,
+    val manageLabel: String,
+    val doneLabel: String,
 )
 
 /** The system's Copy / Share / Select all, as Samsung words them (the app has no strings for these). */
@@ -41,6 +50,9 @@ object SelectionMenuHarness {
     var samsung: Boolean = true
     /** Draws the price as if it had just been long-pressed. */
     var selected: Boolean = false
+    /** Where the price was last drawn (window coordinates), for the gesture checks. */
+    var priceBounds: Rect? = null
+    var longPresses: Int = 0
 }
 
 @Composable
@@ -54,14 +66,28 @@ fun rememberSelectionMenuInfo(): SelectionMenuInfo {
         copyLabel = copy,
         shareLabel = share,
         selectAllLabel = selectAll,
-        rtl = device == "iw" || device == "ar"
+        rtl = device == "iw" || device == "ar",
+        manageLabel = HarnessStrings.get(device, "samsung_manage_apps"),
+        doneLabel = HarnessStrings.get(device, "samsung_done")
     )
 }
 
 @Composable
-fun SelectablePrice(text: String, modifier: Modifier = Modifier) {
+fun SelectablePrice(text: String, modifier: Modifier = Modifier, onLongPress: () -> Unit = {}) {
     val palette = LocalPalette.current
-    Box(modifier.padding(vertical = 6.dp), contentAlignment = Alignment.Center) {
+    val currentOnLongPress by rememberUpdatedState(onLongPress)
+    Box(
+        modifier
+            .onGloballyPositioned { SelectionMenuHarness.priceBounds = it.boundsInWindow() }
+            .pointerInput(Unit) {
+                detectTapGestures(onLongPress = {
+                    SelectionMenuHarness.longPresses++
+                    currentOnLongPress()
+                })
+            }
+            .padding(vertical = 6.dp),
+        contentAlignment = Alignment.Center
+    ) {
         Text(
             text = text,
             fontSize = 30.sp,

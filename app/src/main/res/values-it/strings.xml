@@ -124,6 +124,8 @@
     <string name="select_menu_step2">Nel menu tocca ⋮ e poi \"Gestisci app\" (l\'ultima opzione).</string>
     <string name="select_menu_step3">Attiva \"%1$s\" e tocca Fatto.</string>
     <string name="select_menu_share">Funziona anche da Condividi → \"%1$s\".</string>
+    <string name="samsung_manage_apps">Gestisci app</string>
+    <string name="samsung_done">Fatto</string>
     <string name="tip_offer_action">Mostra</string>
     <string name="tip_calc_title">Calcolatrice e cronologia</string>
     <string name="tip_calc_body">Il tasto calcolatrice nella riga in basso aggiunge + − × ÷ per calcoli come %1$s, e il risultato viene convertito subito in tutte le valute. Gli importi e i calcoli precedenti restano nella cronologia, sotto le schede.</string>

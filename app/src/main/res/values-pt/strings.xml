@@ -124,6 +124,8 @@
     <string name="select_menu_step2">No menu, toque em ⋮ e depois em \"Gerenciar apps\" (a última opção).</string>
     <string name="select_menu_step3">Ative \"%1$s\" e toque em Concluído.</string>
     <string name="select_menu_share">Também funciona em Compartilhar → \"%1$s\".</string>
+    <string name="samsung_manage_apps">Gerenciar apps</string>
+    <string name="samsung_done">Concluído</string>
     <string name="tip_offer_action">Ver</string>
     <string name="tip_calc_title">Calculadora e histórico</string>
     <string name="tip_calc_body">A tecla de calculadora na fileira de baixo adiciona + − × ÷ para contas como %1$s, e o resultado é convertido na hora para todas as moedas. Valores e contas anteriores ficam no histórico, abaixo dos cartões.</string>

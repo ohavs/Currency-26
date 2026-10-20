@@ -124,6 +124,8 @@
     <string name="select_menu_step2">בתפריט שנפתח הקישו על ⋮ ואז על ניהול האפליקציות (האפשרות האחרונה).</string>
     <string name="select_menu_step3">הפעילו את \"%1$s\" ואשרו.</string>
     <string name="select_menu_share">עובד גם דרך שיתוף ← \"%1$s\".</string>
+    <string name="samsung_manage_apps">ניהול אפליקציות</string>
+    <string name="samsung_done">סיום</string>
     <string name="tip_offer_action">הצגה</string>
     <string name="tip_calc_title">מחשבון והיסטוריה</string>
     <string name="tip_calc_body">מקש המחשבון בשורה התחתונה מוסיף פעולות חשבון לחישובים כמו %1$s, והתוצאה מומרת מיד לכל המטבעות. סכומים וחישובים קודמים נשמרים בהיסטוריה, מתחת לכרטיסים.</string>

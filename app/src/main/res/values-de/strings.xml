@@ -124,6 +124,8 @@
     <string name="select_menu_step2">Tippe im Menü auf ⋮ und dann auf \"Apps verwalten\" (die letzte Option).</string>
     <string name="select_menu_step3">Schalte \"%1$s\" ein und tippe auf Fertig.</string>
     <string name="select_menu_share">Funktioniert auch über Teilen → \"%1$s\".</string>
+    <string name="samsung_manage_apps">Apps verwalten</string>
+    <string name="samsung_done">Fertig</string>
     <string name="tip_offer_action">Zeigen</string>
     <string name="tip_calc_title">Rechner und Verlauf</string>
     <string name="tip_calc_body">Die Rechner-Taste in der unteren Reihe fügt + − × ÷ hinzu, für Rechnungen wie %1$s, und das Ergebnis wird sofort in alle Währungen umgerechnet. Frühere Beträge und Rechnungen findest du im Verlauf unter den Karten.</string>

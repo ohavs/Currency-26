@@ -1,8 +1,8 @@
 #!/bin/bash
 # Smoke test of the Play build (R8, ads, billing, consent) on an emulator: start the app, open Settings and
 # the Premium sheet, start a rewarded video, open the quick-convert bubble and pick another currency in it,
-# then select the price in Settings' "Convert from any app" and convert it from the selection menu. Fails on
-# any crash.
+# then follow the tour's "show me how" to the price in Settings' "Convert from any app", select it and convert it
+# from the selection menu. Fails on any crash.
 # Screenshots go to smoke/ (and, shrunk, into the job log: see shots.py).
 set -u
 APK="$1"
@@ -38,18 +38,25 @@ tap "United Arab Emirates Dirham"
 shot 8-quick-chosen
 adb shell input keyevent KEYCODE_BACK; sleep 2
 
-# Settings -> "Convert from any app": a long press on the sample price opens the system selection menu.
+# The tour's "Convert from any app" card -> "Show me how": Settings opens on the sample price in a spotlight, and a
+# long press on it (through the spotlight) opens the system selection menu.
 adb shell am start -W -n $PKG/com.example.MainActivity
 sleep 6
 tap "Settings"
-tap "Convert from any app"
-shot 9-select-section
+tap "Widget"
+# "Show the quick tour" is at the end of the widget section.
+adb shell input swipe 540 1700 540 700 400; sleep 2
+tap "Show the quick tour"
+tap "Next"
+shot 9-tour-select
+tap "Show me how" 4
+shot 10-select-guide
 python3 .github/smoke/tap.py "€120" --long || echo "(no sample price on screen)"
 sleep 3
-shot 10-select-menu
+shot 11-select-menu
 python3 .github/smoke/tap.py "Convert currency" || { python3 .github/smoke/tap.py "More options" && sleep 2 && python3 .github/smoke/tap.py "Convert currency"; } || echo "(no 'Convert currency' in the menu)"
 sleep 5
-shot 11-select-bubble
+shot 12-select-bubble
 
 adb logcat -d > smoke/logcat.txt
 if grep -q "FATAL EXCEPTION" smoke/logcat.txt; then

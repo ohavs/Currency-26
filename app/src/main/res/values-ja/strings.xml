@@ -124,6 +124,8 @@
     <string name="select_menu_step2">メニューで ⋮ をタップし、\"アプリを管理\"（最後の項目）をタップします。</string>
     <string name="select_menu_step3">\"%1$s\"をオンにして、完了をタップします。</string>
     <string name="select_menu_share">共有 → \"%1$s\" からも使えます。</string>
+    <string name="samsung_manage_apps">アプリを管理</string>
+    <string name="samsung_done">完了</string>
     <string name="tip_offer_action">見る</string>
     <string name="tip_calc_title">電卓と履歴</string>
     <string name="tip_calc_body">下の段の電卓キーで + − × ÷ が使え、%1$s のような計算ができます。結果はすぐにすべての通貨に換算されます。これまでの金額と計算は、カードの下の履歴に残ります。</string>
