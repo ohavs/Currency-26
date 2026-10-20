@@ -44,6 +44,7 @@
    - Testing ← Internal testing ← Create new release.
    - להשאיר את Play App Signing (ברירת המחדל).
    - להעלות את ה־AAB מה־artifact ‏`currency-26-play-bundle` של ריצת ה־Release האחרונה (Actions ← Release ← הריצה ← Artifacts).
+     - ✅ הראשון מוכן: גרסה 5.0.23. ב־Actions ← Release ← הריצה של 20.10 (‏"Merge pull request #29") ← Artifacts. הקובץ חתום במפתח ההעלאה.
    - ההעלאה נועלת את `com.ohav.currency`. מכאן והלאה ההעלאות אוטומטיות.
 4. **בודקים פנימיים:**
    - להוסיף את עצמך ב־Internal testing ← Testers.

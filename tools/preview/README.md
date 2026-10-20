@@ -13,6 +13,7 @@ gradle -q dragCheck               # swap/drag, spotlight, tour and keypad tap ch
 gradle -q vmCheck                 # the real MainViewModel: calculator, history, Premium gates
 ONLY=store_ gradle -q run         # sources for the Google Play screenshots (then tools/store/screenshots.mjs)
 python3 montage.py sheet.png 900 out/a.png out/b.png   # side-by-side sheet at 900px high
+python3 gif.py out/v23_demo_he_he demo.gif --crop x,y,w,h   # animations: renderFrames writes out/<name>/NNN.png
 ```
 
 - Needs Gradle 8.x and JDK 21; dependencies come from Maven Central (no Google Maven, so androidx
