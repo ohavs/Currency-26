@@ -28,7 +28,9 @@ Hebrew, and show rendered previews of visual changes (see `tools/preview`).
   (`pyaxmlparser` or a UTF-16 search), new strings in `resources.arsc`.
 - When a task is done, save what the next session needs (this file, `docs/PLAY_LAUNCH_PLAN.md`), merge it,
   and tell the owner it is safe to `/clear`. The owner asked for this every time.
-- Latest release: 5.0.20 (widget currency names in Rubik). History, decisions and the Play launch steps:
+- Latest release: 5.0.21 (the two builds, merged in PR #23; same key as 5.0.20, checked). Its Pages run
+  failed and the Play bundle was skipped: both wait for the owner's steps 1.1-1.2. History, decisions and the
+  Play launch steps:
   `docs/PLAY_LAUNCH_PLAN.md` (Hebrew).
 
 ## Where things are
