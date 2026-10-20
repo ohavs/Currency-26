@@ -14,7 +14,8 @@ Hebrew, and show rendered previews of visual changes (see `tools/preview`).
   push, then poll `https://api.github.com/repos/ohavs/Currency-26/actions/runs?head_sha=<sha>`):
   - `android.yml`: every branch push builds both flavors, prints each APK's permissions and size, runs tests.
   - `smoke.yml`: app changes on a branch run the minified Play APK on an emulator (start, calculator,
-    settings, Premium, a rewarded test video, the quick-convert bubble) and fail on a crash. Artifacts can't
+    settings, Premium, a rewarded test video, the quick-convert bubble and its currency picker, a long press
+    on the Settings sample price and "Convert currency" from that menu) and fail on a crash. Artifacts can't
     be downloaded from the container (blob storage is blocked), so the screenshots are printed into the last
     step's log as `SHOT <name> <base64 chunk>` lines (read them with `get_job_logs` and join the chunks).
 - **Every push to `main` is a release**: `release.yml` publishes `v5.0.<run>` with
@@ -46,8 +47,10 @@ Hebrew, and show rendered previews of visual changes (see `tools/preview`).
 - `data/`: `CurrencyRepository` - Room rates per USD from open.er-api.com, SharedPreferences
   `currency_prefs` for everything else.
 - `ui/`: `CalculatorScreen` (banners, cards), `Keypad` (calculator keys), `HistoryPanel`,
-  `SettingsScreen`, `CurrencyPicker`, `FeatureTour` and `Spotlight`, `QuickConvertSheet`; `theme/Color.kt`
-  (palettes) and `theme/PaletteTexture.kt`.
+  `SettingsScreen`, `CurrencyPicker` (`CurrencyChooser` is its body, reused by the bubble), `FeatureTour` and
+  `Spotlight`, `QuickConvertSheet`, `SelectionMenu` (a real TextView to long-press, and the menu labels in the
+  phone's language; the preview has a stand-in in `tools/preview/stubs`); `theme/Color.kt` (palettes) and
+  `theme/PaletteTexture.kt`.
 - `utils/`: `Calculator` (expression keys, parsing, `%` rules), `CalcHistory`, `PriceParser`
   and `QuickConvert` (prices in free text), `CurrencySearch`, `AppLanguage`, `CountryLanguage`,
   `DeviceCountry`, `FeatureTourSchedule`, amount formatting, currency info.
@@ -83,8 +86,14 @@ Hebrew, and show rendered previews of visual changes (see `tools/preview`).
   selection menu, the share sheet) follow the device language, not the in-app one.
 - The feature tour must never pop up by itself: its sheet covers the keypad and its buttons sit on the
   `. 0 00` row, so people typing dismissed it by accident. It is offered by a banner instead.
-- Samsung One UI 7/8 hides other apps in the text-selection menu, so quick convert also registers as a
-  share target.
+- Samsung One UI 7/8 hides other apps in the text-selection menu until they are turned on under ⋮ >
+  "Manage apps", so quick convert also registers as a share target. That screen is part of the selection menu
+  and has no intent: Settings > "Convert from any app" offers a sample price to long-press instead (5.0.22).
+  Apps can't move their item up the selection menu: system actions come first, the rest overflows into ⋮,
+  and Android ignores intent-filter priority for regular apps.
+- Quick-convert bubble (5.0.22): tapping the converted card (or the chip over a list) picks another currency
+  inside the bubble. The pick is kept (`quick_target`) until the app's own target changes, and "open in app"
+  carries it over (`QuickConvert.appCurrencies`).
 - Glance: keep layout nesting under 10 levels. Image tints must be opaque (texture strength is baked into
   the PNG alpha) because API < 31 tints with SRC_ATOP.
 - Widgets can't use font resources (launchers inflate them in a restricted context) and Glance's "medium"
