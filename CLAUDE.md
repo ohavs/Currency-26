@@ -14,8 +14,9 @@ Hebrew, and show rendered previews of visual changes (see `tools/preview`).
   push, then poll `https://api.github.com/repos/ohavs/Currency-26/actions/runs?head_sha=<sha>`):
   - `android.yml`: every branch push builds both flavors, prints each APK's permissions and size, runs tests.
   - `smoke.yml`: app changes on a branch run the minified Play APK on an emulator (start, calculator,
-    settings, Premium, a rewarded test video, the quick-convert bubble and its currency picker, a long press
-    on the Settings sample price and "Convert currency" from that menu) and fail on a crash. Artifacts can't
+    settings, Premium, a rewarded test video, the quick-convert bubble and its currency picker, the tour's
+    "Show me how" to the Settings sample price, a long press on it and "Convert currency" from that menu) and
+    fail on a crash of the app (uiautomator itself sometimes dies mid-run: printed, not counted). Artifacts can't
     be downloaded from the container (blob storage is blocked), so the screenshots are printed into the last
     step's log as `SHOT <name> <base64 chunk>` lines (read them with `get_job_logs` and join the chunks).
 - **Every push to `main` is a release**: `release.yml` publishes `v5.0.<run>` with
@@ -35,9 +36,10 @@ Hebrew, and show rendered previews of visual changes (see `tools/preview`).
   (`pyaxmlparser` or a UTF-16 search), new strings in `resources.arsc`.
 - When a task is done, save what the next session needs (this file, `docs/PLAY_LAUNCH_PLAN.md`), merge it,
   and tell the owner it is safe to `/clear`. The owner asked for this every time.
-- Latest release: 5.0.23 (PR #29: an animated demo of the selection menu in Settings > "Convert from any app").
-  Its run built the first signed Play bundle (artifact `currency-26-play-bundle`, run 39430944465), ready for
-  the owner's first manual upload (plan step 3.3). Upload key secrets are in and verified. GitHub Pages is on
+- Latest release: 5.0.24 (PR #32: the tour's "Convert from any app" card got "Show me how", which opens
+  Settings on the sample price in a spotlight; on Samsung the section's demo acts out ⋮ > "Manage apps" >
+  switch on > Done first). Its run built a signed Play bundle (artifact `currency-26-play-bundle`, run
+  39441843630), ready for the owner's first manual upload (plan step 3.3). Upload key secrets are in and verified. GitHub Pages is on
   (source "GitHub Actions"); the owner's manual Pages run on 2026-10-20 published the privacy policy at
   https://ohavs.github.io/Currency-26/privacy.html (step 1 is done). History, decisions and the Play launch
   steps: `docs/PLAY_LAUNCH_PLAN.md` (Hebrew).
@@ -49,7 +51,7 @@ Hebrew, and show rendered previews of visual changes (see `tools/preview`).
   `currency_prefs` for everything else.
 - `ui/`: `CalculatorScreen` (banners, cards), `Keypad` (calculator keys), `HistoryPanel`,
   `SettingsScreen`, `CurrencyPicker` (`CurrencyChooser` is its body, reused by the bubble), `FeatureTour` and
-  `Spotlight`, `QuickConvertSheet`, `SelectionMenuDemo` (the looping demo; `DemoTimeline` is its pure script),
+  `Spotlight`, `QuickConvertSheet`, `SelectionMenuDemo` (the looping demo; `DemoTimeline` and, on Samsung, `SetupTimeline` are its pure scripts),
   `SelectionMenu` (a real TextView to long-press, and the menu labels in the
   phone's language; the preview has a stand-in in `tools/preview/stubs`); `theme/Color.kt` (palettes) and
   `theme/PaletteTexture.kt`.
@@ -93,6 +95,11 @@ Hebrew, and show rendered previews of visual changes (see `tools/preview`).
   and has no intent: Settings > "Convert from any app" offers a sample price to long-press instead (5.0.22).
   Apps can't move their item up the selection menu: system actions come first, the rest overflows into ⋮,
   and Android ignores intent-filter priority for regular apps.
+- Samsung's "Manage apps" panel in the setup demo (5.0.24) is drawn from the step texts ("turn on ... and tap
+  Done"); no source documents the real screen. If the owner sends a screenshot, match it.
+- `Spotlight` without `onTargetTap` lets touches through its hole (four blocks around it close it): the
+  sample-price guide needs the long press to reach the real TextView. `SelectablePrice` must not reset its
+  text on recomposition, or the selection the guide leads to is dropped.
 - Quick-convert bubble (5.0.22): tapping the converted card (or the chip over a list) picks another currency
   inside the bubble. The pick is kept (`quick_target`) until the app's own target changes, and "open in app"
   carries it over (`QuickConvert.appCurrencies`).
