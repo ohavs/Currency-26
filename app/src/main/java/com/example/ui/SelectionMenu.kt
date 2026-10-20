@@ -61,6 +61,8 @@ fun SelectablePrice(text: String, modifier: Modifier = Modifier) {
     AndroidView(
         factory = { context ->
             TextView(context).apply {
+                // Apps' items (PROCESS_TEXT) only join the menu of a TextView with an id.
+                id = View.generateViewId()
                 setTextIsSelectable(true)
                 gravity = Gravity.CENTER
                 textDirection = View.TEXT_DIRECTION_LTR
