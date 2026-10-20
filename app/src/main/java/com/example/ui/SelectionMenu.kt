@@ -1,10 +1,12 @@
 package com.example.ui
 
 import android.content.Intent
+import android.content.res.Resources
 import android.os.Build
 import android.text.SpannableString
 import android.text.Spanned
 import android.text.TextPaint
+import android.text.TextUtils
 import android.text.style.URLSpan
 import android.util.TypedValue
 import android.view.Gravity
@@ -31,6 +33,12 @@ data class SelectionMenuInfo(
     val appLabel: String,
     /** Samsung hides other apps' items until they are turned on under ⋮ → "Manage apps". */
     val samsung: Boolean,
+    /** The menu's own items, as the phone words them (for [SelectionMenuDemo]); Share when the phone has the label. */
+    val copyLabel: String,
+    val shareLabel: String?,
+    val selectAllLabel: String,
+    /** The phone's language reads right to left, and so does the menu. */
+    val rtl: Boolean,
 )
 
 @Composable
@@ -41,10 +49,17 @@ fun rememberSelectionMenuInfo(): SelectionMenuInfo {
         val pm = context.packageManager
         val ours = pm.queryIntentActivities(Intent(Intent.ACTION_PROCESS_TEXT).setType("text/plain"), 0)
             .firstOrNull { it.activityInfo.packageName == context.packageName }
+        // The system's own resources are in the phone's language too: the menu's labels come from there.
+        val system = Resources.getSystem()
+        val share = system.getIdentifier("share", "string", "android").takeIf { it != 0 }
         SelectionMenuInfo(
             menuLabel = ours?.loadLabel(pm)?.toString() ?: context.getString(R.string.quick_convert_label),
             appLabel = context.applicationInfo.loadLabel(pm).toString(),
-            samsung = Build.MANUFACTURER.equals("samsung", ignoreCase = true)
+            samsung = Build.MANUFACTURER.equals("samsung", ignoreCase = true),
+            copyLabel = system.getString(android.R.string.copy),
+            shareLabel = share?.let { runCatching { system.getString(it) }.getOrNull() },
+            selectAllLabel = system.getString(android.R.string.selectAll),
+            rtl = TextUtils.getLayoutDirectionFromLocale(system.configuration.locales[0]) == View.LAYOUT_DIRECTION_RTL
         )
     }
 }

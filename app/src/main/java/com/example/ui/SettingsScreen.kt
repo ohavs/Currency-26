@@ -81,6 +81,7 @@ import com.example.ui.theme.ColorThemeOption
 import com.example.ui.theme.LocalPalette
 import com.example.ui.theme.Palettes
 import com.example.utils.AppLanguage
+import com.example.utils.ConvertedPrice
 import com.example.utils.formatUpdatedAt
 
 @Composable
@@ -120,6 +121,8 @@ fun SettingsScreen(
     adPrivacyOptions: Boolean = false,
     onAdPrivacyOptions: () -> Unit = {},
     onWidgetGuideDone: () -> Unit = {},
+    /** [SAMPLE_PRICE] in the user's currency, for the "Convert from any app" demo (null before there are rates). */
+    quickSample: ConvertedPrice? = null,
 ) {
     BackHandler(onBack = onClose)
     BackHandler(enabled = highlightAddWidget, onBack = onWidgetGuideDone)
@@ -352,6 +355,7 @@ fun SettingsScreen(
                         style = MaterialTheme.typography.bodyMedium,
                         color = palette.inkMuted
                     )
+                    SelectionMenuDemo(menu, SAMPLE_PRICE, quickSample)
                     // A real selection menu, right here: the quickest way to Samsung's "Manage apps", and a try-out.
                     Column(
                         modifier = Modifier
@@ -362,7 +366,7 @@ fun SettingsScreen(
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
                         Text(stringResource(R.string.select_menu_try), style = MaterialTheme.typography.labelMedium, color = palette.inkMuted)
-                        SelectablePrice("€120", Modifier.fillMaxWidth())
+                        SelectablePrice(SAMPLE_PRICE, Modifier.fillMaxWidth())
                     }
                     if (menu.samsung) {
                         Text(
@@ -473,6 +477,9 @@ private fun intervalLabel(minutes: Long): String = when {
     minutes % 60L == 0L -> stringResource(R.string.interval_hours, (minutes / 60).toInt())
     else -> stringResource(R.string.interval_minutes, minutes.toInt())
 }
+
+/** The price Settings offers to long-press, and that its demo converts. */
+internal const val SAMPLE_PRICE = "€120"
 
 /**
  * A settings card that opens and closes by tapping its title row. Closed, it shows only the title and

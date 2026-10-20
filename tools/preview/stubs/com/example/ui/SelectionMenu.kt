@@ -17,7 +17,23 @@ import androidx.compose.ui.unit.sp
 import com.example.ui.theme.LocalPalette
 
 /** Desktop stand-in for the app's SelectionMenu.kt: the phone's language and maker are set by the render. */
-data class SelectionMenuInfo(val menuLabel: String, val appLabel: String, val samsung: Boolean)
+data class SelectionMenuInfo(
+    val menuLabel: String,
+    val appLabel: String,
+    val samsung: Boolean,
+    val copyLabel: String,
+    val shareLabel: String?,
+    val selectAllLabel: String,
+    val rtl: Boolean,
+)
+
+/** The system's Copy / Share / Select all, as Samsung words them (the app has no strings for these). */
+private val systemLabels = mapOf(
+    "en" to listOf("Copy", "Share", "Select all"),
+    "iw" to listOf("העתק", "שתף", "בחר הכל"),
+    "ar" to listOf("نسخ", "مشاركة", "تحديد الكل"),
+    "ru" to listOf("Копировать", "Поделиться", "Выбрать все"),
+)
 
 object SelectionMenuHarness {
     /** The phone's language (the selection menu's), which can differ from the app's. */
@@ -28,11 +44,19 @@ object SelectionMenuHarness {
 }
 
 @Composable
-fun rememberSelectionMenuInfo(): SelectionMenuInfo = SelectionMenuInfo(
-    menuLabel = HarnessStrings.get(SelectionMenuHarness.deviceLanguage, "quick_convert_label"),
-    appLabel = HarnessStrings.get(SelectionMenuHarness.deviceLanguage, "app_name"),
-    samsung = SelectionMenuHarness.samsung
-)
+fun rememberSelectionMenuInfo(): SelectionMenuInfo {
+    val device = SelectionMenuHarness.deviceLanguage
+    val (copy, share, selectAll) = systemLabels[device] ?: systemLabels.getValue("en")
+    return SelectionMenuInfo(
+        menuLabel = HarnessStrings.get(device, "quick_convert_label"),
+        appLabel = HarnessStrings.get(device, "app_name"),
+        samsung = SelectionMenuHarness.samsung,
+        copyLabel = copy,
+        shareLabel = share,
+        selectAllLabel = selectAll,
+        rtl = device == "iw" || device == "ar"
+    )
+}
 
 @Composable
 fun SelectablePrice(text: String, modifier: Modifier = Modifier) {

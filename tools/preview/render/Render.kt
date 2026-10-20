@@ -91,6 +91,33 @@ private fun renderTapped(name: String, tapsDp: List<Pair<Float, Float>>, widthDp
     println("rendered out/$name.png")
 }
 
+/** Taps, lets the screen settle, then saves a frame every [stepMs] for [durationMs]: out/<name>/000.png... */
+@OptIn(androidx.compose.ui.ExperimentalComposeUiApi::class)
+private fun renderFrames(
+    name: String, tapsDp: List<Pair<Float, Float>>, widthDp: Int = 400, heightDp: Int = 860,
+    durationMs: Int = com.example.ui.DemoTimeline.LOOP_MS, stepMs: Int = 40, content: @Composable () -> Unit,
+) {
+    System.getenv("ONLY")?.let { f -> if (f.split(",").none { name.contains(it) }) return }
+    val density = 2f
+    val scene = ImageComposeScene(width = (widthDp * density).toInt(), height = (heightDp * density).toInt(), density = Density(density), content = content)
+    var t = 0L
+    fun frame() { t += 16_000_000L; scene.render(t) }
+    frame()
+    for ((x, y) in tapsDp) {
+        val o = androidx.compose.ui.geometry.Offset(x * density, y * density)
+        scene.sendPointerEvent(androidx.compose.ui.input.pointer.PointerEventType.Press, o); frame()
+        scene.sendPointerEvent(androidx.compose.ui.input.pointer.PointerEventType.Release, o); frame()
+    }
+    repeat(40) { frame() }
+    val dir = File("out/$name").apply { deleteRecursively(); mkdirs() }
+    for (i in 0 until durationMs / stepMs) {
+        t += stepMs * 1_000_000L
+        File(dir, "%03d.png".format(i)).writeBytes(scene.render(t).encodeToData(EncodedImageFormat.PNG)!!.bytes)
+    }
+    scene.close()
+    println("rendered out/$name/ (${durationMs / stepMs} frames)")
+}
+
 private val now = System.currentTimeMillis()
 private val sampleHistory = listOf(
     com.example.utils.HistoryEntry(now - 4 * 60_000, "USD", "ILS", "EUR", "1550", "1250+300", 5754.07, 1424.61),
@@ -180,6 +207,29 @@ fun main() {
     if (System.getenv("ONLY")?.startsWith("store_") == true) {
         storeShots()
         System.exit(0)
+    }
+    // v5.0.23: the "Convert from any app" demo on a loop, as frames (out/<name>/NNN.png; tools/preview/gif.py makes the GIF).
+    for ((name, app, device, theme, dark) in listOf(
+        DemoCase("he_he", "iw", "iw", "sunset", false), DemoCase("en_en", "en", "en", "sage", false),
+        DemoCase("he_en_dark", "iw", "en", "lavender", true), DemoCase("ar_ar", "ar", "ar", "ocean", false),
+    )) {
+        val sample = com.example.utils.QuickConvert.convert(com.example.ui.SAMPLE_PRICE, rates, "USD", "ILS", null, null).lines.firstOrNull()
+        renderFrames("v23_demo_$name", listOf(200f to (System.getenv("MENU_TAP_Y")?.toFloat() ?: 400f)), heightDp = 1000) {
+            com.example.ui.SelectionMenuHarness.deviceLanguage = device
+            com.example.ui.SelectionMenuHarness.samsung = true
+            Frame(dark, theme, app) {
+                SettingsScreen(
+                    themeMode = "system", colorTheme = theme, autoUpdate = AutoUpdateSettings(),
+                    lastUpdateTimestamp = state.lastUpdateTimestamp, isRefreshing = false, lastRefreshFailed = false,
+                    canPinWidget = true, onClose = {}, onThemeModeChange = {}, onColorThemeChange = {},
+                    onAutoUpdateEnabledChange = {}, onIntervalChange = {}, onWifiOnlyChange = {},
+                    onRefreshOnOpenChange = {}, onRefreshNow = {}, onAddWidget = {},
+                    appUpdate = com.example.ui.AppUpdateState(installedVersion = "5.0.23", checked = true),
+                    checkAppUpdates = true, onCheckAppUpdatesChange = {}, onCheckForAppUpdate = {}, onStartAppUpdate = {},
+                    language = if (app == "iw") "he" else app, onLanguageChange = {}, quickSample = sample
+                )
+            }
+        }
     }
     // v5.0.22: "Convert from any app" in Settings (a price to long-press, Samsung's steps); the bubble's currency picker.
     for ((name, app, device, samsung, dark) in listOf(
@@ -826,6 +876,7 @@ private data class Quad(val a: String, val b: Boolean, val c: Int, val d: Boolea
 
 private data class Quad2(val a: String, val b: QuickSpec, val c: String?, val d: Boolean)
 
+private data class DemoCase(val name: String, val app: String, val device: String, val theme: String, val dark: Boolean)
 private data class MenuCase(val name: String, val app: String, val device: String, val samsung: Boolean, val dark: Boolean)
 
 private data class QuickSpec(

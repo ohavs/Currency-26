@@ -117,6 +117,7 @@ import com.example.ui.theme.AmountTextStyle
 import com.example.ui.theme.LocalPalette
 import com.example.ui.theme.paletteTexture
 import com.example.utils.HistoryEntry
+import com.example.utils.QuickConvert
 import com.example.utils.amountSymbol
 import com.example.utils.formatExpression
 import com.example.utils.toRawAmount
@@ -255,6 +256,10 @@ fun CalculatorScreen(viewModel: MainViewModel, monetization: Monetization, onRem
                     adPrivacyOptions = privacyOptionsRequired,
                     onAdPrivacyOptions = { activity?.let(monetization::showPrivacyOptions) },
                     onWidgetGuideDone = viewModel::endWidgetGuide,
+                    quickSample = remember(state.rates, state.sourceCurrency, state.targetCurrency) {
+                        QuickConvert.convert(SAMPLE_PRICE, state.rates, state.sourceCurrency, state.targetCurrency, null, null)
+                            .lines.firstOrNull()
+                    },
                 )
                 AppScreen.Picker -> CurrencySelector(
                     state = state,
