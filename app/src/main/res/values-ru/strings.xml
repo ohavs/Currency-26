@@ -124,6 +124,8 @@
     <string name="select_menu_step2">В меню нажмите ⋮, затем \"Управление приложениями\" (последний пункт).</string>
     <string name="select_menu_step3">Включите \"%1$s\" и нажмите \"Готово\".</string>
     <string name="select_menu_share">Работает и через \"Поделиться\" → \"%1$s\".</string>
+    <string name="samsung_manage_apps">Управление приложениями</string>
+    <string name="samsung_done">Готово</string>
     <string name="tip_offer_action">Показать</string>
     <string name="tip_calc_title">Калькулятор и история</string>
     <string name="tip_calc_body">Кнопка калькулятора в нижнем ряду добавляет + − × ÷ для расчётов вроде %1$s, а результат сразу пересчитывается во все валюты. Прежние суммы и расчёты сохраняются в истории, под карточками.</string>

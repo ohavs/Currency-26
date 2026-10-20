@@ -62,11 +62,15 @@ import androidx.compose.runtime.Composable
 import kotlinx.coroutines.delay
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.layout.boundsInWindow
+import androidx.compose.ui.layout.positionInWindow
+import androidx.compose.ui.unit.toSize
+import kotlin.math.roundToInt
 import androidx.compose.ui.geometry.Rect
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
@@ -123,19 +127,35 @@ fun SettingsScreen(
     onWidgetGuideDone: () -> Unit = {},
     /** [SAMPLE_PRICE] in the user's currency, for the "Convert from any app" demo (null before there are rates). */
     quickSample: ConvertedPrice? = null,
+    /** Walks the user to the sample price: "Convert from any app" opens, scrolls into view and the price gets a spotlight. */
+    highlightSelectMenu: Boolean = false,
+    onSelectGuideDone: () -> Unit = {},
 ) {
     BackHandler(onBack = onClose)
     BackHandler(enabled = highlightAddWidget, onBack = onWidgetGuideDone)
+    BackHandler(enabled = highlightSelectMenu, onBack = onSelectGuideDone)
     val palette = LocalPalette.current
     val scroll = rememberScrollState()
     var addWidgetBounds by remember { mutableStateOf<Rect?>(null) }
+    var samplePriceBounds by remember { mutableStateOf<Rect?>(null) }
+    var viewportBounds by remember { mutableStateOf<Rect?>(null) }
     var spotlightReady by remember { mutableStateOf(false) }
-    LaunchedEffect(highlightAddWidget) {
+    LaunchedEffect(highlightAddWidget, highlightSelectMenu) {
         spotlightReady = false
         if (highlightAddWidget) {
             // Let the widget section finish opening, then bring it (the last section) into view.
             delay(380)
             scroll.animateScrollTo(scroll.maxValue)
+            spotlightReady = true
+        } else if (highlightSelectMenu) {
+            // The price comes up a little above the middle, with room for the tooltip over it.
+            delay(380)
+            val price = samplePriceBounds
+            val viewport = viewportBounds
+            if (price != null && viewport != null) {
+                val goal = scroll.value + price.top - viewport.top - viewport.height * 0.4f
+                scroll.animateScrollTo(goal.roundToInt().coerceIn(0, scroll.maxValue))
+            }
             spotlightReady = true
         }
     }
@@ -155,6 +175,7 @@ fun SettingsScreen(
             Column(
                 modifier = Modifier
                     .weight(1f)
+                    .onGloballyPositioned { viewportBounds = it.boundsInWindow() }
                     .verticalScroll(scroll)
                     .padding(bottom = 24.dp),
                 verticalArrangement = Arrangement.spacedBy(10.dp)
@@ -348,14 +369,23 @@ fun SettingsScreen(
                 SettingsSection(
                     title = stringResource(R.string.tip_select_title),
                     icon = Icons.Rounded.HighlightAlt,
-                    summary = stringResource(R.string.select_menu_summary, menu.menuLabel)
+                    summary = stringResource(R.string.select_menu_summary, menu.menuLabel),
+                    initiallyExpanded = highlightSelectMenu
                 ) {
                     Text(
                         text = stringResource(R.string.select_menu_body, menu.menuLabel),
                         style = MaterialTheme.typography.bodyMedium,
                         color = palette.inkMuted
                     )
-                    SelectionMenuDemo(menu, SAMPLE_PRICE, quickSample)
+                    if (menu.samsung) {
+                        Text(
+                            text = stringResource(R.string.select_menu_samsung),
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = palette.ink
+                        )
+                    }
+                    // On Samsung the demo turns the item on first (it ends with the conversion too, so one is enough).
+                    SelectionMenuDemo(menu, SAMPLE_PRICE, quickSample, setup = menu.samsung)
                     // A real selection menu, right here: the quickest way to Samsung's "Manage apps", and a try-out.
                     Column(
                         modifier = Modifier
@@ -365,15 +395,23 @@ fun SettingsScreen(
                             .padding(horizontal = 16.dp, vertical = 10.dp),
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
-                        Text(stringResource(R.string.select_menu_try), style = MaterialTheme.typography.labelMedium, color = palette.inkMuted)
-                        SelectablePrice(SAMPLE_PRICE, Modifier.fillMaxWidth())
+                        // The spotlight's tooltip says the same, and its edge would cut through this line.
+                        Text(
+                            text = stringResource(R.string.select_menu_try),
+                            style = MaterialTheme.typography.labelMedium,
+                            color = palette.inkMuted,
+                            modifier = Modifier.alpha(if (highlightSelectMenu && spotlightReady) 0f else 1f)
+                        )
+                        SelectablePrice(
+                            text = SAMPLE_PRICE,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                // Not clipped to the screen: the guide measures it before scrolling it into view.
+                                .onGloballyPositioned { samplePriceBounds = Rect(it.positionInWindow(), it.size.toSize()) },
+                            onLongPress = { if (highlightSelectMenu) onSelectGuideDone() }
+                        )
                     }
                     if (menu.samsung) {
-                        Text(
-                            text = stringResource(R.string.select_menu_samsung),
-                            style = MaterialTheme.typography.bodyMedium,
-                            color = palette.ink
-                        )
                         Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                             listOf(
                                 stringResource(R.string.select_menu_step1),
@@ -465,6 +503,16 @@ fun SettingsScreen(
                     onAddWidget()
                 },
                 onDismiss = onWidgetGuideDone
+            )
+        }
+        val price = samplePriceBounds
+        if (highlightSelectMenu && spotlightReady && price != null) {
+            // The price stays live under the spotlight: a long press selects it and the guide steps aside.
+            Spotlight(
+                target = price,
+                message = stringResource(R.string.select_menu_try),
+                onTargetTap = null,
+                onDismiss = onSelectGuideDone
             )
         }
     }

@@ -124,6 +124,8 @@
     <string name="select_menu_step2">Menüde ⋮ simgesine, ardından \"Uygulamaları yönet\" seçeneğine dokunun (son seçenek).</string>
     <string name="select_menu_step3">\"%1$s\" seçeneğini açın ve Bitti\'ye dokunun.</string>
     <string name="select_menu_share">Paylaş → \"%1$s\" ile de çalışır.</string>
+    <string name="samsung_manage_apps">Uygulamaları yönet</string>
+    <string name="samsung_done">Bitti</string>
     <string name="tip_offer_action">Göster</string>
     <string name="tip_calc_title">Hesap makinesi ve geçmiş</string>
     <string name="tip_calc_body">Alt sıradaki hesap makinesi tuşu %1$s gibi hesaplar için + − × ÷ ekler ve sonuç anında tüm para birimlerine çevrilir. Önceki tutarlar ve hesaplar, kartların altındaki Geçmiş\'te saklanır.</string>

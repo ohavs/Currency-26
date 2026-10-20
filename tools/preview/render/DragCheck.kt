@@ -107,7 +107,7 @@ fun main() {
     scene.close()
 
     // Spotlight guide in Settings: a tap on the highlighted button adds the widget, a tap elsewhere just closes.
-    for ((label, point) in listOf("tap on spotlight button" to Offset(px(200f), px(540f)), "tap outside spotlight " to Offset(px(200f), px(120f)))) {
+    for ((label, point) in listOf("tap on spotlight button" to Offset(px(200f), px(622f)), "tap outside spotlight " to Offset(px(200f), px(120f)))) {
         var added = 0
         var done = 0
         val settings = ImageComposeScene(width = px(400f).toInt(), height = px(860f).toInt(), density = Density(density)) {
@@ -132,6 +132,39 @@ fun main() {
         settings.sendPointerEvent(PointerEventType.Press, point); sframe()
         settings.sendPointerEvent(PointerEventType.Release, point); sframe()
         println("$label -> addWidget=$added guideDone=$done")
+        settings.close()
+    }
+
+    // Sample-price guide in Settings: a long press goes through the spotlight's hole to the price (which ends the
+    // guide); a tap elsewhere just closes it.
+    for (inside in listOf(true, false)) {
+        var done = 0
+        com.example.ui.SelectionMenuHarness.longPresses = 0
+        val settings = ImageComposeScene(width = px(400f).toInt(), height = px(860f).toInt(), density = Density(density)) {
+            MyApplicationTheme(themeMode = "light") {
+                CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Rtl) {
+                    com.example.ui.SettingsScreen(
+                        themeMode = "system", colorTheme = "sage", autoUpdate = com.example.data.AutoUpdateSettings(),
+                        lastUpdateTimestamp = 0L, isRefreshing = false, lastRefreshFailed = false,
+                        canPinWidget = true, onClose = {}, onThemeModeChange = {}, onColorThemeChange = {},
+                        onAutoUpdateEnabledChange = {}, onIntervalChange = {}, onWifiOnlyChange = {},
+                        onRefreshOnOpenChange = {}, onRefreshNow = {}, onAddWidget = {},
+                        appUpdate = com.example.ui.AppUpdateState(installedVersion = "5.0.24", checked = true),
+                        checkAppUpdates = true, onCheckAppUpdatesChange = {}, onCheckForAppUpdate = {}, onStartAppUpdate = {},
+                        highlightSelectMenu = true, onSelectGuideDone = { done++ }
+                    )
+                }
+            }
+        }
+        var st = 0L
+        fun sframe() { st += 16_000_000L; settings.render(st) }
+        repeat(150) { sframe() }
+        val price = com.example.ui.SelectionMenuHarness.priceBounds!!
+        val point = if (inside) price.center else Offset(px(200f), px(120f))
+        settings.sendPointerEvent(PointerEventType.Press, point); sframe()
+        Thread.sleep(800); sframe()
+        settings.sendPointerEvent(PointerEventType.Release, point); sframe()
+        println("${if (inside) "long-press sample price" else "long-press outside    "} -> pricePressed=${com.example.ui.SelectionMenuHarness.longPresses} guideDone=$done (price at y=${(price.center.y / density).toInt()}dp)")
         settings.close()
     }
 

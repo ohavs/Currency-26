@@ -124,6 +124,8 @@
     <string name="select_menu_step2">In the menu, tap ⋮ and then \"Manage apps\" (the last option).</string>
     <string name="select_menu_step3">Turn on \"%1$s\" and tap Done.</string>
     <string name="select_menu_share">Also works from Share → \"%1$s\".</string>
+    <string name="samsung_manage_apps">Manage apps</string>
+    <string name="samsung_done">Done</string>
     <string name="tip_offer_action">Show</string>
     <string name="tip_calc_title">Calculator and history</string>
     <string name="tip_calc_body">The calculator key in the bottom row adds + − × ÷ for sums like %1$s, and the result is converted to every currency right away. Past amounts and calculations are kept in History, under the cards.</string>

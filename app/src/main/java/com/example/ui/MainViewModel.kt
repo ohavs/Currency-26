@@ -378,6 +378,20 @@ class MainViewModel(
         _widgetGuide.value = false
     }
 
+    private val _selectGuide = MutableStateFlow(false)
+    /** Settings is open on "Convert from any app" with the sample price in a spotlight (from the tour's "show me how"). */
+    val selectGuide: StateFlow<Boolean> = _selectGuide.asStateFlow()
+
+    fun startSelectGuide() {
+        dismissTour()
+        _state.update { it.copy(showSettings = true) }
+        _selectGuide.value = true
+    }
+
+    fun endSelectGuide() {
+        _selectGuide.value = false
+    }
+
     private val _legacyAppInstalled = MutableStateFlow(false)
     /** The old AI Studio build is still installed next to this app (checked on every resume). */
     val legacyAppInstalled: StateFlow<Boolean> = _legacyAppInstalled.asStateFlow()
@@ -648,6 +662,7 @@ class MainViewModel(
 
     fun closeSettings() {
         _widgetGuide.value = false
+        _selectGuide.value = false
         _state.update { it.copy(showSettings = false) }
     }
 

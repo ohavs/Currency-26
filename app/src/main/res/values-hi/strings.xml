@@ -124,6 +124,8 @@
     <string name="select_menu_step2">मेन्यू में ⋮ पर टैप करें, फिर \"ऐप्स प्रबंधित करें\" (आख़िरी विकल्प) पर।</string>
     <string name="select_menu_step3">\"%1$s\" चालू करें और हो गया पर टैप करें।</string>
     <string name="select_menu_share">शेयर करें → \"%1$s\" से भी काम करता है।</string>
+    <string name="samsung_manage_apps">ऐप्स प्रबंधित करें</string>
+    <string name="samsung_done">हो गया</string>
     <string name="tip_offer_action">देखें</string>
     <string name="tip_calc_title">कैलकुलेटर और इतिहास</string>
     <string name="tip_calc_body">नीचे की पंक्ति की कैलकुलेटर कुंजी %1$s जैसे हिसाब के लिए + − × ÷ जोड़ती है, और नतीजा तुरंत सभी मुद्राओं में बदल जाता है। पिछली राशियाँ और हिसाब कार्डों के नीचे इतिहास में रहते हैं।</string>

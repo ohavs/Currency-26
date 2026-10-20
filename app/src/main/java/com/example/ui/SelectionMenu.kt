@@ -1,6 +1,7 @@
 package com.example.ui
 
 import android.content.Intent
+import android.content.res.Configuration
 import android.content.res.Resources
 import android.os.Build
 import android.text.SpannableString
@@ -13,7 +14,9 @@ import android.view.Gravity
 import android.view.View
 import android.widget.TextView
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalContext
@@ -39,6 +42,9 @@ data class SelectionMenuInfo(
     val selectAllLabel: String,
     /** The phone's language reads right to left, and so does the menu. */
     val rtl: Boolean,
+    /** Samsung's "Manage apps" and its panel's "Done", in the phone's language (our own wording of them). */
+    val manageLabel: String,
+    val doneLabel: String,
 )
 
 @Composable
@@ -52,6 +58,7 @@ fun rememberSelectionMenuInfo(): SelectionMenuInfo {
         // The system's own resources are in the phone's language too: the menu's labels come from there.
         val system = Resources.getSystem()
         val share = system.getIdentifier("share", "string", "android").takeIf { it != 0 }
+        val device = context.createConfigurationContext(Configuration(context.resources.configuration).apply { setLocales(system.configuration.locales) })
         SelectionMenuInfo(
             menuLabel = ours?.loadLabel(pm)?.toString() ?: context.getString(R.string.quick_convert_label),
             appLabel = context.applicationInfo.loadLabel(pm).toString(),
@@ -59,18 +66,22 @@ fun rememberSelectionMenuInfo(): SelectionMenuInfo {
             copyLabel = system.getString(android.R.string.copy),
             shareLabel = share?.let { runCatching { system.getString(it) }.getOrNull() },
             selectAllLabel = system.getString(android.R.string.selectAll),
-            rtl = TextUtils.getLayoutDirectionFromLocale(system.configuration.locales[0]) == View.LAYOUT_DIRECTION_RTL
+            rtl = TextUtils.getLayoutDirectionFromLocale(system.configuration.locales[0]) == View.LAYOUT_DIRECTION_RTL,
+            manageLabel = device.getString(R.string.samsung_manage_apps),
+            doneLabel = device.getString(R.string.samsung_done)
         )
     }
 }
 
 /**
  * A price to long-press: it opens the phone's own selection menu, with "Convert currency" (and Samsung's
- * "Manage apps"). Compose text has no such menu, so this is a classic TextView.
+ * "Manage apps"). Compose text has no such menu, so this is a classic TextView. [onLongPress] runs as the
+ * selection starts.
  */
 @Composable
-fun SelectablePrice(text: String, modifier: Modifier = Modifier) {
+fun SelectablePrice(text: String, modifier: Modifier = Modifier, onLongPress: () -> Unit = {}) {
     val palette = LocalPalette.current
+    val currentOnLongPress by rememberUpdatedState(onLongPress)
     val ink = palette.ink.toArgb()
     val selection = palette.accent.copy(alpha = 0.35f).toArgb()
     AndroidView(
@@ -84,13 +95,21 @@ fun SelectablePrice(text: String, modifier: Modifier = Modifier) {
                 setTextSize(TypedValue.COMPLEX_UNIT_SP, 30f)
                 typeface = ResourcesCompat.getFont(context, R.font.rubik_bold)
                 setPadding(0, 12, 0, 12)
+                // Returning false leaves the long press to the TextView, which selects the price as before.
+                setOnLongClickListener {
+                    currentOnLongPress()
+                    false
+                }
             }
         },
         update = { view ->
             // A long press selects the word under the finger, which would leave "€" out of "€120"; a link span is
-            // selected whole instead. This one draws nothing and opens nothing.
-            view.text = SpannableString(text).apply {
-                setSpan(WholePrice(), 0, text.length, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
+            // selected whole instead. This one draws nothing and opens nothing. Setting the text again would drop
+            // a selection in progress (the guide's spotlight steps aside just as it starts).
+            if (view.text.toString() != text) {
+                view.text = SpannableString(text).apply {
+                    setSpan(WholePrice(), 0, text.length, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
+                }
             }
             view.setTextColor(ink)
             view.highlightColor = selection

@@ -133,6 +133,9 @@ ROWS = [
  ("select_menu_step2", "בתפריט שנפתח הקישו על ⋮ ואז על ניהול האפליקציות (האפשרות האחרונה).", "In the menu, tap ⋮ and then \"Manage apps\" (the last option).", "En el menú, toca ⋮ y luego \"Gestionar aplicaciones\" (la última opción)."),
  ("select_menu_step3", "הפעילו את \"%1$s\" ואשרו.", "Turn on \"%1$s\" and tap Done.", "Activa \"%1$s\" y toca Listo."),
  ("select_menu_share", "עובד גם דרך שיתוף ← \"%1$s\".", "Also works from Share → \"%1$s\".", "También funciona desde Compartir → \"%1$s\"."),
+ # Samsung's own labels in its "Manage apps" panel, for the animation (shown in the phone's language).
+ ("samsung_manage_apps", "ניהול אפליקציות", "Manage apps", "Gestionar aplicaciones"),
+ ("samsung_done", "סיום", "Done", "Listo"),
  ("tip_offer_action", "הצגה", "Show", "Ver"),
  ("tip_calc_title", "מחשבון והיסטוריה", "Calculator and history", "Calculadora e historial"),
  ("tip_calc_body", "מקש המחשבון בשורה התחתונה מוסיף פעולות חשבון לחישובים כמו %1$s, והתוצאה מומרת מיד לכל המטבעות. סכומים וחישובים קודמים נשמרים בהיסטוריה, מתחת לכרטיסים.", "The calculator key in the bottom row adds + − × ÷ for sums like %1$s, and the result is converted to every currency right away. Past amounts and calculations are kept in History, under the cards.", "La tecla de calculadora de la fila inferior añade + − × ÷ para cuentas como %1$s, y el resultado se convierte al instante a todas las monedas. Los importes y cálculos anteriores se guardan en Historial, bajo las tarjetas."),

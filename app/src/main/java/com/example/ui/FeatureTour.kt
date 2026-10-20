@@ -95,9 +95,9 @@ internal val FeatureTip.titleRes: Int
 
 /**
  * A short tour over the calculator: the home-screen widget, converting a price selected in another app, the
- * calculator keys (and the history) and the additional currency, with a way to try them
- * where there is one ("show me how" walks to the widget button in Settings). Opened from the banner that offers it (first launch, then after a while while a feature is
- * still unused) or from Settings.
+ * calculator keys (and the history) and the additional currency, with a way to try each ("show me how" walks to
+ * the widget button, or to the sample price to long-press, in Settings). Opened from the banner that offers it
+ * (first launch, then after a while while a feature is still unused) or from Settings.
  */
 @Composable
 fun FeatureTour(
@@ -108,6 +108,7 @@ fun FeatureTour(
     onDismiss: () -> Unit,
     initialPage: Int = 0,
     onTryCalculator: () -> Unit = {},
+    onShowSelectGuide: () -> Unit = {},
 ) {
     if (tips.isEmpty()) return
     val palette = LocalPalette.current
@@ -213,8 +214,8 @@ fun FeatureTour(
                     )
                     Spacer(Modifier.height(18.dp))
                     when {
-                        // Nothing to try from here: it happens in other apps.
-                        tip == FeatureTip.SELECT_CONVERT -> Unit
+                        // Settings has a price to long-press (and, on Samsung, the way to turn the menu item on).
+                        tip == FeatureTip.SELECT_CONVERT -> TourButton(stringResource(R.string.tip_widget_action), Icons.Rounded.TouchApp, guarded(onShowSelectGuide))
                         tip == FeatureTip.EXTRA_CURRENCY -> TourButton(stringResource(R.string.add_currency), Icons.Rounded.Add, guarded(onAddCurrency))
                         tip == FeatureTip.CALCULATOR -> TourButton(stringResource(R.string.tip_calc_action), Icons.Rounded.Calculate, guarded(onTryCalculator))
                         canPinWidget -> TourButton(stringResource(R.string.tip_widget_action), Icons.Rounded.TouchApp, guarded(onShowWidgetGuide))

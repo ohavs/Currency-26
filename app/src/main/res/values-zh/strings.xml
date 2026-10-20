@@ -124,6 +124,8 @@
     <string name="select_menu_step2">在菜单中点按 ⋮，然后点按\"管理应用\"（最后一项）。</string>
     <string name="select_menu_step3">打开\"%1$s\"，然后点按完成。</string>
     <string name="select_menu_share">也可以通过 分享 → \"%1$s\" 使用。</string>
+    <string name="samsung_manage_apps">管理应用</string>
+    <string name="samsung_done">完成</string>
     <string name="tip_offer_action">查看</string>
     <string name="tip_calc_title">计算器和历史记录</string>
     <string name="tip_calc_body">底行的计算器键可加入 + − × ÷，用于 %1$s 这样的计算，结果会立即换算成所有货币。以前的金额和计算都保存在卡片下方的历史记录中。</string>

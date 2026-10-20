@@ -124,6 +124,8 @@
     <string name="select_menu_step2">Dans le menu, touchez ⋮ puis \"Gérer les applications\" (la dernière option).</string>
     <string name="select_menu_step3">Activez \"%1$s\" et touchez OK.</string>
     <string name="select_menu_share">Fonctionne aussi depuis Partager → \"%1$s\".</string>
+    <string name="samsung_manage_apps">Gérer les applications</string>
+    <string name="samsung_done">OK</string>
     <string name="tip_offer_action">Voir</string>
     <string name="tip_calc_title">Calculatrice et historique</string>
     <string name="tip_calc_body">La touche calculatrice de la rangée du bas ajoute + − × ÷ pour des calculs comme %1$s, et le résultat est aussitôt converti dans toutes les devises. Les montants et calculs précédents sont gardés dans l\'historique, sous les cartes.</string>

@@ -124,6 +124,8 @@
     <string name="select_menu_step2">في القائمة، اضغط على ⋮ ثم \"إدارة التطبيقات\" (الخيار الأخير).</string>
     <string name="select_menu_step3">فعّل \"%1$s\" ثم اضغط تم.</string>
     <string name="select_menu_share">يعمل أيضًا من مشاركة ← \"%1$s\".</string>
+    <string name="samsung_manage_apps">إدارة التطبيقات</string>
+    <string name="samsung_done">تم</string>
     <string name="tip_offer_action">عرض</string>
     <string name="tip_calc_title">آلة حاسبة وسجل</string>
     <string name="tip_calc_body">يضيف زر الآلة الحاسبة في الصف السفلي عمليات + − × ÷ لحسابات مثل %1$s، وتُحوَّل النتيجة فورًا إلى كل العملات. تُحفظ المبالغ والحسابات السابقة في السجل، أسفل البطاقات.</string>

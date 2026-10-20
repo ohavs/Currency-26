@@ -10,6 +10,7 @@ import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.absoluteOffset
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -52,20 +53,24 @@ import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.layout.positionInWindow
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.IntOffset
+import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import com.example.ui.theme.LocalPalette
 import kotlin.math.roundToInt
 
 /**
  * Dims the screen except for [target] (window coordinates), which gets a pulsing ring and a tooltip with
- * [message]. Tapping the target runs [onTargetTap]; tapping anywhere else runs [onDismiss].
+ * [message]. Tapping the target runs [onTargetTap]; tapping anywhere else runs [onDismiss]. Without
+ * [onTargetTap], touches on the target reach what is under it (a long press on a price).
  */
 @Composable
-fun Spotlight(target: Rect, message: String, onTargetTap: () -> Unit, onDismiss: () -> Unit) {
+fun Spotlight(target: Rect, message: String, onTargetTap: (() -> Unit)?, onDismiss: () -> Unit) {
     val palette = LocalPalette.current
     val density = LocalDensity.current
     var origin by remember { mutableStateOf(Offset.Zero) }
+    var area by remember { mutableStateOf(IntSize.Zero) }
     var tooltipHeight by remember { mutableIntStateOf(0) }
     val appear = remember { Animatable(0f) }
     LaunchedEffect(Unit) { appear.animateTo(1f, tween(320, easing = FastOutSlowInEasing)) }
@@ -86,7 +91,10 @@ fun Spotlight(target: Rect, message: String, onTargetTap: () -> Unit, onDismiss:
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .onGloballyPositioned { origin = it.positionInWindow() }
+            .onGloballyPositioned {
+                origin = it.positionInWindow()
+                area = it.size
+            }
             .graphicsLayer {
                 compositingStrategy = CompositingStrategy.Offscreen
                 alpha = appear.value
@@ -109,13 +117,35 @@ fun Spotlight(target: Rect, message: String, onTargetTap: () -> Unit, onDismiss:
                     style = Stroke(width = 3.dp.toPx())
                 )
             }
-            .pointerInput(Unit) {
-                detectTapGestures { position ->
-                    val cutout = currentTarget.translate(-origin).inflate(margin)
-                    if (cutout.contains(position)) currentOnTargetTap() else currentOnDismiss()
+            .then(
+                if (onTargetTap == null) {
+                    Modifier
+                } else {
+                    Modifier.pointerInput(Unit) {
+                        detectTapGestures { position ->
+                            val cutout = currentTarget.translate(-origin).inflate(margin)
+                            if (cutout.contains(position)) currentOnTargetTap?.invoke() else currentOnDismiss()
+                        }
+                    }
                 }
-            }
+            )
     ) {
+        if (onTargetTap == null) {
+            // Four blocks around the hole close the spotlight; the hole has none, so the target gets its own touches.
+            listOf(
+                Rect(0f, 0f, area.width.toFloat(), hole.top),
+                Rect(0f, hole.bottom, area.width.toFloat(), area.height.toFloat()),
+                Rect(0f, hole.top, hole.left, hole.bottom),
+                Rect(hole.right, hole.top, area.width.toFloat(), hole.bottom),
+            ).forEach { block ->
+                Box(
+                    Modifier
+                        .absoluteOffset { IntOffset(block.left.roundToInt(), block.top.roundToInt()) }
+                        .size(with(density) { DpSize(block.width.coerceAtLeast(0f).toDp(), block.height.coerceAtLeast(0f).toDp()) })
+                        .pointerInput(Unit) { detectTapGestures { currentOnDismiss() } }
+                )
+            }
+        }
         // The tooltip sits above the target, or below it when there is no room above.
         val gap = with(density) { 14.dp.toPx() }
         val above = hole.top - gap - tooltipHeight >= with(density) { 24.dp.toPx() }
