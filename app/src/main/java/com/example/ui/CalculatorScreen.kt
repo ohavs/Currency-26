@@ -38,6 +38,7 @@ import androidx.compose.material.icons.rounded.Add
 import androidx.compose.material.icons.rounded.Close
 import androidx.compose.material.icons.rounded.DeleteOutline
 import androidx.compose.material.icons.rounded.Edit
+import androidx.compose.material.icons.rounded.History
 import androidx.compose.material.icons.rounded.Lightbulb
 import androidx.compose.material.icons.rounded.Refresh
 import androidx.compose.material.icons.rounded.SwapVert
@@ -73,6 +74,7 @@ import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.PathEffect
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.boundsInParent
 import androidx.compose.ui.layout.onGloballyPositioned
@@ -95,6 +97,7 @@ import androidx.compose.ui.text.style.TextDirection
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.LayoutDirection
+import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.em
 import androidx.compose.ui.unit.sp
@@ -107,7 +110,6 @@ import com.example.ui.theme.paletteTexture
 import com.example.utils.HistoryEntry
 import com.example.utils.amountSymbol
 import com.example.utils.formatExpression
-import com.example.utils.quickAmounts
 import com.example.utils.toRawAmount
 import com.example.utils.formatAmount
 import com.example.utils.formatAmountInput
@@ -178,7 +180,6 @@ fun CalculatorScreen(viewModel: MainViewModel, onRemoveLegacyApp: () -> Unit = {
                     onOpenTour = viewModel::openOfferedTour,
                     onDismissTourOffer = viewModel::dismissTourOffer,
                     onToggleCalculator = viewModel::toggleCalculator,
-                    onQuickAmount = viewModel::applyQuickAmount,
                     onOpenHistory = viewModel::openHistory,
                     onCloseHistory = viewModel::closeHistory,
                     onRestoreHistory = viewModel::restoreHistory,
@@ -268,7 +269,6 @@ fun CalculatorContent(
     onOpenTour: () -> Unit = {},
     onDismissTourOffer: () -> Unit = {},
     onToggleCalculator: () -> Unit = {},
-    onQuickAmount: (Long) -> Unit = {},
     onOpenHistory: () -> Unit = {},
     onCloseHistory: () -> Unit = {},
     onRestoreHistory: (HistoryEntry) -> Unit = {},
@@ -342,13 +342,15 @@ fun CalculatorContent(
             state.calculating -> formatExpression(expression)
             else -> formatAmountInput(expression)
         }
-        val sourceNote = when {
-            state.calculating -> "= " + (state.sourceValue?.let(::toRawAmount)?.let(::formatAmountInput) ?: "—")
-            state.lastExpression != null -> formatExpression(state.lastExpression) + " ="
-            else -> null
-        }
+        val sourceResult = if (state.calculating) state.sourceValue?.let(::toRawAmount)?.let(::formatAmountInput) else null
+        val sourceNote = state.lastExpression?.takeIf { !state.calculating }?.let { formatExpression(it) + " =" }
         val entries = buildList {
-            add(StackEntry(CurrencySlot.SOURCE, state.sourceCurrency, sourceAmount, palette.card, note = sourceNote, calculation = state.calculating))
+            add(
+                StackEntry(
+                    CurrencySlot.SOURCE, state.sourceCurrency, sourceAmount, palette.card,
+                    note = sourceNote, calculation = state.calculating, result = sourceResult
+                )
+            )
             add(StackEntry(CurrencySlot.TARGET, state.targetCurrency, converted(state.targetAmount), palette.highlight))
             if (extraCode != null && extraAmount != null) {
                 add(StackEntry(CurrencySlot.EXTRA_TARGET, extraCode, converted(extraAmount), palette.background, removable = true))
@@ -360,14 +362,16 @@ fun CalculatorContent(
             onCurrencyClick = onCurrencyClick,
             onSwapSlots = onSwapSlots,
             onRemoveExtra = onRemoveExtra,
-            onSourceAmountClick = if (state.showHistory) onCloseHistory else onOpenHistory
+            onSourceAmountClick = if (state.showHistory) onCloseHistory else onOpenHistory,
+            // The calculator needs the room: currency codes instead of names while it is open.
+            compactNames = state.expression != null
         )
 
-        if (extraCode != null) {
-            Spacer(Modifier.height(14.dp))
-        } else {
-            AddCurrencyButton(onClick = { onCurrencyClick(CurrencySlot.EXTRA_TARGET) })
-        }
+        CardLinks(
+            onAddCurrency = if (extraCode == null) ({ onCurrencyClick(CurrencySlot.EXTRA_TARGET) }) else null,
+            historyOpen = state.showHistory,
+            onHistory = if (state.showHistory) onCloseHistory else onOpenHistory
+        )
 
         Box(
             modifier = Modifier
@@ -396,16 +400,11 @@ fun CalculatorContent(
                         modifier = Modifier.fillMaxSize()
                     )
                 } else {
-                    val raw = state.expression ?: state.sourceAmountRaw
                     Keypad(
                         calculatorOpen = state.expression != null,
                         canEvaluate = state.calculating,
-                        quickAmounts = if (raw == "0" || raw.isEmpty()) quickAmounts(state.rates[state.sourceCurrency]) else null,
-                        currencySymbol = amountSymbol(state.sourceCurrency),
                         onKey = onKeypad,
                         onToggleCalculator = onToggleCalculator,
-                        onQuickAmount = onQuickAmount,
-                        onOpenHistory = onOpenHistory,
                         modifier = Modifier.fillMaxSize()
                     )
                 }
@@ -627,10 +626,12 @@ private data class StackEntry(
     val cardColor: Color,
     /** The optional extra currency: drawn as a light dashed card with its own remove button. */
     val removable: Boolean = false,
-    /** A small line under the amount: the live result while calculating, or the calculation behind the amount. */
+    /** A small line under the amount: the calculation behind it (after "=" or from the history). */
     val note: String? = null,
     /** [amount] is a calculation: long ones keep their end (where typing happens) in view. */
     val calculation: Boolean = false,
+    /** What the calculation comes to so far, shown under it; null while it has no result ("5 ÷ 0"). */
+    val result: String? = null,
 )
 
 /**
@@ -646,6 +647,7 @@ private fun CurrencyStack(
     onSwapSlots: (CurrencySlot, CurrencySlot) -> Unit,
     onRemoveExtra: () -> Unit,
     onSourceAmountClick: () -> Unit = {},
+    compactNames: Boolean = false,
 ) {
     val palette = LocalPalette.current
     val haptics = LocalHapticFeedback.current
@@ -762,6 +764,8 @@ private fun CurrencyStack(
                         onRemove = if (entry.removable) onRemoveExtra else null,
                         note = entry.note,
                         calculation = entry.calculation,
+                        result = entry.result,
+                        compactName = compactNames,
                         // The source amount opens the history; not when a long press lifted the row and let go.
                         onAmountClick = if (slot == CurrencySlot.SOURCE) {
                             { if (dragging == null) onSourceAmountClick() }
@@ -862,7 +866,10 @@ private fun TrashZone(active: Boolean, modifier: Modifier = Modifier) {
     }
 }
 
-/** One currency in a single row: flag and currency name (tap to change) on one side, symbol and amount on the other. */
+/**
+ * One currency in a single row: flag and currency name (tap to change) on one side, symbol and amount on the
+ * other. A [calculation] stands on its own, without the symbol: that goes with its [result] on the line under it.
+ */
 @Composable
 private fun CurrencyRow(
     code: String,
@@ -875,6 +882,9 @@ private fun CurrencyRow(
     onRemove: (() -> Unit)? = null,
     note: String? = null,
     calculation: Boolean = false,
+    result: String? = null,
+    /** The currency code instead of its name (while the calculator is open). */
+    compactName: Boolean = false,
     onAmountClick: (() -> Unit)? = null,
 ) {
     val palette = LocalPalette.current
@@ -899,7 +909,13 @@ private fun CurrencyRow(
         ) {
             Text(text = info.flag, fontSize = 30.sp)
             Spacer(Modifier.width(10.dp))
-            CurrencyName(currencyName(code, LocalAppLocale.current))
+            AnimatedContent(
+                targetState = if (compactName) code else currencyName(code, LocalAppLocale.current),
+                transitionSpec = { fadeIn(tween(220)) togetherWith fadeOut(tween(150)) },
+                label = "currencyName"
+            ) { name ->
+                CurrencyName(name)
+            }
         }
         Spacer(Modifier.width(12.dp))
         // Amount on the far side from the currency (left in Hebrew, right in English/Spanish).
@@ -918,16 +934,25 @@ private fun CurrencyRow(
                 )
                 .padding(vertical = 4.dp)
         ) {
+            val symbol = amountSymbol(code)
             AutoSizeText(
-                text = amountWithSymbol(amount, amountSymbol(code), palette.accent),
-                style = AmountTextStyle.copy(fontSize = if (note != null) 28.sp else 32.sp),
+                text = if (calculation) AnnotatedString(amount) else amountWithSymbol(amount, symbol, palette.accent),
+                style = AmountTextStyle.copy(fontSize = if (note != null || calculation) 28.sp else 32.sp),
                 color = palette.ink,
                 textAlign = farSide,
                 minFontSize = if (calculation) 18f else 12f,
                 keepEnd = calculation,
                 modifier = Modifier.fillMaxWidth()
             )
-            if (note != null) {
+            if (calculation) {
+                AutoSizeText(
+                    text = AnnotatedString("= ") + (result?.let { amountWithSymbol(it, symbol, palette.accent, 0.85.em) } ?: AnnotatedString("—")),
+                    style = AmountTextStyle.copy(fontSize = 19.sp, lineHeight = 24.sp, letterSpacing = 0.sp),
+                    color = palette.inkMuted,
+                    textAlign = farSide,
+                    modifier = Modifier.fillMaxWidth()
+                )
+            } else if (note != null) {
                 Text(
                     text = note,
                     style = MaterialTheme.typography.labelLarge.copy(textDirection = TextDirection.Ltr),
@@ -985,8 +1010,13 @@ private fun CurrencyName(text: String, maxWidth: Dp = 150.dp) {
 }
 
 /** The amount with its currency symbol beside it ("$ 1,250", "1,250 Ft"): smaller and in the accent color. */
-internal fun amountWithSymbol(amount: String, symbol: String, symbolColor: Color): AnnotatedString = buildAnnotatedString {
-    val symbolStyle = SpanStyle(color = symbolColor, fontSize = 0.7.em, fontWeight = FontWeight.SemiBold)
+internal fun amountWithSymbol(
+    amount: String,
+    symbol: String,
+    symbolColor: Color,
+    symbolSize: TextUnit = 0.7.em,
+): AnnotatedString = buildAnnotatedString {
+    val symbolStyle = SpanStyle(color = symbolColor, fontSize = symbolSize, fontWeight = FontWeight.SemiBold)
     if (symbolLeads(symbol)) {
         withStyle(symbolStyle) { append(symbol); append(' ') }
         append(amount)
@@ -1008,26 +1038,40 @@ private fun Modifier.dashedBorder(color: Color) = drawBehind {
     )
 }
 
-/** Light "+ add currency" link under the pair; a second target currency is optional. */
+/**
+ * Light links under the cards: "+ add currency" on the reading side ([onAddCurrency] is null once there is an
+ * additional currency) and the history on the other, highlighted while it is open.
+ */
 @Composable
-private fun AddCurrencyButton(onClick: () -> Unit) {
-    val palette = LocalPalette.current
-    Box(
+private fun CardLinks(onAddCurrency: (() -> Unit)?, historyOpen: Boolean, onHistory: () -> Unit) {
+    Row(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(vertical = 4.dp)
+            .padding(vertical = 2.dp),
+        verticalAlignment = Alignment.CenterVertically
     ) {
-        Row(
-            modifier = Modifier
-                .clip(CircleShape)
-                .clickable(role = Role.Button, onClick = onClick)
-                .padding(horizontal = 12.dp, vertical = 8.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Icon(Icons.Rounded.Add, contentDescription = null, tint = palette.inkMuted, modifier = Modifier.size(18.dp))
-            Spacer(Modifier.width(6.dp))
-            Text(stringResource(R.string.add_currency), style = MaterialTheme.typography.labelLarge, color = palette.inkMuted)
-        }
+        if (onAddCurrency != null) CardLink(Icons.Rounded.Add, stringResource(R.string.add_currency), onAddCurrency)
+        Spacer(Modifier.weight(1f))
+        CardLink(Icons.Rounded.History, stringResource(R.string.history), onHistory, selected = historyOpen)
+    }
+}
+
+@Composable
+private fun CardLink(icon: ImageVector, text: String, onClick: () -> Unit, selected: Boolean = false) {
+    val palette = LocalPalette.current
+    val background by animateColorAsState(if (selected) palette.card else palette.card.copy(alpha = 0f), label = "link")
+    val content = if (selected) palette.ink else palette.inkMuted
+    Row(
+        modifier = Modifier
+            .clip(CircleShape)
+            .background(background)
+            .clickable(role = Role.Button, onClick = onClick)
+            .padding(horizontal = 12.dp, vertical = 8.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Icon(icon, contentDescription = null, tint = if (selected) palette.accent else content, modifier = Modifier.size(18.dp))
+        Spacer(Modifier.width(6.dp))
+        Text(text, style = MaterialTheme.typography.labelLarge, color = content, maxLines = 1)
     }
 }
 

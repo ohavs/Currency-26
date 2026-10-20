@@ -10,7 +10,7 @@ cd tools/preview
 ONLY=v15_quick gradle -q run      # render (ONLY filters by name; omit for everything) -> out/*.png
 gradle -q test                    # utils and widget-sizing tests
 gradle -q dragCheck               # swap/drag, spotlight, tour and keypad tap checks
-gradle -q vmCheck                 # the real MainViewModel: calculator, quick amounts, history
+gradle -q vmCheck                 # the real MainViewModel: calculator, history
 python3 montage.py sheet.png 900 out/a.png out/b.png   # side-by-side sheet at 900px high
 ```
 

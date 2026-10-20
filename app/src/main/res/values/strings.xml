@@ -117,7 +117,7 @@
     <string name="tip_select_title">Convert from any app</string>
     <string name="tip_select_body">Select a price in any app and choose \"Convert currency\" from the menu (or Share → \"Convert currency\"). The result pops up right away, without leaving what you\'re doing.</string>
     <string name="tip_offer_action">Show</string>
-    <string name="tip_calc_title">Calculator, history and quick amounts</string>
-    <string name="tip_calc_body">The calculator key in the bottom row adds + − × ÷ for sums like %1$s, and the result is converted to every currency right away. Tap the amount to see your history; after C, the top row offers round amounts.</string>
+    <string name="tip_calc_title">Calculator and history</string>
+    <string name="tip_calc_body">The calculator key in the bottom row adds + − × ÷ for sums like %1$s, and the result is converted to every currency right away. Past amounts and calculations are kept in History, under the cards.</string>
     <string name="tip_calc_action">Try it</string>
 </resources>

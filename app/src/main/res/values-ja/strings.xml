@@ -117,7 +117,7 @@
     <string name="tip_select_title">どのアプリからでも換算</string>
     <string name="tip_select_body">どのアプリでも価格を選択し、メニューから\"通貨を換算\"を選びます（または 共有 → \"通貨を換算\"）。今の画面のまま、すぐに結果が表示されます。</string>
     <string name="tip_offer_action">見る</string>
-    <string name="tip_calc_title">電卓・履歴・クイック金額</string>
-    <string name="tip_calc_body">下の段の電卓キーで + − × ÷ が使え、%1$s のような計算ができます。結果はすぐにすべての通貨に換算されます。金額をタップすると履歴が表示され、C の後は上の段にキリのいい金額が並びます。</string>
+    <string name="tip_calc_title">電卓と履歴</string>
+    <string name="tip_calc_body">下の段の電卓キーで + − × ÷ が使え、%1$s のような計算ができます。結果はすぐにすべての通貨に換算されます。これまでの金額と計算は、カードの下の履歴に残ります。</string>
     <string name="tip_calc_action">試してみる</string>
 </resources>

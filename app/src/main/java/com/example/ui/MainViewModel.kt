@@ -47,7 +47,7 @@ data class CalculatorState(
     val expression: String? = null,
     /** The calculation behind the amount (after "=" or from the history), shown under it until the next key. */
     val lastExpression: String? = null,
-    /** The amount is a result, a quick amount or from the history: the next digit starts a new one. */
+    /** The amount is a result or from the history: the next digit starts a new one. */
     val freshAmount: Boolean = false,
     /** The history list is shown in place of the keypad. */
     val showHistory: Boolean = false,
@@ -486,9 +486,6 @@ class MainViewModel(
         }
     }
 
-    /** A quick amount (shown in the clear/backspace row while the amount is zero). */
-    fun applyQuickAmount(amount: Long) = loadAmount(amount.toString(), edited = true)
-
     fun openHistory() {
         _state.update { it.copy(showHistory = true) }
     }
@@ -512,17 +509,16 @@ class MainViewModel(
             if (extra !in pair) extra else listOf(current.sourceCurrency, current.targetCurrency).firstOrNull { it !in pair }
         }
         applySlots(mapOf(CurrencySlot.SOURCE to entry.source, CurrencySlot.TARGET to entry.target, CurrencySlot.EXTRA_TARGET to extra))
-        loadAmount(entry.amount, edited = false)
-        _state.update { it.copy(lastExpression = entry.expression, showHistory = false) }
-    }
-
-    /** Puts [raw] on the keypad as a finished amount (the next digit starts a new one). */
-    private fun loadAmount(raw: String, edited: Boolean) {
-        if (edited) recordHistory()
-        setAmount(raw)
-        amountEdited = edited
+        // A finished amount: the next digit starts a new one.
+        setAmount(entry.amount)
+        amountEdited = false
         _state.update {
-            it.copy(expression = it.expression?.let { raw }, freshAmount = true, lastExpression = null)
+            it.copy(
+                expression = it.expression?.let { entry.amount },
+                freshAmount = true,
+                lastExpression = entry.expression,
+                showHistory = false
+            )
         }
     }
 
