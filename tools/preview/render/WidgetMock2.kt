@@ -13,7 +13,11 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.rememberTextMeasurer
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.platform.LocalDensity
+import com.example.ui.theme.Rubik
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -37,6 +41,7 @@ fun LargeWidgetMock2(
     p: AppPalette, widthDp: Float, heightDp: Float, appRtl: Boolean, locale: Locale,
     amountRaw: String, src: String, tgt: String, rate: Double, extra: String?, extraRate: Double,
     updatedTime: String?, updatedLabel: String, launcherRtl: Boolean = false, theme: String = "sage",
+    systemNameFont: Boolean = false,
 ) {
     val pillFirst = appRtl == launcherRtl
     val layout = largeWidgetLayout(widthDp, heightDp, extra != null)
@@ -58,7 +63,7 @@ fun LargeWidgetMock2(
     fun card(code: String, text: String, bg: Color, removable: Boolean, modifier: Modifier) {
         val symbol = amountSymbol(code)
         val width = if (removable) amountWidth - 32f else amountWidth
-        Card(p, code, symbol, text, fitAmountSp(text, width, maxAmountSp, symbol = symbol), layout, bg, locale, pillFirst, launcherRtl, removable, modifier)
+        Card(p, code, symbol, text, fitAmountSp(text, width, maxAmountSp, symbol = symbol), layout, bg, locale, pillFirst, launcherRtl, removable, modifier, systemNameFont)
     }
 
     CompositionLocalProvider(LocalLayoutDirection provides if (launcherRtl) LayoutDirection.Rtl else LayoutDirection.Ltr) {
@@ -126,6 +131,7 @@ fun LargeWidgetMock2(
 private fun Card(
     p: AppPalette, code: String, symbol: String, amount: String, fontSp: Float, layout: LargeWidgetLayout, bg: Color,
     locale: Locale, pillFirst: Boolean, launcherRtl: Boolean, removable: Boolean, modifier: Modifier,
+    systemNameFont: Boolean = false,
 ) {
     val info = getCurrencyInfo(code)
     Row(modifier.fillMaxWidth().clip(RoundedCornerShape(20.dp)).background(bg).padding(horizontal = LargeWidgetLayout.CARD_PADDING.dp), verticalAlignment = Alignment.CenterVertically) {
@@ -134,9 +140,15 @@ private fun Card(
                 Text(info.flag, fontSize = layout.flagSp.sp)
                 if (layout.showNames) {
                     val name = currencyName(code, locale)
-                    Text(if (layout.nameLines > 1) shortName(name, max = 24) else shortName(name, max = 13),
-                        style = TextStyle(color = p.ink, fontSize = layout.nameSp.sp, fontWeight = FontWeight.Medium, textAlign = TextAlign.Center),
-                        maxLines = layout.nameLines, modifier = Modifier.fillMaxWidth())
+                    if (systemNameFont) {
+                        // Before 5.0.20: the launcher's own font at "medium" weight (regular on Samsung).
+                        val max = if (layout.nameLines > 1) 24 else 13
+                        Text(if (name.length <= max) name else name.take(max - 1).trimEnd() + "…",
+                            style = TextStyle(color = p.ink, fontSize = layout.nameSp.sp, fontWeight = FontWeight.Normal, textAlign = TextAlign.Center),
+                            maxLines = layout.nameLines, modifier = Modifier.fillMaxWidth())
+                    } else {
+                        AppFontNameMock(name, p.ink, layout)
+                    }
                 }
             }
         }
@@ -211,4 +223,16 @@ fun SmallWidgetMock2(
             }
         }
     }
+}
+
+/** Mirror of AppFontText: Rubik SemiBold, shrinking up to 3sp (not under 10sp) before cutting the name short. */
+@Composable
+private fun AppFontNameMock(name: String, color: Color, layout: LargeWidgetLayout) {
+    val measurer = rememberTextMeasurer()
+    val widthPx = with(LocalDensity.current) { layout.labelWidthDp.dp.roundToPx() }
+    val minSp = (layout.nameSp - 3f).coerceAtLeast(10f)
+    fun style(sp: Float) = TextStyle(color = color, fontFamily = Rubik, fontWeight = FontWeight.SemiBold, fontSize = sp.sp, textAlign = TextAlign.Center)
+    var sp = layout.nameSp
+    while (sp - 1f >= minSp && measurer.measure(name, style(sp), maxLines = layout.nameLines, constraints = androidx.compose.ui.unit.Constraints(maxWidth = widthPx)).hasVisualOverflow) sp -= 1f
+    Text(name, style = style(sp), maxLines = layout.nameLines, overflow = TextOverflow.Ellipsis, modifier = Modifier.width(layout.labelWidthDp.dp))
 }

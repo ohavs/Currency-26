@@ -544,6 +544,37 @@ fun main() {
         }
     }
     val he = java.util.Locale.forLanguageTag("he")
+    // 5.0.20: currency names in the app's font, before and after, beside the app's own card.
+    for (lang in listOf("he", "en")) for (dark in listOf(false, true)) for (before in listOf(true, false)) {
+        val p = com.example.ui.theme.Palettes.resolve("sage", dark)
+        val heb = lang == "he"
+        render("v20_name_${lang}_${if (dark) "dark" else "light"}_${if (before) "before" else "after"}", widthDp = 320, heightDp = 400) {
+            Box(Modifier.fillMaxSize().background(androidx.compose.ui.graphics.Color(0xFF3B4E66)).padding(10.dp)) {
+                com.example.widget.LargeWidgetMock2(
+                    p, 300f, 380f, heb, if (heb) he else java.util.Locale.ENGLISH,
+                    amountRaw = "1250", src = "USD", tgt = "ILS", rate = 3.7123, extra = null, extraRate = 0.0,
+                    updatedTime = if (heb) "היום 22:26" else "today 22:26", updatedLabel = if (heb) "עודכן היום 22:26" else "Updated today 22:26",
+                    systemNameFont = before
+                )
+            }
+        }
+    }
+    for (lang in listOf("he", "en")) {
+        val p = com.example.ui.theme.Palettes.resolve("sage", false)
+        val heb = lang == "he"
+        render("v20_name_${lang}_extra_after", widthDp = 320, heightDp = 400) {
+            Box(Modifier.fillMaxSize().background(androidx.compose.ui.graphics.Color(0xFF3B4E66)).padding(10.dp)) {
+                com.example.widget.LargeWidgetMock2(
+                    p, 300f, 380f, heb, if (heb) he else java.util.Locale.ENGLISH,
+                    amountRaw = "1250", src = "AED", tgt = "ILS", rate = 1.01, extra = "HUF", extraRate = 96.27,
+                    updatedTime = if (heb) "היום 22:26" else "today 22:26", updatedLabel = if (heb) "עודכן היום 22:26" else "Updated today 22:26"
+                )
+            }
+        }
+    }
+    render("v20_app_card_he", widthDp = 400, heightDp = 520) {
+        Frame(false, "sage") { Calc(state.copy(sourceAmountRaw = "1250")) }
+    }
     val only = System.getenv("ONLY")
     data class W(val name: String, val w: Float, val h: Float, val appRtl: Boolean, val extra: String?, val launcherRtl: Boolean = false, val amount: String = "1250")
     for (c in listOf(
