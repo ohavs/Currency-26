@@ -116,6 +116,14 @@
     <string name="quick_assumed">推定した通貨</string>
     <string name="tip_select_title">どのアプリからでも換算</string>
     <string name="tip_select_body">どのアプリでも価格を選択し、メニューから\"通貨を換算\"を選びます（または 共有 → \"通貨を換算\"）。今の画面のまま、すぐに結果が表示されます。</string>
+    <string name="select_menu_summary">価格を選択 → \"%1$s\"</string>
+    <string name="select_menu_body">どのアプリでも価格を選択し、表示されるメニューで\"%1$s\"を選びます（⋮ の中にある場合もあります）。アプリを離れずに、その上に結果が表示されます。</string>
+    <string name="select_menu_try">ここで試す：価格を長押し</string>
+    <string name="select_menu_samsung">Samsung のスマートフォンでは、一度オンにするまでこの項目は表示されません：</string>
+    <string name="select_menu_step1">上の価格を長押しします。</string>
+    <string name="select_menu_step2">メニューで ⋮ をタップし、\"アプリを管理\"（最後の項目）をタップします。</string>
+    <string name="select_menu_step3">\"%1$s\"をオンにして、完了をタップします。</string>
+    <string name="select_menu_share">共有 → \"%1$s\" からも使えます。</string>
     <string name="tip_offer_action">見る</string>
     <string name="tip_calc_title">電卓と履歴</string>
     <string name="tip_calc_body">下の段の電卓キーで + − × ÷ が使え、%1$s のような計算ができます。結果はすぐにすべての通貨に換算されます。これまでの金額と計算は、カードの下の履歴に残ります。</string>

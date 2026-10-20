@@ -116,6 +116,14 @@
     <string name="quick_assumed">Moneda supuesta</string>
     <string name="tip_select_title">Convierte desde cualquier app</string>
     <string name="tip_select_body">Selecciona un precio en cualquier app y elige \"Convertir moneda\" en el menú (o Compartir → \"Convertir moneda\"). El resultado aparece al instante, sin salir de lo que estás haciendo.</string>
+    <string name="select_menu_summary">Selecciona un precio → \"%1$s\"</string>
+    <string name="select_menu_body">Selecciona un precio en cualquier app y elige \"%1$s\" en el menú que aparece (a veces está bajo ⋮). La respuesta aparece sobre la app, sin salir de ella.</string>
+    <string name="select_menu_try">Pruébalo aquí: mantén pulsado el precio</string>
+    <string name="select_menu_samsung">En los teléfonos Samsung la opción está oculta hasta que la activas, una sola vez:</string>
+    <string name="select_menu_step1">Mantén pulsado el precio de arriba.</string>
+    <string name="select_menu_step2">En el menú, toca ⋮ y luego \"Gestionar aplicaciones\" (la última opción).</string>
+    <string name="select_menu_step3">Activa \"%1$s\" y toca Listo.</string>
+    <string name="select_menu_share">También funciona desde Compartir → \"%1$s\".</string>
     <string name="tip_offer_action">Ver</string>
     <string name="tip_calc_title">Calculadora e historial</string>
     <string name="tip_calc_body">La tecla de calculadora de la fila inferior añade + − × ÷ para cuentas como %1$s, y el resultado se convierte al instante a todas las monedas. Los importes y cálculos anteriores se guardan en Historial, bajo las tarjetas.</string>

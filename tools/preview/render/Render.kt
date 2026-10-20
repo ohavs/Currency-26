@@ -181,6 +181,64 @@ fun main() {
         storeShots()
         System.exit(0)
     }
+    // v5.0.22: "Convert from any app" in Settings (a price to long-press, Samsung's steps); the bubble's currency picker.
+    for ((name, app, device, samsung, dark) in listOf(
+        MenuCase("he_en_samsung", "iw", "en", true, false), MenuCase("en_en_samsung", "en", "en", true, false),
+        MenuCase("he_he_pixel", "iw", "iw", false, false), MenuCase("he_en_samsung_dark", "iw", "en", true, true),
+    )) {
+        val tapY = System.getenv("MENU_TAP_Y")?.toFloat() ?: 400f
+        for (open in listOf(false, true)) {
+            renderTapped("v22_settings_${name}_${if (open) "open" else "closed"}", if (open) listOf(200f to tapY) else emptyList(), heightDp = 1100, frames = 40) {
+                com.example.ui.SelectionMenuHarness.deviceLanguage = device
+                com.example.ui.SelectionMenuHarness.samsung = samsung
+                Frame(dark, "sage", app) {
+                    SettingsScreen(
+                        themeMode = "system", colorTheme = "sage", autoUpdate = AutoUpdateSettings(),
+                        lastUpdateTimestamp = state.lastUpdateTimestamp, isRefreshing = false, lastRefreshFailed = false,
+                        canPinWidget = true, onClose = {}, onThemeModeChange = {}, onColorThemeChange = {},
+                        onAutoUpdateEnabledChange = {}, onIntervalChange = {}, onWifiOnlyChange = {},
+                        onRefreshOnOpenChange = {}, onRefreshNow = {}, onAddWidget = {},
+                        appUpdate = com.example.ui.AppUpdateState(installedVersion = "5.0.22", checked = true),
+                        checkAppUpdates = true, onCheckAppUpdatesChange = {}, onCheckForAppUpdate = {}, onStartAppUpdate = {},
+                        language = if (app == "iw") "he" else app, onLanguageChange = {}
+                    )
+                }
+            }
+        }
+    }
+    val pickRates = mapOf("USD" to 1.0, "ILS" to 3.7123, "EUR" to 0.9191, "GBP" to 0.7874, "THB" to 35.81, "JPY" to 149.52, "CAD" to 1.3644,
+        "CHF" to 0.8812, "HUF" to 357.4, "CZK" to 23.11, "PLN" to 3.98, "TRY" to 34.12, "AED" to 3.6725)
+    for ((name, spec, chosen, picking) in listOf(
+        Quad2("single_iw", QuickSpec("iw", false, "€120", "ILS", "USD", null, "ILS", canReplace = false), null, false),
+        Quad2("single_iw_chosen_huf", QuickSpec("iw", false, "€120", "ILS", "USD", null, "ILS", canReplace = false), "HUF", false),
+        Quad2("single_iw_picker", QuickSpec("iw", false, "€120", "ILS", "USD", null, "ILS", canReplace = false), null, true),
+        Quad2("single_en_picker", QuickSpec("en", false, "Rooms from $189 per night", "ILS", "USD", null, "ILS", canReplace = false, theme = "ocean"), null, true),
+        Quad2("single_iw_dark_picker", QuickSpec("iw", true, "€120", "ILS", "USD", "GBP", "ILS", canReplace = false, theme = "lavender"), null, true),
+        Quad2("list_iw", QuickSpec("iw", false, "Room €90, breakfast €12, city tax €4", "ILS", "USD", null, "ILS", canReplace = true, theme = "sunset"), null, false),
+        Quad2("list_iw_picker", QuickSpec("iw", false, "Room €90, breakfast €12, city tax €4", "ILS", "USD", null, "ILS", canReplace = true, theme = "sunset"), null, true),
+    )) {
+        renderTapped("v22_quick_$name", emptyList(), frames = 40) {
+            androidx.compose.ui.res.HarnessStrings.language = spec.lang
+            val locale = java.util.Locale.forLanguageTag(if (spec.lang == "iw") "he" else spec.lang)
+            MyApplicationTheme(themeMode = if (spec.dark) "dark" else "light", colorThemeStr = spec.theme) {
+                CompositionLocalProvider(
+                    LocalLayoutDirection provides if (spec.lang == "iw") LayoutDirection.Rtl else LayoutDirection.Ltr,
+                    com.example.ui.LocalAppLocale provides locale
+                ) {
+                    Box(Modifier.fillMaxSize().background(androidx.compose.ui.graphics.Color(if (spec.dark) 0xFF1B1B1F else 0xFFF4F4F6))) {
+                        FakeBrowserPage(spec.text, spec.dark)
+                        com.example.ui.QuickConvertSheet(
+                            conversion = com.example.utils.QuickConvert.convert(spec.text, pickRates, spec.source, spec.target, spec.extra, spec.local, chosen),
+                            colorTheme = spec.theme, offline = false, canReplace = spec.canReplace, copied = false,
+                            onCopy = {}, onReplace = {}, onOpenApp = {}, onDismiss = {},
+                            rates = pickRates, recents = listOfNotNull(chosen, spec.target, spec.source, spec.extra, "EUR", "THB"),
+                            onChooseCurrency = {}, startPicking = picking
+                        )
+                    }
+                }
+            }
+        }
+    }
     // v5.0.21 (Play build): Premium sheet, the locked calculator key, the ad strip, Settings and the locked widget.
     val hourMs = 3_600_000L
     val freeState = com.example.premium.PremiumState()
@@ -765,6 +823,10 @@ fun main() {
 private data class Quint(val a: String, val b: Float, val c: Float, val d: Boolean, val e: String?)
 
 private data class Quad(val a: String, val b: Boolean, val c: Int, val d: Boolean)
+
+private data class Quad2(val a: String, val b: QuickSpec, val c: String?, val d: Boolean)
+
+private data class MenuCase(val name: String, val app: String, val device: String, val samsung: Boolean, val dark: Boolean)
 
 private data class QuickSpec(
     val lang: String, val dark: Boolean, val text: String, val target: String, val source: String, val extra: String?,

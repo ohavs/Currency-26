@@ -116,6 +116,14 @@
     <string name="quick_assumed">अनुमानित मुद्रा</string>
     <string name="tip_select_title">किसी भी ऐप से बदलें</string>
     <string name="tip_select_body">किसी भी ऐप में कीमत चुनें और मेन्यू से \"मुद्रा बदलें\" चुनें (या शेयर करें → \"मुद्रा बदलें\")। नतीजा तुरंत दिखेगा, जो कर रहे हैं उसे छोड़े बिना।</string>
+    <string name="select_menu_summary">कीमत चुनें → \"%1$s\"</string>
+    <string name="select_menu_body">किसी भी ऐप में कीमत चुनें और खुलने वाले मेन्यू में \"%1$s\" चुनें (कभी-कभी यह ⋮ में होता है)। जवाब ऐप छोड़े बिना उसके ऊपर दिखता है।</string>
+    <string name="select_menu_try">यहाँ आज़माएँ: कीमत को देर तक दबाएँ</string>
+    <string name="select_menu_samsung">Samsung फ़ोन पर यह विकल्प तब तक छिपा रहता है जब तक आप इसे एक बार चालू न करें:</string>
+    <string name="select_menu_step1">ऊपर दी गई कीमत को देर तक दबाएँ।</string>
+    <string name="select_menu_step2">मेन्यू में ⋮ पर टैप करें, फिर \"ऐप्स प्रबंधित करें\" (आख़िरी विकल्प) पर।</string>
+    <string name="select_menu_step3">\"%1$s\" चालू करें और हो गया पर टैप करें।</string>
+    <string name="select_menu_share">शेयर करें → \"%1$s\" से भी काम करता है।</string>
     <string name="tip_offer_action">देखें</string>
     <string name="tip_calc_title">कैलकुलेटर और इतिहास</string>
     <string name="tip_calc_body">नीचे की पंक्ति की कैलकुलेटर कुंजी %1$s जैसे हिसाब के लिए + − × ÷ जोड़ती है, और नतीजा तुरंत सभी मुद्राओं में बदल जाता है। पिछली राशियाँ और हिसाब कार्डों के नीचे इतिहास में रहते हैं।</string>

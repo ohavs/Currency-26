@@ -15,6 +15,8 @@ mkdir -p "$DIR/app/com/example/premium"
 cp "$SRC/premium/Premium.kt" "$SRC/premium/Monetization.kt" "$DIR/app/com/example/premium/"
 # The real fonts file loads Android resources; stubs/ has a desktop one.
 rm "$DIR/app/com/example/ui/theme/Fonts.kt"
+# The selectable price is an Android TextView; stubs/ has a drawn one.
+rm "$DIR/app/com/example/ui/SelectionMenu.kt"
 rm -rf "$DIR/apptest" && mkdir -p "$DIR/apptest/widget"
 cp -r "$TEST/utils" "$DIR/apptest/"
 cp "$TEST/widget/WidgetSizingTest.kt" "$DIR/apptest/widget/"

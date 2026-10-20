@@ -116,6 +116,14 @@
     <string name="quick_assumed">Tahmini para birimi</string>
     <string name="tip_select_title">Her uygulamadan çevirin</string>
     <string name="tip_select_body">Herhangi bir uygulamada bir fiyatı seçin ve menüden \"Döviz çevir\"i seçin (veya Paylaş → \"Döviz çevir\"). Sonuç, yaptığınız işi bırakmadan hemen görünür.</string>
+    <string name="select_menu_summary">Bir fiyat seçin → \"%1$s\"</string>
+    <string name="select_menu_body">Herhangi bir uygulamada bir fiyat seçin ve açılan menüden \"%1$s\" seçeneğine dokunun (bazen ⋮ altındadır). Cevap, uygulamadan çıkmadan üzerinde belirir.</string>
+    <string name="select_menu_try">Burada deneyin: fiyata uzun basın</string>
+    <string name="select_menu_samsung">Samsung telefonlarda bu seçenek, bir kez açana kadar gizlidir:</string>
+    <string name="select_menu_step1">Yukarıdaki fiyata uzun basın.</string>
+    <string name="select_menu_step2">Menüde ⋮ simgesine, ardından \"Uygulamaları yönet\" seçeneğine dokunun (son seçenek).</string>
+    <string name="select_menu_step3">\"%1$s\" seçeneğini açın ve Bitti\'ye dokunun.</string>
+    <string name="select_menu_share">Paylaş → \"%1$s\" ile de çalışır.</string>
     <string name="tip_offer_action">Göster</string>
     <string name="tip_calc_title">Hesap makinesi ve geçmiş</string>
     <string name="tip_calc_body">Alt sıradaki hesap makinesi tuşu %1$s gibi hesaplar için + − × ÷ ekler ve sonuç anında tüm para birimlerine çevrilir. Önceki tutarlar ve hesaplar, kartların altındaki Geçmiş\'te saklanır.</string>

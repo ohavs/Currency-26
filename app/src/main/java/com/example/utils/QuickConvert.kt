@@ -11,6 +11,8 @@ data class ConvertedPrice(val price: FoundPrice, val to: String, val value: Doub
 /** What the quick-convert bubble shows for a piece of selected text. */
 data class QuickConversion(
     val lines: List<ConvertedPrice>,
+    /** The currency prices go to first (one already in it goes to the next of the user's currencies). */
+    val target: String,
     /** For a single price: the same amount in the user's other currencies. */
     val others: List<Pair<String, Double>>,
     /** The sum, when there are several prices in one currency. */
@@ -26,11 +28,15 @@ data class QuickConversion(
     }
 }
 
+/** The currencies on the app's main screen: from, to and the optional third. */
+data class AppCurrencies(val source: String, val target: String, val extra: String?)
+
 object QuickConvert {
     /**
      * Converts the prices in [text] into the user's currencies ([source], [target] and the optional [extra];
      * the target first, so "€120" shows in shekels and "₪120" in dollars). Rates are per US dollar.
      * [local] is the currency of the country the phone is in, which settles "$", "kr" and bare numbers abroad.
+     * [chosen] is a currency picked in the bubble itself; it comes before the target.
      */
     fun convert(
         text: String,
@@ -39,8 +45,9 @@ object QuickConvert {
         target: String,
         extra: String?,
         local: String?,
+        chosen: String? = null,
     ): QuickConversion {
-        val mine = listOfNotNull(target, source, extra).distinct()
+        val mine = listOfNotNull(chosen, target, source, extra).distinct()
         // A bare number is in the local currency when abroad (it isn't the target), else in the source.
         val fallback = local?.takeIf { it != target && it in rates } ?: source
         val prices = PriceParser.parse(text, rates.keys, listOfNotNull(local, source, target, extra), fallback)
@@ -55,7 +62,17 @@ object QuickConvert {
         }.orEmpty()
         val total = lines.takeIf { it.size > 1 && it.all { l -> l.to == it[0].to } }
             ?.let { it[0].to to it.sumOf { l -> l.value } }
-        return QuickConversion(lines, others, total)
+        return QuickConversion(lines, mine.first(), others, total)
+    }
+
+    /**
+     * The app's currencies after "open in app" on a price in [price] converted to [to]: the price's currency
+     * becomes the source and [to] the target. The extra currency stays unless it is one of those two, when it
+     * takes a currency that was pushed out instead, so none shows twice and as few as possible are lost.
+     */
+    fun appCurrencies(price: String, to: String, source: String, target: String, extra: String?): AppCurrencies {
+        val left = listOfNotNull(extra, target, source).filter { it != price && it != to }
+        return AppCurrencies(price, to, if (extra == null) null else left.firstOrNull())
     }
 
     fun convertAmount(amount: Double, from: String, to: String, rates: Map<String, Double>): Double =

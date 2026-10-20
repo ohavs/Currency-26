@@ -116,6 +116,14 @@
     <string name="quick_assumed">Devise supposée</string>
     <string name="tip_select_title">Convertissez depuis n\'importe quelle app</string>
     <string name="tip_select_body">Sélectionnez un prix dans n\'importe quelle app et choisissez \"Convertir la devise\" dans le menu (ou Partager → \"Convertir la devise\"). Le résultat s\'affiche aussitôt, sans quitter ce que vous faites.</string>
+    <string name="select_menu_summary">Sélectionnez un prix → \"%1$s\"</string>
+    <string name="select_menu_body">Sélectionnez un prix dans n\'importe quelle app et choisissez \"%1$s\" dans le menu qui s\'ouvre (parfois sous ⋮). La réponse s\'affiche par-dessus l\'app, sans la quitter.</string>
+    <string name="select_menu_try">Essayez ici : appuyez longuement sur le prix</string>
+    <string name="select_menu_samsung">Sur les téléphones Samsung, l\'option est masquée tant que vous ne l\'activez pas, une seule fois :</string>
+    <string name="select_menu_step1">Appuyez longuement sur le prix ci-dessus.</string>
+    <string name="select_menu_step2">Dans le menu, touchez ⋮ puis \"Gérer les applications\" (la dernière option).</string>
+    <string name="select_menu_step3">Activez \"%1$s\" et touchez OK.</string>
+    <string name="select_menu_share">Fonctionne aussi depuis Partager → \"%1$s\".</string>
     <string name="tip_offer_action">Voir</string>
     <string name="tip_calc_title">Calculatrice et historique</string>
     <string name="tip_calc_body">La touche calculatrice de la rangée du bas ajoute + − × ÷ pour des calculs comme %1$s, et le résultat est aussitôt converti dans toutes les devises. Les montants et calculs précédents sont gardés dans l\'historique, sous les cartes.</string>

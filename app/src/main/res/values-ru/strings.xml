@@ -116,6 +116,14 @@
     <string name="quick_assumed">Валюта предположена</string>
     <string name="tip_select_title">Конвертация из любого приложения</string>
     <string name="tip_select_body">Выделите цену в любом приложении и выберите \"Конвертировать валюту\" в меню (или \"Поделиться\" → \"Конвертировать валюту\"). Результат появится сразу, не отрываясь от дела.</string>
+    <string name="select_menu_summary">Выделите цену → \"%1$s\"</string>
+    <string name="select_menu_body">Выделите цену в любом приложении и выберите \"%1$s\" в появившемся меню (иногда он под ⋮). Ответ появится поверх приложения, не покидая его.</string>
+    <string name="select_menu_try">Попробуйте здесь: нажмите и удерживайте цену</string>
+    <string name="select_menu_samsung">На телефонах Samsung этот пункт скрыт, пока его не включить, один раз:</string>
+    <string name="select_menu_step1">Нажмите и удерживайте цену выше.</string>
+    <string name="select_menu_step2">В меню нажмите ⋮, затем \"Управление приложениями\" (последний пункт).</string>
+    <string name="select_menu_step3">Включите \"%1$s\" и нажмите \"Готово\".</string>
+    <string name="select_menu_share">Работает и через \"Поделиться\" → \"%1$s\".</string>
     <string name="tip_offer_action">Показать</string>
     <string name="tip_calc_title">Калькулятор и история</string>
     <string name="tip_calc_body">Кнопка калькулятора в нижнем ряду добавляет + − × ÷ для расчётов вроде %1$s, а результат сразу пересчитывается во все валюты. Прежние суммы и расчёты сохраняются в истории, под карточками.</string>

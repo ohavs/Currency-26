@@ -116,6 +116,14 @@
     <string name="quick_assumed">Währung angenommen</string>
     <string name="tip_select_title">Aus jeder App umrechnen</string>
     <string name="tip_select_body">Markiere einen Preis in einer beliebigen App und wähle \"Währung umrechnen\" im Menü (oder Teilen → \"Währung umrechnen\"). Das Ergebnis erscheint sofort, ohne die App zu verlassen.</string>
+    <string name="select_menu_summary">Preis markieren → \"%1$s\"</string>
+    <string name="select_menu_body">Markiere einen Preis in einer beliebigen App und wähle \"%1$s\" im Menü, das sich öffnet (manchmal unter ⋮). Die Antwort erscheint über der App, ohne sie zu verlassen.</string>
+    <string name="select_menu_try">Hier ausprobieren: lange auf den Preis tippen</string>
+    <string name="select_menu_samsung">Auf Samsung-Handys ist die Option versteckt, bis du sie einmal einschaltest:</string>
+    <string name="select_menu_step1">Tippe lange auf den Preis oben.</string>
+    <string name="select_menu_step2">Tippe im Menü auf ⋮ und dann auf \"Apps verwalten\" (die letzte Option).</string>
+    <string name="select_menu_step3">Schalte \"%1$s\" ein und tippe auf Fertig.</string>
+    <string name="select_menu_share">Funktioniert auch über Teilen → \"%1$s\".</string>
     <string name="tip_offer_action">Zeigen</string>
     <string name="tip_calc_title">Rechner und Verlauf</string>
     <string name="tip_calc_body">Die Rechner-Taste in der unteren Reihe fügt + − × ÷ hinzu, für Rechnungen wie %1$s, und das Ergebnis wird sofort in alle Währungen umgerechnet. Frühere Beträge und Rechnungen findest du im Verlauf unter den Karten.</string>

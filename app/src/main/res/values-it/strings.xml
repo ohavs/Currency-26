@@ -116,6 +116,14 @@
     <string name="quick_assumed">Valuta presunta</string>
     <string name="tip_select_title">Converti da qualsiasi app</string>
     <string name="tip_select_body">Seleziona un prezzo in qualsiasi app e scegli \"Converti valuta\" dal menu (o Condividi → \"Converti valuta\"). Il risultato appare subito, senza lasciare ciò che stai facendo.</string>
+    <string name="select_menu_summary">Seleziona un prezzo → \"%1$s\"</string>
+    <string name="select_menu_body">Seleziona un prezzo in qualsiasi app e scegli \"%1$s\" nel menu che si apre (a volte è sotto ⋮). La risposta compare sopra l\'app, senza uscirne.</string>
+    <string name="select_menu_try">Provalo qui: tieni premuto sul prezzo</string>
+    <string name="select_menu_samsung">Sui telefoni Samsung l\'opzione è nascosta finché non la attivi, una volta sola:</string>
+    <string name="select_menu_step1">Tieni premuto sul prezzo qui sopra.</string>
+    <string name="select_menu_step2">Nel menu tocca ⋮ e poi \"Gestisci app\" (l\'ultima opzione).</string>
+    <string name="select_menu_step3">Attiva \"%1$s\" e tocca Fatto.</string>
+    <string name="select_menu_share">Funziona anche da Condividi → \"%1$s\".</string>
     <string name="tip_offer_action">Mostra</string>
     <string name="tip_calc_title">Calcolatrice e cronologia</string>
     <string name="tip_calc_body">Il tasto calcolatrice nella riga in basso aggiunge + − × ÷ per calcoli come %1$s, e il risultato viene convertito subito in tutte le valute. Gli importi e i calcoli precedenti restano nella cronologia, sotto le schede.</string>

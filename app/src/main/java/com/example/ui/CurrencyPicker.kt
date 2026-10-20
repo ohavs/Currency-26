@@ -64,7 +64,6 @@ fun CurrencySelector(
     onRemove: () -> Unit = {},
 ) {
     BackHandler(onBack = onClose)
-    val palette = LocalPalette.current
 
     val slot = state.pickerSlot
     val currentCode = state.currencyIn(slot)
@@ -81,14 +80,6 @@ fun CurrencySelector(
     val allCurrencies = remember(state.rates.keys, hidden) {
         state.rates.keys.ifEmpty { currencyMap.keys }.filterNot { it in hidden }.sorted()
     }
-    val query = state.searchQuery.trim()
-    // Code, symbol, currency and country names in every app language - best matches first.
-    val locale = LocalAppLocale.current
-    val filtered = remember(allCurrencies, query, locale) { CurrencySearch.search(allCurrencies, query, locale) }
-    LaunchedEffect(allCurrencies, locale) {
-        withContext(Dispatchers.Default) { CurrencySearch.warmUp(allCurrencies, locale) }
-    }
-    val recents = state.recentCurrencies.filter { it in allCurrencies }.take(8)
 
     Column(
         modifier = Modifier
@@ -111,7 +102,48 @@ fun CurrencySelector(
             }
         )
 
-        SearchField(query = state.searchQuery, onQueryChange = onSearch)
+        CurrencyChooser(
+            currencies = allCurrencies,
+            rates = state.rates,
+            currentCode = currentCode,
+            otherCode = otherCode,
+            recents = state.recentCurrencies,
+            query = state.searchQuery,
+            onQueryChange = onSearch,
+            onSelect = onSelect,
+            modifier = Modifier.weight(1f)
+        )
+    }
+}
+
+/**
+ * The search field, the recently used currencies and the list of [currencies]: the body of the app's picker, and
+ * of the quick-convert bubble's. Rates in the list are against [otherCode].
+ */
+@Composable
+fun CurrencyChooser(
+    currencies: List<String>,
+    rates: Map<String, Double>,
+    currentCode: String?,
+    otherCode: String,
+    recents: List<String>,
+    query: String,
+    onQueryChange: (String) -> Unit,
+    onSelect: (String) -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    val palette = LocalPalette.current
+    val trimmed = query.trim()
+    // Code, symbol, currency and country names in every app language - best matches first.
+    val locale = LocalAppLocale.current
+    val filtered = remember(currencies, trimmed, locale) { CurrencySearch.search(currencies, trimmed, locale) }
+    LaunchedEffect(currencies, locale) {
+        withContext(Dispatchers.Default) { CurrencySearch.warmUp(currencies, locale) }
+    }
+    val recentRow = recents.filter { it in currencies }.distinct().take(8)
+
+    Column(modifier = modifier) {
+        SearchField(query = query, onQueryChange = onQueryChange)
 
         Spacer(Modifier.height(12.dp))
 
@@ -122,7 +154,7 @@ fun CurrencySelector(
             contentPadding = PaddingValues(bottom = 24.dp),
             verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-            if (query.isEmpty() && recents.isNotEmpty()) {
+            if (trimmed.isEmpty() && recentRow.isNotEmpty()) {
                 item(key = "recent-label") { SectionLabel(stringResource(R.string.recently_used)) }
                 item(key = "recent-row") {
                     Row(
@@ -131,7 +163,7 @@ fun CurrencySelector(
                             .horizontalScroll(rememberScrollState()),
                         horizontalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
-                        recents.forEach { code ->
+                        recentRow.forEach { code ->
                             RecentChip(code = code, selected = code == currentCode, onClick = { onSelect(code) })
                         }
                     }
@@ -142,7 +174,6 @@ fun CurrencySelector(
             }
 
             items(filtered, key = { it }) { code ->
-                val rates = state.rates
                 val rateText = if (code != otherCode && rates[code] != null && rates[otherCode] != null) {
                     "${formatRate(rates.getValue(otherCode) / rates.getValue(code))} $otherCode"
                 } else {
@@ -159,7 +190,7 @@ fun CurrencySelector(
             if (filtered.isEmpty()) {
                 item(key = "empty") {
                     Text(
-                        text = stringResource(R.string.no_results, query),
+                        text = stringResource(R.string.no_results, trimmed),
                         style = MaterialTheme.typography.bodyLarge,
                         color = palette.inkMuted,
                         modifier = Modifier

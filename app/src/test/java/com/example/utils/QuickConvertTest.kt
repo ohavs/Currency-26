@@ -39,4 +39,28 @@ class QuickConvertTest {
         assertEquals("Room ₪370.00, breakfast ₪37.00", result.replaceIn(text))
         assertNull(QuickConvert.convert("€90", rates, "USD", "ILS", null, null).total)
     }
+
+    @Test
+    fun `a currency chosen in the bubble comes first, the app's currencies after it`() {
+        val result = QuickConvert.convert("$100", rates, "USD", "ILS", null, "ILS", chosen = "EUR")
+        assertEquals("EUR", result.target)
+        val line = result.lines.single()
+        assertEquals("EUR", line.to)
+        assertEquals(90.0, line.value, 1e-9)
+        assertEquals(listOf("ILS"), result.others.map { it.first })
+        // A price already in the chosen currency goes to the target.
+        assertEquals("ILS", QuickConvert.convert("€90", rates, "USD", "ILS", null, "ILS", chosen = "EUR").lines.single().to)
+    }
+
+    @Test
+    fun `opening in the app keeps the user's currencies where it can`() {
+        // A new currency to the target: the old source makes way, the extra stays.
+        assertEquals(AppCurrencies("EUR", "ILS", "GBP"), QuickConvert.appCurrencies("EUR", "ILS", "USD", "ILS", "GBP"))
+        // A price in the target swaps the two.
+        assertEquals(AppCurrencies("ILS", "USD", null), QuickConvert.appCurrencies("ILS", "USD", "USD", "ILS", null))
+        // A price in the extra currency: the old source takes its place.
+        assertEquals(AppCurrencies("GBP", "ILS", "USD"), QuickConvert.appCurrencies("GBP", "ILS", "USD", "ILS", "GBP"))
+        // The extra currency chosen in the bubble: the old target takes its place.
+        assertEquals(AppCurrencies("EUR", "GBP", "ILS"), QuickConvert.appCurrencies("EUR", "GBP", "USD", "ILS", "GBP"))
+    }
 }

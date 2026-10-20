@@ -1,5 +1,7 @@
 package com.example.ui
 
+import androidx.activity.compose.BackHandler
+import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.tween
@@ -11,19 +13,27 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.navigationBarsPadding
+import androidx.compose.foundation.layout.ime
+import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.union
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.windowInsetsPadding
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.rounded.ArrowBack
 import androidx.compose.material.icons.automirrored.rounded.OpenInNew
 import androidx.compose.material.icons.rounded.Check
 import androidx.compose.material.icons.rounded.CloudOff
 import androidx.compose.material.icons.rounded.ContentCopy
+import androidx.compose.material.icons.rounded.ExpandMore
 import androidx.compose.material.icons.rounded.FindReplace
 import androidx.compose.material.icons.rounded.SearchOff
 import androidx.compose.material3.CircularProgressIndicator
@@ -32,7 +42,11 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -40,6 +54,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDirection
@@ -52,6 +67,7 @@ import com.example.ui.theme.paletteTexture
 import com.example.utils.ConvertedPrice
 import com.example.utils.QuickConversion
 import com.example.utils.amountSymbol
+import com.example.utils.currencyMap
 import com.example.utils.currencyName
 import com.example.utils.formatAmount
 import com.example.utils.formatOriginal
@@ -62,7 +78,8 @@ import com.example.utils.withSymbol
 /**
  * The bubble that pops over another app when the user picks "Convert currency" on selected text.
  * [conversion] is null while the very first rates load ([offline] when they could not); tapping outside the
- * card dismisses it.
+ * card dismisses it. Tapping the currency it converts to opens a picker in the bubble ([onChooseCurrency]);
+ * [recents] are offered first there.
  */
 @Composable
 fun QuickConvertSheet(
@@ -75,11 +92,23 @@ fun QuickConvertSheet(
     onReplace: () -> Unit,
     onOpenApp: () -> Unit,
     onDismiss: () -> Unit,
+    rates: Map<String, Double> = emptyMap(),
+    recents: List<String> = emptyList(),
+    onChooseCurrency: ((String) -> Unit)? = null,
+    startPicking: Boolean = false,
 ) {
     val palette = LocalPalette.current
     val appear = remember { Animatable(0f) }
     LaunchedEffect(Unit) { appear.animateTo(1f, tween(180, easing = FastOutSlowInEasing)) }
     val noRipple = remember { MutableInteractionSource() }
+    var picking by rememberSaveable { mutableStateOf(startPicking) }
+    var query by rememberSaveable { mutableStateOf("") }
+    val closePicker = {
+        picking = false
+        query = ""
+    }
+    BackHandler(enabled = picking, onBack = closePicker)
+    val choose = onChooseCurrency?.let { { picking = true } }
 
     Box(
         modifier = Modifier
@@ -91,7 +120,8 @@ fun QuickConvertSheet(
         Column(
             modifier = Modifier
                 .align(Alignment.BottomCenter)
-                .navigationBarsPadding()
+                // The picker's search field brings the keyboard up under the card.
+                .windowInsetsPadding(WindowInsets.navigationBars.union(WindowInsets.ime))
                 .padding(12.dp)
                 .fillMaxWidth()
                 .graphicsLayer { translationY = (1f - appear.value) * 48.dp.toPx() }
@@ -99,9 +129,22 @@ fun QuickConvertSheet(
                 .background(palette.background)
                 .paletteTexture(colorTheme, palette)
                 .clickable(interactionSource = noRipple, indication = null, onClick = {})
+                .animateContentSize()
                 .padding(16.dp)
         ) {
             when {
+                picking && conversion != null && onChooseCurrency != null -> CurrencyPage(
+                    conversion = conversion,
+                    rates = rates,
+                    recents = recents,
+                    query = query,
+                    onQueryChange = { query = it },
+                    onBack = closePicker,
+                    onSelect = { code ->
+                        closePicker()
+                        onChooseCurrency(code)
+                    }
+                )
                 conversion == null && offline -> Message(stringResource(R.string.offline), Icons.Rounded.CloudOff, onOpenApp)
                 conversion == null -> Box(Modifier.fillMaxWidth().height(120.dp), contentAlignment = Alignment.Center) {
                     CircularProgressIndicator(color = palette.accent, strokeWidth = 3.dp)
@@ -109,7 +152,7 @@ fun QuickConvertSheet(
                 conversion.lines.isEmpty() -> Message(stringResource(R.string.quick_no_price), Icons.Rounded.SearchOff, onOpenApp)
                 else -> {
                     val single = conversion.lines.singleOrNull()
-                    if (single != null) SinglePrice(single, conversion.others) else PriceList(conversion)
+                    if (single != null) SinglePrice(single, conversion.others, choose) else PriceList(conversion, choose)
                     Spacer(Modifier.height(14.dp))
                     Row(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically) {
                         PillButton(
@@ -139,9 +182,47 @@ fun QuickConvertSheet(
     }
 }
 
+/**
+ * The currencies to convert to, inside the bubble: the price on top (a single one's currency is not offered), then
+ * the app's picker with its search and the user's currencies first.
+ */
+@Composable
+private fun CurrencyPage(
+    conversion: QuickConversion,
+    rates: Map<String, Double>,
+    recents: List<String>,
+    query: String,
+    onQueryChange: (String) -> Unit,
+    onBack: () -> Unit,
+    onSelect: (String) -> Unit,
+) {
+    val single = conversion.lines.singleOrNull()
+    val currencies = remember(rates.keys, single) {
+        rates.keys.ifEmpty { currencyMap.keys }.filter { it != single?.price?.currency }.sorted()
+    }
+    Column(Modifier.fillMaxWidth().fillMaxHeight(0.8f)) {
+        AppTopBar(
+            title = stringResource(R.string.choose_currency),
+            subtitle = single?.let { withSymbol(it.price.currency, it.price.amount, original = true) },
+            navigation = { RoundIconButton(Icons.AutoMirrored.Rounded.ArrowBack, stringResource(R.string.back), onBack) }
+        )
+        CurrencyChooser(
+            currencies = currencies,
+            rates = rates,
+            currentCode = single?.to ?: conversion.target,
+            otherCode = single?.price?.currency ?: conversion.target,
+            recents = recents,
+            query = query,
+            onQueryChange = onQueryChange,
+            onSelect = onSelect,
+            modifier = Modifier.weight(1f)
+        )
+    }
+}
+
 /** The price as found (with a hint when its currency was a guess) above the converted amount, like the app's cards. */
 @Composable
-private fun SinglePrice(line: ConvertedPrice, others: List<Pair<String, Double>>) {
+private fun SinglePrice(line: ConvertedPrice, others: List<Pair<String, Double>>, onChooseCurrency: (() -> Unit)?) {
     val palette = LocalPalette.current
     val from = line.price
     PriceCard(
@@ -152,7 +233,14 @@ private fun SinglePrice(line: ConvertedPrice, others: List<Pair<String, Double>>
         fontSize = 22
     )
     Spacer(Modifier.height(6.dp))
-    PriceCard(code = line.to, amount = formatAmount(line.value), note = null, background = palette.highlight, fontSize = 34)
+    PriceCard(
+        code = line.to,
+        amount = formatAmount(line.value),
+        note = null,
+        background = palette.highlight,
+        fontSize = 34,
+        onClick = onChooseCurrency
+    )
     val rate = if (from.amount != 0.0) line.value / from.amount else 0.0
     val details = (others.map { (code, value) -> withSymbol(code, value) } + "1 ${from.currency} = ${formatRate(rate)} ${line.to}")
     Spacer(Modifier.height(10.dp))
@@ -166,29 +254,40 @@ private fun SinglePrice(line: ConvertedPrice, others: List<Pair<String, Double>>
     )
 }
 
-/** A currency card: flag and name on the reading side, the amount with its symbol on the other. */
+/**
+ * A currency card: flag and name on the reading side, the amount with its symbol on the other. With [onClick] the
+ * name carries a chevron, and the card changes the currency.
+ */
 @Composable
-private fun PriceCard(code: String, amount: String, note: String?, background: Color, fontSize: Int) {
+private fun PriceCard(code: String, amount: String, note: String?, background: Color, fontSize: Int, onClick: (() -> Unit)? = null) {
     val palette = LocalPalette.current
     val locale = LocalAppLocale.current
+    val changeLabel = stringResource(R.string.change_currency)
     Row(
         modifier = Modifier
             .fillMaxWidth()
             .clip(RoundedCornerShape(24.dp))
             .background(background)
+            .then(if (onClick != null) Modifier.clickable(role = Role.Button, onClickLabel = changeLabel, onClick = onClick) else Modifier)
             .padding(horizontal = 16.dp, vertical = 12.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
         Text(getCurrencyInfo(code).flag, fontSize = 26.sp)
         Spacer(Modifier.width(10.dp))
         Column(Modifier.weight(1f)) {
-            Text(
-                currencyName(code, locale),
-                style = MaterialTheme.typography.titleSmall,
-                color = palette.ink,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis
-            )
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Text(
+                    currencyName(code, locale),
+                    style = MaterialTheme.typography.titleSmall,
+                    color = palette.ink,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                    modifier = Modifier.weight(1f, fill = false)
+                )
+                if (onClick != null) {
+                    Icon(Icons.Rounded.ExpandMore, contentDescription = null, tint = palette.inkMuted, modifier = Modifier.size(20.dp))
+                }
+            }
             if (note != null) {
                 Text(note, style = MaterialTheme.typography.labelMedium, color = palette.inkMuted, maxLines = 1)
             }
@@ -207,9 +306,12 @@ private fun PriceCard(code: String, amount: String, note: String?, background: C
     }
 }
 
-/** Several prices: each one converted, and their sum when they share a currency. */
+/**
+ * Several prices: each one converted, and their sum when they share a currency. The currency they go to heads the
+ * converted side, as a chip that changes it.
+ */
 @Composable
-private fun PriceList(conversion: QuickConversion) {
+private fun PriceList(conversion: QuickConversion, onChooseCurrency: (() -> Unit)?) {
     val palette = LocalPalette.current
     Column(
         modifier = Modifier
@@ -218,6 +320,12 @@ private fun PriceList(conversion: QuickConversion) {
             .background(palette.card)
             .padding(horizontal = 16.dp, vertical = 8.dp)
     ) {
+        if (onChooseCurrency != null) {
+            Row(Modifier.fillMaxWidth().padding(top = 4.dp, bottom = 2.dp)) {
+                Spacer(Modifier.weight(1f))
+                CurrencyChip(conversion.target, onChooseCurrency)
+            }
+        }
         conversion.lines.forEach { line ->
             ListRow(withSymbol(line.price.currency, line.price.amount, original = true), withSymbol(line.to, line.value))
         }
@@ -240,6 +348,25 @@ private fun PriceList(conversion: QuickConversion) {
                 maxLines = 1
             )
         }
+    }
+}
+
+/** A currency's flag and code with a chevron: tapping it picks another one. */
+@Composable
+private fun CurrencyChip(code: String, onClick: () -> Unit) {
+    val palette = LocalPalette.current
+    Row(
+        modifier = Modifier
+            .clip(CircleShape)
+            .background(palette.highlight)
+            .clickable(role = Role.Button, onClickLabel = stringResource(R.string.change_currency), onClick = onClick)
+            .padding(start = 10.dp, end = 6.dp, top = 4.dp, bottom = 4.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Text(getCurrencyInfo(code).flag, fontSize = 16.sp)
+        Spacer(Modifier.width(6.dp))
+        Text(code, style = MaterialTheme.typography.labelLarge.copy(textDirection = TextDirection.Ltr), color = palette.ink)
+        Icon(Icons.Rounded.ExpandMore, contentDescription = null, tint = palette.inkMuted, modifier = Modifier.size(18.dp))
     }
 }
 
