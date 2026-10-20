@@ -30,10 +30,6 @@ internal fun fitAmountSp(
     return byWidth.coerceAtMost(maxSp).coerceAtLeast(minSp)
 }
 
-/** Keeps long currency names ("דירהם (איחוד האמירויות)") from crowding the widget. */
-internal fun shortName(name: String, max: Int = 14): String =
-    if (name.length <= max) name else name.take(max - 1).trimEnd() + "…"
-
 /** Sizes for the large widget, in dp / sp values (Glance cannot size text by itself). */
 internal data class LargeWidgetLayout(
     val showKeypad: Boolean,

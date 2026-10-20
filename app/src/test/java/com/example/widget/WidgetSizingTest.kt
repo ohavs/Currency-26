@@ -37,12 +37,6 @@ class WidgetSizingTest {
   }
 
   @Test
-  fun `long names are shortened`() {
-    assertEquals("שקל חדש", shortName("שקל חדש"))
-    assertEquals("דירהם (איחוד…", shortName("דירהם (איחוד האמירויות)"))
-  }
-
-  @Test
   fun `a 4x4 widget gets a roomy keypad and a rate line`() {
     val layout = largeWidgetLayout(300f, 380f, hasExtra = false)
     assertTrue(layout.showKeypad && layout.showRate && layout.showNames)

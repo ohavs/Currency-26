@@ -30,7 +30,6 @@ import androidx.glance.state.GlanceStateDefinition
 import androidx.glance.state.PreferencesGlanceStateDefinition
 import androidx.glance.text.FontWeight
 import androidx.glance.text.Text
-import androidx.glance.text.TextAlign
 import androidx.glance.text.TextStyle
 import androidx.glance.unit.ColorProvider
 import com.example.CurrencyApp
@@ -233,12 +232,14 @@ class LargeCurrencyWidget : GlanceAppWidget() {
         ) {
             Text(getCurrencyInfo(code).flag, style = TextStyle(fontSize = layout.flagSp.sp))
             if (layout.showNames) {
-                val name = currencyName(code, locale)
-                Text(
-                    if (layout.nameLines > 1) shortName(name, max = 24) else shortName(name, max = 13),
-                    style = TextStyle(color = colors.ink, fontSize = layout.nameSp.sp, fontWeight = FontWeight.Medium, textAlign = TextAlign.Center),
+                // In the app's font and weight: the system "medium" weight looked regular on Samsung.
+                AppFontText(
+                    text = currencyName(code, locale),
+                    color = colors.ink,
+                    sizeSp = layout.nameSp,
+                    widthDp = layout.labelWidthDp,
                     maxLines = layout.nameLines,
-                    modifier = GlanceModifier.fillMaxWidth()
+                    minSp = (layout.nameSp - 3f).coerceAtLeast(10f)
                 )
             }
         }
