@@ -15,14 +15,20 @@
 - **Android Studio:** File ← Open ← תיקיית הפרויקט, ואז Run.
 - **שורת פקודה** (JDK 17 ומעלה + Android SDK):
   ```
-  ./gradlew assembleDebug        # APK ב-app/build/outputs/apk/debug/
-  ./gradlew testDebugUnitTest    # בדיקות יחידה
+  ./gradlew assembleGithubDebug     # גרסת הגיטהאב: app/build/outputs/apk/github/debug/
+  ./gradlew bundlePlayRelease       # גרסת Google Play (AAB, פרסומות ופרימיום)
+  ./gradlew testGithubDebugUnitTest # בדיקות יחידה
   ```
+
+## שתי גרסאות
+- **github**: ה-APK מה-Releases. מתעדכנת מעצמה, הכול פתוח ואין בה פרסומות.
+- **play**: לחנות. פרסומות (AdMob), פרימיום (ניסיון, סרטונים או רכישה), בלי עדכון עצמי.
+  התוכנית המלאה, כולל הצעדים שנשארו: `docs/PLAY_LAUNCH_PLAN.md`.
 
 ## חתימה
 
 כל ה-APK-ים (debug ו-release) נחתמים במפתח המשותף `debug.keystore` שבריפו, כדי שכל גרסה תתעדכן מעל הקודמת.
 המפתח ציבורי (הריפו פתוח), ולכן הוא לא מגן מפני APK מזויף שמישהו ישכנע אתכם להתקין ידנית -
 העדכונים בתוך האפליקציה מגיעים רק מה-Releases של הריפו הזה.
-אפשר לעבור למפתח פרטי (`my-upload-key.jks` או `KEYSTORE_PATH` + `STORE_PASSWORD` + `KEY_PASSWORD`),
-אבל המעבר דורש התקנה מחדש פעם אחת. אל תעלו קובץ `.jks` לגיט.
+גרסת play נחתמת במפתח העלאה פרטי (`UPLOAD_KEYSTORE` + `UPLOAD_KEYSTORE_PASSWORD`, ב-CI מתוך secrets),
+ו-Google Play חותמת אותה מחדש. אל תעלו קובץ `.jks` לגיט.

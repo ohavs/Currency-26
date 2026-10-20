@@ -10,7 +10,7 @@ import com.example.update.AppUpdater
  */
 fun main() {
     val context = android.content.ContextWrapper(null)
-    val vm = MainViewModel(CurrencyRepository(context), AppUpdater(context))
+    val vm = MainViewModel(CurrencyRepository(context), AppUpdater(context), com.example.premium.FakeMonetization(com.example.premium.PremiumState(purchased = true)))
     var failures = 0
     fun check(what: String, ok: Boolean) {
         println("${if (ok) "ok  " else "FAIL"} $what")
@@ -67,6 +67,24 @@ fun main() {
     check("leaving after typing records", s().history.first().amount == "5" && s().history.size == sizeBefore + 1)
     vm.clearHistory()
     check("clear", s().history.isEmpty())
+
+    // Premium locked (Play build after the trial): the gates open the sheet, an unlock finishes the action.
+    val premium = com.example.premium.FakeMonetization(com.example.premium.PremiumState())
+    val locked = MainViewModel(CurrencyRepository(context), AppUpdater(context), premium)
+    fun l() = locked.state.value
+    if (l().expression != null) locked.toggleCalculator()
+    locked.toggleCalculator()
+    check("locked calculator opens Premium", l().expression == null && locked.premiumSheet.value == com.example.premium.PremiumReason.CALCULATOR)
+    premium.set(com.example.premium.PremiumRules.afterVideo(com.example.premium.PremiumRules.afterVideo(com.example.premium.PremiumState(), System.currentTimeMillis()), System.currentTimeMillis()))
+    check("unlocking opens the calculator and closes the sheet", l().expression != null && locked.premiumSheet.value == null)
+    premium.set(com.example.premium.PremiumState())
+    check("locking again closes the calculator", l().expression == null)
+    locked.setColorTheme("ocean")
+    check("locked colours open Premium, theme kept", locked.premiumSheet.value == com.example.premium.PremiumReason.COLORS && locked.effectiveColorTheme.value == "sage")
+    locked.closePremium()
+    val before = premium.conversions
+    locked.onKeypadPress("C"); locked.onKeypadPress("7"); locked.onKeypadPress("5")
+    check("typing a new amount counts one conversion", premium.conversions == before + 1)
 
     println(if (failures == 0) "all checks passed" else "$failures checks failed")
     if (failures > 0) kotlin.system.exitProcess(1)

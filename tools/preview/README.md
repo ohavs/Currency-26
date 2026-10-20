@@ -10,14 +10,16 @@ cd tools/preview
 ONLY=v15_quick gradle -q run      # render (ONLY filters by name; omit for everything) -> out/*.png
 gradle -q test                    # utils and widget-sizing tests
 gradle -q dragCheck               # swap/drag, spotlight, tour and keypad tap checks
-gradle -q vmCheck                 # the real MainViewModel: calculator, history
+gradle -q vmCheck                 # the real MainViewModel: calculator, history, Premium gates
+ONLY=store_ gradle -q run         # sources for the Google Play screenshots (then tools/store/screenshots.mjs)
 python3 montage.py sheet.png 900 out/a.png out/b.png   # side-by-side sheet at 900px high
 ```
 
 - Needs Gradle 8.x and JDK 21; dependencies come from Maven Central (no Google Maven, so androidx
   lifecycle/annotation are stubbed in `stubs/`).
 - `stubs/` stands in for Android-only pieces: string and drawable resources (read straight from
-  `app/src/main/res`), fonts, the repository, the updater, `BackHandler`.
+  `app/src/main/res`), fonts, the repository, the updater, `BackHandler`, `LocalContext`, and
+  `FakeMonetization` (a fixed Premium state; the ad strip drawn as its placeholder).
 - Glance widgets can't run here; `render/WidgetMock2.kt` mirrors their layout math (`WidgetSizing.kt`
   is shared). Keep it in step when the widgets change.
 - When app code gains a new Android dependency in `ui/` or `utils/`, add a stub or the compile fails.

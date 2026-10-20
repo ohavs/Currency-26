@@ -10,6 +10,7 @@ import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
@@ -70,6 +71,8 @@ internal fun Keypad(
     onKey: (String) -> Unit,
     onToggleCalculator: () -> Unit,
     modifier: Modifier = Modifier,
+    /** Premium is locked: the calculator key carries a lock and opens the Premium sheet. */
+    calculatorLocked: Boolean = false,
 ) {
     val palette = LocalPalette.current
     val haptics = LocalHapticFeedback.current
@@ -112,7 +115,7 @@ internal fun Keypad(
                     keys.forEachIndexed { index, key ->
                         if (index > 0) Spacer(Modifier.width(KeyGap))
                         if (key == CALCULATOR_KEY) {
-                            CalculatorToggle(calculatorOpen, canEvaluate, Modifier.weight(1f).fillMaxHeight(), press)
+                            CalculatorToggle(calculatorOpen, canEvaluate, calculatorLocked, Modifier.weight(1f).fillMaxHeight(), press)
                         } else {
                             KeyButton(palette.cardSoft, Modifier.weight(1f).fillMaxHeight(), onClick = { press(key) }) {
                                 Text(key, style = MaterialTheme.typography.headlineSmall.copy(fontSize = 26.sp), color = palette.ink)
@@ -153,7 +156,7 @@ private fun RowScope.CalculatorKey(key: String, label: String, open: Float, modi
 
 /** The key in place of "00": a calculator that opens the operators, "=" while there is something to compute. */
 @Composable
-private fun CalculatorToggle(open: Boolean, canEvaluate: Boolean, modifier: Modifier, press: (String) -> Unit) {
+private fun CalculatorToggle(open: Boolean, canEvaluate: Boolean, locked: Boolean, modifier: Modifier, press: (String) -> Unit) {
     val palette = LocalPalette.current
     val background by animateColorAsState(
         when {
@@ -175,6 +178,7 @@ private fun CalculatorToggle(open: Boolean, canEvaluate: Boolean, modifier: Modi
         modifier = modifier.semantics { contentDescription = description },
         onClick = { press(if (open && canEvaluate) "=" else CALCULATOR_KEY) }
     ) {
+        if (locked && !open) LockBadge()
         AnimatedContent(
             targetState = open && canEvaluate,
             transitionSpec = { fadeIn(tween(150)) togetherWith fadeOut(tween(100)) },
@@ -199,7 +203,7 @@ internal fun KeyButton(
     color: Color,
     modifier: Modifier = Modifier,
     onClick: () -> Unit,
-    content: @Composable () -> Unit,
+    content: @Composable BoxScope.() -> Unit,
 ) {
     Box(
         modifier = modifier

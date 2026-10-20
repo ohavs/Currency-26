@@ -21,6 +21,7 @@ import androidx.compose.runtime.getValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import com.example.data.CurrencySlot
+import com.example.premium.PremiumReason
 import com.example.ui.CalculatorScreen
 import com.example.ui.LocalAppLocale
 import com.example.ui.MainViewModel
@@ -46,10 +47,12 @@ class MainActivity : ComponentActivity() {
             override fun <T : ViewModel> create(modelClass: Class<T>): T {
                 val app = application as CurrencyApp
                 @Suppress("UNCHECKED_CAST")
-                return MainViewModel(app.repository, app.appUpdater) as T
+                return MainViewModel(app.repository, app.appUpdater, app.monetization) as T
             }
         }
     }
+
+    private val monetization get() = (application as CurrencyApp).monetization
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -57,9 +60,10 @@ class MainActivity : ComponentActivity() {
         if (savedInstanceState == null) {
             handleWidgetIntent(intent)
         }
+        monetization.start(this)
         setContent {
             val themeMode by viewModel.themeMode.collectAsState()
-            val colorThemeStr by viewModel.colorTheme.collectAsState()
+            val colorThemeStr by viewModel.effectiveColorTheme.collectAsState()
             val language by viewModel.language.collectAsState()
             LaunchedEffect(language) {
                 if (language != appliedLanguage) recreate()
@@ -82,7 +86,11 @@ class MainActivity : ComponentActivity() {
                     themeMode = themeMode,
                     colorThemeStr = colorThemeStr
                 ) {
-                    CalculatorScreen(viewModel, onRemoveLegacyApp = { runCatching { startActivity(LegacyApp.uninstallIntent()) } })
+                    CalculatorScreen(
+                        viewModel,
+                        monetization = monetization,
+                        onRemoveLegacyApp = { runCatching { startActivity(LegacyApp.uninstallIntent()) } }
+                    )
                 }
             }
         }
@@ -96,6 +104,7 @@ class MainActivity : ComponentActivity() {
 
     override fun onResume() {
         super.onResume()
+        monetization.onResume()
         viewModel.reloadSelection()
         viewModel.setLegacyAppInstalled(LegacyApp.isInstalled(this))
         viewModel.maybeShowTour(widgetPlaced = isWidgetPlaced())
@@ -114,6 +123,7 @@ class MainActivity : ComponentActivity() {
     }
 
     private fun handleWidgetIntent(intent: Intent?) {
+        if (intent?.action == ACTION_OPEN_PREMIUM) viewModel.openPremium(PremiumReason.WIDGET)
         if (intent?.action == ACTION_PICK_CURRENCY) {
             val slot = intent.getStringExtra(EXTRA_PICK_SLOT)
                 ?.let { name -> CurrencySlot.values().firstOrNull { it.name == name } }
@@ -124,6 +134,7 @@ class MainActivity : ComponentActivity() {
 
     companion object {
         const val ACTION_PICK_CURRENCY = "com.example.action.PICK_CURRENCY"
+        const val ACTION_OPEN_PREMIUM = "com.example.action.OPEN_PREMIUM"
         const val EXTRA_PICK_SLOT = "pick_slot"
         /** Written by older widget versions. */
         private const val EXTRA_PICK_SOURCE = "pick_source"
@@ -135,6 +146,12 @@ class MainActivity : ComponentActivity() {
                 // Distinct data per slot so the widget PendingIntents never overwrite each other.
                 .setData(Uri.parse("currency26://pick/" + slot.name.lowercase()))
                 .putExtra(EXTRA_PICK_SLOT, slot.name)
+                .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP)
+
+        /** The locked widget's "Unlock": the app opens on the Premium sheet. */
+        fun openPremiumIntent(context: Context): Intent =
+            Intent(context, MainActivity::class.java)
+                .setAction(ACTION_OPEN_PREMIUM)
                 .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP)
 
         fun openAppIntent(context: Context): Intent =

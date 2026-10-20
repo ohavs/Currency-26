@@ -14,7 +14,7 @@ concurrency:
 jobs:
   build:
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: 40
     steps:
       - uses: actions/checkout@v4
 
@@ -25,17 +25,29 @@ jobs:
 
       - uses: gradle/actions/setup-gradle@v4
 
-      - name: Build debug and release APKs
-        run: ./gradlew assembleDebug assembleRelease
+      # github = the owner's build (self-update, everything open); play = Google Play (ads, Premium, R8).
+      - name: Build the GitHub APKs and the Play bundle
+        run: ./gradlew assembleGithubDebug assembleGithubRelease assemblePlayRelease bundlePlayRelease
 
-      - name: Upload APK
+      - name: Permissions and sizes
+        run: |
+          AAPT=$(ls "$ANDROID_HOME"/build-tools/*/aapt2 | sort -V | tail -1)
+          for apk in app/build/outputs/apk/*/release/*.apk; do
+            echo "== $apk $(du -h "$apk" | cut -f1)"
+            "$AAPT" dump permissions "$apk"
+          done
+          ls -la app/build/outputs/bundle/playRelease/
+
+      - name: Upload APKs
         uses: actions/upload-artifact@v4
         with:
-          name: currency-26-debug-apk
-          path: app/build/outputs/apk/debug/*.apk
+          name: currency-26-apks
+          path: |
+            app/build/outputs/apk/github/debug/*.apk
+            app/build/outputs/apk/play/release/*.apk
 
       - name: Unit tests
-        run: ./gradlew testDebugUnitTest
+        run: ./gradlew testGithubDebugUnitTest testPlayDebugUnitTest
 
       - name: Upload test reports
         if: failure()

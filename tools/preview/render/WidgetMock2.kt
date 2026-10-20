@@ -236,3 +236,30 @@ private fun AppFontNameMock(name: String, color: Color, layout: LargeWidgetLayou
     while (sp - 1f >= minSp && measurer.measure(name, style(sp), maxLines = layout.nameLines, constraints = androidx.compose.ui.unit.Constraints(maxWidth = widthPx)).hasVisualOverflow) sp -= 1f
     Text(name, style = style(sp), maxLines = layout.nameLines, overflow = TextOverflow.Ellipsis, modifier = Modifier.width(layout.labelWidthDp.dp))
 }
+
+/** Desktop mirror of LockedWidgetContent: Premium is locked, the widget shows the way back in. */
+@Composable
+fun LockedWidgetMock(p: AppPalette, widthDp: Float, heightDp: Float, title: String, action: String, theme: String = "sage", hint: String? = null) {
+    val roomy = heightDp >= 110f
+    Box(
+        Modifier.width(widthDp.dp).height(heightDp.dp).clip(RoundedCornerShape(24.dp)).background(p.background).paletteTexture(theme, p),
+        contentAlignment = Alignment.Center
+    ) {
+        Column(Modifier.fillMaxSize().padding(10.dp), verticalArrangement = Arrangement.Center, horizontalAlignment = Alignment.CenterHorizontally) {
+            if (roomy) {
+                Text("🔒", fontSize = 24.sp)
+                Spacer(Modifier.height(6.dp))
+                Text(title, style = TextStyle(color = p.ink, fontFamily = Rubik, fontWeight = FontWeight.SemiBold, fontSize = 15.sp, textAlign = TextAlign.Center),
+                    maxLines = 2, modifier = Modifier.width((widthDp - 28f).dp))
+                Spacer(Modifier.height(10.dp))
+            }
+            Box(Modifier.clip(RoundedCornerShape(18.dp)).background(p.accent).padding(horizontal = 18.dp, vertical = 8.dp)) {
+                Text((if (roomy) "" else "🔒 ") + action, style = TextStyle(color = p.onAccent, fontSize = 14.sp, fontWeight = FontWeight.Bold), maxLines = 1)
+            }
+            if (heightDp >= 200f && hint != null) {
+                Spacer(Modifier.height(10.dp))
+                Text(hint, style = TextStyle(color = p.inkMuted, fontSize = 12.sp, textAlign = TextAlign.Center), maxLines = 2)
+            }
+        }
+    }
+}

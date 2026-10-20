@@ -2,6 +2,7 @@ package com.example.widget
 
 import android.content.Context
 import androidx.datastore.preferences.core.Preferences
+import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.doublePreferencesKey
 import androidx.datastore.preferences.core.floatPreferencesKey
 import androidx.datastore.preferences.core.longPreferencesKey
@@ -12,6 +13,7 @@ import androidx.glance.appwidget.state.updateAppWidgetState
 import androidx.glance.appwidget.updateAll
 import androidx.glance.state.PreferencesGlanceStateDefinition
 import com.example.CurrencyApp
+import com.example.premium.FREE_COLOR_THEME
 import com.example.utils.AppLanguage
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.GlobalScope
@@ -34,6 +36,8 @@ data class WidgetData(
     val updatedAt: Long,
     /** App language ("he", "en", "es" or "system"): widget texts and which side the currencies sit on. */
     val language: String,
+    /** Premium is open (always in the GitHub build); locked, the widget shows only the way to unlock it. */
+    val unlocked: Boolean = true,
 )
 
 object WidgetStateKeys {
@@ -48,6 +52,7 @@ object WidgetStateKeys {
     val extraTarget = stringPreferencesKey("target2")
     val extraRate = doublePreferencesKey("extra_rate")
     val language = stringPreferencesKey("language")
+    val unlocked = booleanPreferencesKey("premium_unlocked")
 
     /** Float rate written by older versions; read until the widget is refreshed once. */
     val legacyRate = floatPreferencesKey("rate")
@@ -64,6 +69,7 @@ fun Preferences.toWidgetData() = WidgetData(
     colorTheme = this[WidgetStateKeys.colorTheme] ?: "sage",
     updatedAt = this[WidgetStateKeys.updatedAt] ?: 0L,
     language = this[WidgetStateKeys.language] ?: AppLanguage.DEFAULT,
+    unlocked = this[WidgetStateKeys.unlocked] ?: true,
 )
 
 private suspend fun writeWidgetState(context: Context, ids: List<GlanceId>, data: WidgetData) {
@@ -80,6 +86,7 @@ private suspend fun writeWidgetState(context: Context, ids: List<GlanceId>, data
                 this[WidgetStateKeys.colorTheme] = data.colorTheme
                 this[WidgetStateKeys.updatedAt] = data.updatedAt
                 this[WidgetStateKeys.language] = data.language
+                this[WidgetStateKeys.unlocked] = data.unlocked
             }
         }
     }
@@ -97,6 +104,7 @@ private suspend fun updateWidgetsNow(context: Context) {
     try {
         val appContext = context.applicationContext
         val repository = (appContext as CurrencyApp).repository
+        val unlocked = appContext.monetization.access.value.unlocked
 
         val sourceId = repository.getSourceCurrency()
         val targetId = repository.getTargetCurrency()
@@ -113,9 +121,11 @@ private suspend fun updateWidgetsNow(context: Context) {
             extraTargetCurrency = extraId,
             extraRate = extraRate / sourceRate,
             themeMode = repository.themeMode.value,
-            colorTheme = repository.colorTheme.value,
+            // Locked, the widget wears Classic like the app (the chosen set comes back with Premium).
+            colorTheme = if (unlocked) repository.colorTheme.value else FREE_COLOR_THEME,
             updatedAt = repository.getLastUpdateTimestamp(),
             language = repository.language.value,
+            unlocked = unlocked,
         )
 
         val manager = GlanceAppWidgetManager(appContext)

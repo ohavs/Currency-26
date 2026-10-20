@@ -37,6 +37,10 @@ datastorePreferences = "1.1.7"
 glance = "1.1.0"
 workRuntime = "2.9.0"
 robolectric = "4.16.1"
+playBilling = "8.0.0"
+playServicesAds = "24.4.0"
+playReview = "2.0.2"
+ump = "3.1.0"
 roborazzi = "1.59.0"
 
 [libraries]
@@ -88,6 +92,11 @@ robolectric = { group = "org.robolectric", name = "robolectric", version.ref = "
 roborazzi = { group = "io.github.takahirom.roborazzi", name = "roborazzi", version.ref = "roborazzi" }
 roborazzi-compose = { group = "io.github.takahirom.roborazzi", name = "roborazzi-compose", version.ref = "roborazzi" }
 roborazzi-junit-rule = { group = "io.github.takahirom.roborazzi", name = "roborazzi-junit-rule", version.ref = "roborazzi" }
+
+play-billing = { group = "com.android.billingclient", name = "billing", version.ref = "playBilling" }
+play-services-ads = { group = "com.google.android.gms", name = "play-services-ads", version.ref = "playServicesAds" }
+play-review = { group = "com.google.android.play", name = "review-ktx", version.ref = "playReview" }
+ump = { group = "com.google.android.ump", name = "user-messaging-platform", version.ref = "ump" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

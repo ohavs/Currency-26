@@ -54,7 +54,8 @@ class LargeCurrencyWidget : GlanceAppWidget() {
 
     override suspend fun provideGlance(context: Context, id: GlanceId) {
         provideContent {
-            LargeWidgetContent(currentState<Preferences>().toWidgetData())
+            val data = currentState<Preferences>().toWidgetData()
+            if (data.unlocked) LargeWidgetContent(data) else LockedWidgetContent(data)
         }
     }
 

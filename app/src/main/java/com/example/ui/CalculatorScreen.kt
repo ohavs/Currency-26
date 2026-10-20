@@ -58,6 +58,7 @@ import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateMapOf
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
@@ -102,6 +103,14 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.em
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.zIndex
+import android.app.Activity
+import android.content.Context
+import android.content.ContextWrapper
+import androidx.compose.ui.platform.LocalContext
+import com.example.BuildConfig
+import com.example.premium.Monetization
+import com.example.premium.PremiumReason
+import kotlinx.coroutines.delay
 import com.example.R
 import com.example.data.CurrencySlot
 import com.example.ui.theme.AmountTextStyle
@@ -123,10 +132,17 @@ import kotlin.math.abs
 private enum class AppScreen { Calculator, Settings, Picker }
 
 @Composable
-fun CalculatorScreen(viewModel: MainViewModel, onRemoveLegacyApp: () -> Unit = {}) {
+fun CalculatorScreen(viewModel: MainViewModel, monetization: Monetization, onRemoveLegacyApp: () -> Unit = {}) {
     val state by viewModel.state.collectAsState()
     val themeMode by viewModel.themeMode.collectAsState()
-    val colorTheme by viewModel.colorTheme.collectAsState()
+    val colorTheme by viewModel.effectiveColorTheme.collectAsState()
+    val access by viewModel.access.collectAsState()
+    val premiumSheet by viewModel.premiumSheet.collectAsState()
+    val premiumState by monetization.state.collectAsState()
+    val price by monetization.price.collectAsState()
+    val video by monetization.video.collectAsState()
+    val privacyOptionsRequired by monetization.privacyOptionsRequired.collectAsState()
+    val activity = LocalContext.current.findActivity()
     val autoUpdate by viewModel.autoUpdate.collectAsState()
     val appUpdate by viewModel.appUpdate.collectAsState()
     val checkAppUpdates by viewModel.checkAppUpdates.collectAsState()
@@ -142,6 +158,20 @@ fun CalculatorScreen(viewModel: MainViewModel, onRemoveLegacyApp: () -> Unit = {
         state.showCurrencySelector -> AppScreen.Picker
         state.showSettings -> AppScreen.Settings
         else -> AppScreen.Calculator
+    }
+
+    // Natural breaks - back from the picker or settings, or the history closing - are the only moments a
+    // full-screen ad may show (see InterstitialPolicy), never while the user is typing.
+    var lastView by remember { mutableStateOf(screen to state.showHistory) }
+    LaunchedEffect(screen, state.showHistory) {
+        val (previousScreen, historyWasOpen) = lastView
+        lastView = screen to state.showHistory
+        val backToCalculator = screen == AppScreen.Calculator && previousScreen != AppScreen.Calculator
+        val historyClosed = screen == AppScreen.Calculator && historyWasOpen && !state.showHistory
+        if ((backToCalculator || historyClosed) && activity != null) {
+            delay(250)
+            monetization.onBreak(activity)
+        }
     }
 
     // Layout direction comes from the app language (RTL for Hebrew, LTR for English/Spanish).
@@ -184,6 +214,13 @@ fun CalculatorScreen(viewModel: MainViewModel, onRemoveLegacyApp: () -> Unit = {
                     onCloseHistory = viewModel::closeHistory,
                     onRestoreHistory = viewModel::restoreHistory,
                     onClearHistory = viewModel::clearHistory,
+                    calculatorLocked = !access.unlocked,
+                    adSlot = {
+                        monetization.Banner(
+                            placeholder = { PremiumPromo(onClick = { viewModel.openPremium(PremiumReason.NO_ADS) }) },
+                            modifier = Modifier.fillMaxWidth()
+                        )
+                    },
                 )
                 AppScreen.Settings -> SettingsScreen(
                     themeMode = themeMode,
@@ -211,6 +248,12 @@ fun CalculatorScreen(viewModel: MainViewModel, onRemoveLegacyApp: () -> Unit = {
                     onLanguageChange = viewModel::setLanguage,
                     onShowTour = viewModel::showTour,
                     highlightAddWidget = widgetGuide,
+                    showAppUpdates = BuildConfig.SELF_UPDATE,
+                    premium = if (monetization.hasStore) PremiumSummary(access, premiumState.purchasePending) else null,
+                    onOpenPremium = { viewModel.openPremium(PremiumReason.SETTINGS) },
+                    colorsLocked = !access.unlocked,
+                    adPrivacyOptions = privacyOptionsRequired,
+                    onAdPrivacyOptions = { activity?.let(monetization::showPrivacyOptions) },
                     onWidgetGuideDone = viewModel::endWidgetGuide,
                 )
                 AppScreen.Picker -> CurrencySelector(
@@ -243,7 +286,33 @@ fun CalculatorScreen(viewModel: MainViewModel, onRemoveLegacyApp: () -> Unit = {
                 )
             }
         }
+
+        val reason = premiumSheet
+        if (reason != null) {
+            LaunchedEffect(Unit) { activity?.let(monetization::preloadVideo) }
+            PremiumSheet(
+                reason = reason,
+                access = access,
+                videosNeeded = premiumState.videosNeeded(System.currentTimeMillis()),
+                price = price,
+                video = video,
+                purchasePending = premiumState.purchasePending,
+                onWatch = { activity?.let(monetization::watchVideo) },
+                onBuy = { activity?.let(monetization::buy) },
+                onRestore = monetization::restorePurchases,
+                onDismiss = viewModel::closePremium
+            )
+        }
     }
+}
+
+private fun Context.findActivity(): Activity? {
+    var context = this
+    while (context is ContextWrapper) {
+        if (context is Activity) return context
+        context = context.baseContext
+    }
+    return null
 }
 
 @Composable
@@ -273,6 +342,9 @@ fun CalculatorContent(
     onCloseHistory: () -> Unit = {},
     onRestoreHistory: (HistoryEntry) -> Unit = {},
     onClearHistory: () -> Unit = {},
+    calculatorLocked: Boolean = false,
+    /** The ad strip under the keypad (Play build, without Premium forever). */
+    adSlot: @Composable () -> Unit = {},
 ) {
     val updatedAt = formatUpdatedAt(
         state.lastUpdateTimestamp,
@@ -403,6 +475,7 @@ fun CalculatorContent(
                     Keypad(
                         calculatorOpen = state.expression != null,
                         canEvaluate = state.calculating,
+                        calculatorLocked = calculatorLocked,
                         onKey = onKeypad,
                         onToggleCalculator = onToggleCalculator,
                         modifier = Modifier.fillMaxSize()
@@ -412,6 +485,7 @@ fun CalculatorContent(
         }
 
         Spacer(Modifier.height(12.dp))
+        adSlot()
     }
 }
 

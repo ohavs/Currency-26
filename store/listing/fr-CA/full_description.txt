@@ -1,0 +1,26 @@
+Convertissez n'importe quelle devise d'un geste, même hors ligne. Tapez un montant et voyez-le aussitôt dans votre devise, avec les taux de plus de 160 devises mis à jour automatiquement.
+
+★ Simple et rapide
+• Un grand pavé numérique clair : le résultat change pendant la saisie
+• Inversez les devises d'un geste ou ajoutez-en une troisième pour convertir vers deux à la fois
+• Trouvez une devise par pays, nom, symbole ou code, dans n'importe quelle langue
+• Fonctionne hors ligne avec les derniers taux téléchargés
+
+★ Convertissez depuis n'importe quelle app
+Sélectionnez un prix dans le navigateur, une app de réservation ou une discussion et choisissez « Convertir une devise » (ou Partager → « Convertir une devise »). Le résultat s'affiche par-dessus l'app ouverte. Comprend $, €, ₪, « 1.250,00 », « 1.5k » et plus encore.
+
+★ Historique
+Chaque montant et chaque calcul sont conservés. Touchez-en un pour le retrouver avec ses devises.
+
+★ Premium
+• Widget sur l'écran d'accueil : tapez un montant et voyez la conversion sans ouvrir l'app
+• Calculatrice avec pourcentages : 120 + 15 %, 3 × 800 et plus, convertis pendant la saisie
+• 6 thèmes de couleur, chacun en clair et en sombre
+
+Les nouveaux utilisateurs profitent de Premium gratuitement pendant 3 jours. Ensuite, regardez 2 courtes vidéos pour l'ouvrir 24 heures, ou passez à Premium à vie en un seul paiement, qui supprime aussi les publicités. La conversion, la recherche, la devise supplémentaire, l'historique et la conversion depuis d'autres apps restent toujours gratuits.
+
+★ 13 langues
+Français, anglais, hébreu, arabe, espagnol, russe, allemand, portugais, italien, turc, chinois, japonais et hindi.
+
+Les taux sont donnés à titre indicatif et mis à jour environ une fois par jour. Votre banque ou bureau de change peut appliquer un autre taux.
+Rates By Exchange Rate API (https://www.exchangerate-api.com)
