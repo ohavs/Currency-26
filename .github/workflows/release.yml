@@ -6,6 +6,18 @@ name: Release
 on:
   push:
     branches: [main]
+    # Notes, the store page, the site and the other workflows ship nothing: no release for them.
+    paths-ignore:
+      - '**.md'
+      - 'docs/**'
+      - 'site/**'
+      - 'store/**'
+      - 'tools/**'
+      - '.github/workflows/android.yml'
+      - '.github/workflows/pages.yml'
+      - '.github/workflows/play-listing.yml'
+      - '.github/workflows/release.yml'
+      - '.github/workflows/smoke.yml'
   workflow_dispatch:
     inputs:
       github_release:
@@ -80,7 +92,7 @@ jobs:
             echo "ready=false" >> "$GITHUB_OUTPUT"
             exit 0
           fi
-          echo "$UPLOAD_KEYSTORE_BASE64" | base64 -d > "$RUNNER_TEMP/upload-key.jks"
+          echo "$UPLOAD_KEYSTORE_BASE64" | base64 --decode --ignore-garbage > "$RUNNER_TEMP/upload-key.jks"
           echo "UPLOAD_KEYSTORE=$RUNNER_TEMP/upload-key.jks" >> "$GITHUB_ENV"
           echo "ready=true" >> "$GITHUB_OUTPUT"
           if [ -n "$PLAY_SERVICE_ACCOUNT_JSON" ]; then echo "upload=true" >> "$GITHUB_OUTPUT"; fi
