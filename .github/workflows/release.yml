@@ -7,6 +7,11 @@ on:
   push:
     branches: [main]
   workflow_dispatch:
+    inputs:
+      github_release:
+        description: "Also publish a GitHub release (off: only build the Play bundle, e.g. to check the upload key)"
+        type: boolean
+        default: true
 
 permissions:
   contents: write
@@ -17,6 +22,7 @@ concurrency:
 
 jobs:
   release:
+    if: github.event_name == 'push' || inputs.github_release
     runs-on: ubuntu-latest
     timeout-minutes: 30
     steps:
