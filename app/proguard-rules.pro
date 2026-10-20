@@ -24,3 +24,7 @@
 -keep class com.example.widget.** { *; }
 # WorkManager creates workers by class name (its own rules cover the constructor; keep the names stable).
 -keep class com.example.workers.** { *; }
+# OkHttp's optional TLS providers, never present on Android.
+-dontwarn org.bouncycastle.jsse.**
+-dontwarn org.conscrypt.**
+-dontwarn org.openjsse.**
