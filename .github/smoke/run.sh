@@ -59,10 +59,15 @@ sleep 5
 shot 12-select-bubble
 
 adb logcat -d > smoke/logcat.txt
-if grep -q "FATAL EXCEPTION" smoke/logcat.txt; then
+# Only the app's own crashes count: uiautomator (the screen reads above) now and then dies on its way out.
+if grep -A2 "FATAL EXCEPTION" smoke/logcat.txt | grep -q "Process: $PKG"; then
   echo "::error::The app crashed"
   grep -A40 "FATAL EXCEPTION" smoke/logcat.txt | head -120
   exit 1
+fi
+if grep -q "FATAL EXCEPTION" smoke/logcat.txt; then
+  echo "A crash outside the app (not counted):"
+  grep -A4 "FATAL EXCEPTION" smoke/logcat.txt | head -20
 fi
 grep -iE "Ads|UserMessagingPlatform|BillingClient" smoke/logcat.txt | grep -E "$PKG|I/Ads|W/Ads|E/Ads|BillingClient" | head -40
 echo "No crash."
