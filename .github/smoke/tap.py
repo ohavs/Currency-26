@@ -11,7 +11,9 @@ long_press = "--long" in sys.argv[2:]
 
 
 def dump():
-    subprocess.run(["adb", "shell", "uiautomator", "dump", "/sdcard/ui.xml"], capture_output=True)
+    # --windows takes in popups too, like the text-selection toolbar (older versions read it as a file name,
+    # which the real one after it replaces).
+    subprocess.run(["adb", "shell", "uiautomator", "dump", "--windows", "/sdcard/ui.xml"], capture_output=True)
     return subprocess.run(["adb", "shell", "cat", "/sdcard/ui.xml"], capture_output=True, text=True).stdout
 
 
