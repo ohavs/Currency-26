@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
@@ -382,7 +383,8 @@ private class PlayMonetization(private val app: Application) : Monetization {
         val access by access.collectAsState()
         if (access.adFree) return
         val ready by adsReady.collectAsState()
-        BoxWithConstraints(modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
+        // A little more room from the keys above, so a tap meant for the keypad never lands on the ad.
+        BoxWithConstraints(modifier.fillMaxWidth().padding(top = 4.dp), contentAlignment = Alignment.Center) {
             val context = LocalContext.current
             val widthDp = maxWidth.value.toInt()
             val size = remember(widthDp) { AdSize.getCurrentOrientationAnchoredAdaptiveBannerAdSize(context, widthDp) }

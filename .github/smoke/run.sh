@@ -25,8 +25,8 @@ tap "24 hours free" 20
 shot 5-video
 adb shell input keyevent KEYCODE_BACK; sleep 2
 adb shell am force-stop $PKG
-adb shell am start -W -a android.intent.action.SEND -t text/plain \
-  --es android.intent.extra.TEXT "Hotel room €120 per night" -n $PKG/com.example.QuickConvertActivity
+# One quoted string: adb shell splits its arguments again on the device.
+adb shell "am start -W -a android.intent.action.SEND -t text/plain --es android.intent.extra.TEXT 'Hotel room €120 per night' -n $PKG/com.example.QuickConvertActivity"
 sleep 6
 shot 6-quick
 
