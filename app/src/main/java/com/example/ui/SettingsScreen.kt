@@ -39,6 +39,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.ArrowBack
 import androidx.compose.material.icons.automirrored.rounded.KeyboardArrowRight
 import androidx.compose.material.icons.rounded.Check
+import androidx.compose.material.icons.rounded.HighlightAlt
 import androidx.compose.material.icons.rounded.Info
 import androidx.compose.material.icons.rounded.WorkspacePremium
 import androidx.compose.ui.platform.LocalUriHandler
@@ -338,6 +339,50 @@ fun SettingsScreen(
                             onClick = onRefreshNow
                         )
                     }
+                }
+
+                val menu = rememberSelectionMenuInfo()
+                SettingsSection(
+                    title = stringResource(R.string.tip_select_title),
+                    icon = Icons.Rounded.HighlightAlt,
+                    summary = stringResource(R.string.select_menu_summary, menu.menuLabel)
+                ) {
+                    Text(
+                        text = stringResource(R.string.select_menu_body, menu.menuLabel),
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = palette.inkMuted
+                    )
+                    // A real selection menu, right here: the quickest way to Samsung's "Manage apps", and a try-out.
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clip(RoundedCornerShape(18.dp))
+                            .background(palette.cardSoft)
+                            .padding(horizontal = 16.dp, vertical = 10.dp),
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        Text(stringResource(R.string.select_menu_try), style = MaterialTheme.typography.labelMedium, color = palette.inkMuted)
+                        SelectablePrice("€120", Modifier.fillMaxWidth())
+                    }
+                    if (menu.samsung) {
+                        Text(
+                            text = stringResource(R.string.select_menu_samsung),
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = palette.ink
+                        )
+                        Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                            listOf(
+                                stringResource(R.string.select_menu_step1),
+                                stringResource(R.string.select_menu_step2),
+                                stringResource(R.string.select_menu_step3, menu.appLabel)
+                            ).forEachIndexed { index, step -> StepRow(index + 1, step) }
+                        }
+                    }
+                    Text(
+                        text = stringResource(R.string.select_menu_share, menu.menuLabel),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = palette.inkMuted
+                    )
                 }
 
                 SettingsSection(
@@ -643,6 +688,25 @@ private fun PremiumRow(premium: PremiumSummary, onClick: () -> Unit) {
             Text(summary, style = MaterialTheme.typography.labelMedium, color = palette.inkMuted, maxLines = 2, overflow = TextOverflow.Ellipsis)
         }
         Icon(Icons.AutoMirrored.Rounded.KeyboardArrowRight, contentDescription = null, tint = palette.inkMuted)
+    }
+}
+
+/** A numbered step: the number in an accent circle, then the text. */
+@Composable
+private fun StepRow(number: Int, text: String) {
+    val palette = LocalPalette.current
+    Row(verticalAlignment = Alignment.Top) {
+        Box(
+            modifier = Modifier
+                .size(24.dp)
+                .clip(CircleShape)
+                .background(palette.accent),
+            contentAlignment = Alignment.Center
+        ) {
+            Text("$number", style = MaterialTheme.typography.labelMedium, color = palette.onAccent)
+        }
+        Spacer(Modifier.width(10.dp))
+        Text(text, style = MaterialTheme.typography.bodyMedium, color = palette.ink, modifier = Modifier.padding(top = 2.dp))
     }
 }
 

@@ -116,6 +116,14 @@
     <string name="quick_assumed">מטבע משוער</string>
     <string name="tip_select_title">המרה מכל אפליקציה</string>
     <string name="tip_select_body">סמנו מחיר בכל אפליקציה ובחרו \"המרת מטבע\" בתפריט (או \"שיתוף\" ← \"המרת מטבע\"). התוצאה קופצת מיד, בלי לעזוב את מה שאתם עושים.</string>
+    <string name="select_menu_summary">סמנו מחיר ← \"%1$s\"</string>
+    <string name="select_menu_body">סמנו מחיר בכל אפליקציה ובחרו \"%1$s\" בתפריט שנפתח (לפעמים הוא תחת ⋮). התשובה קופצת מעל האפליקציה, בלי לעזוב אותה.</string>
+    <string name="select_menu_try">נסו כאן: לחיצה ארוכה על המחיר</string>
+    <string name="select_menu_samsung">בטלפונים של סמסונג האפשרות מוסתרת עד שמפעילים אותה, פעם אחת:</string>
+    <string name="select_menu_step1">לחיצה ארוכה על המחיר שלמעלה.</string>
+    <string name="select_menu_step2">בתפריט שנפתח הקישו על ⋮ ואז על ניהול האפליקציות (האפשרות האחרונה).</string>
+    <string name="select_menu_step3">הפעילו את \"%1$s\" ואשרו.</string>
+    <string name="select_menu_share">עובד גם דרך שיתוף ← \"%1$s\".</string>
     <string name="tip_offer_action">הצגה</string>
     <string name="tip_calc_title">מחשבון והיסטוריה</string>
     <string name="tip_calc_body">מקש המחשבון בשורה התחתונה מוסיף פעולות חשבון לחישובים כמו %1$s, והתוצאה מומרת מיד לכל המטבעות. סכומים וחישובים קודמים נשמרים בהיסטוריה, מתחת לכרטיסים.</string>

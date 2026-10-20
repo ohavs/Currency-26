@@ -116,6 +116,14 @@
     <string name="quick_assumed">Currency assumed</string>
     <string name="tip_select_title">Convert from any app</string>
     <string name="tip_select_body">Select a price in any app and choose \"Convert currency\" from the menu (or Share → \"Convert currency\"). The result pops up right away, without leaving what you\'re doing.</string>
+    <string name="select_menu_summary">Select a price → \"%1$s\"</string>
+    <string name="select_menu_body">Select a price in any app and choose \"%1$s\" in the menu that opens (sometimes it\'s under ⋮). The answer pops up over the app, without leaving it.</string>
+    <string name="select_menu_try">Try it here: long-press the price</string>
+    <string name="select_menu_samsung">On Samsung phones the option is hidden until you turn it on, once:</string>
+    <string name="select_menu_step1">Long-press the price above.</string>
+    <string name="select_menu_step2">In the menu, tap ⋮ and then \"Manage apps\" (the last option).</string>
+    <string name="select_menu_step3">Turn on \"%1$s\" and tap Done.</string>
+    <string name="select_menu_share">Also works from Share → \"%1$s\".</string>
     <string name="tip_offer_action">Show</string>
     <string name="tip_calc_title">Calculator and history</string>
     <string name="tip_calc_body">The calculator key in the bottom row adds + − × ÷ for sums like %1$s, and the result is converted to every currency right away. Past amounts and calculations are kept in History, under the cards.</string>

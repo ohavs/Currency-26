@@ -127,6 +127,20 @@ class CurrencyRepository(
     fun quickConvertUsed(): Boolean = prefs.getBoolean("quick_convert_used", false)
     fun markQuickConvertUsed() { prefs.edit().putBoolean("quick_convert_used", true).apply() }
 
+    /**
+     * The currency last picked in the quick-convert bubble, while the app's target is still the one it was picked
+     * against: choosing another target in the app (or "open in app") brings the bubble back to the app's.
+     */
+    fun getQuickTarget(): String? =
+        prefs.getString("quick_target", null)?.takeIf { prefs.getString("quick_target_base", null) == getTargetCurrency() }
+    fun setQuickTarget(code: String) {
+        val target = getTargetCurrency()
+        val editor = prefs.edit()
+        if (code == target) editor.remove("quick_target").remove("quick_target_base")
+        else editor.putString("quick_target", code).putString("quick_target_base", target)
+        editor.apply()
+    }
+
     /** The tour card about converting selected text has been shown (once to everyone, it came in 5.0.15). */
     fun quickConvertTipSeen(): Boolean = prefs.getBoolean("quick_convert_tip_seen", false)
     fun markQuickConvertTipSeen() { prefs.edit().putBoolean("quick_convert_tip_seen", true).apply() }

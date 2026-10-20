@@ -33,7 +33,8 @@ import kotlinx.coroutines.launch
  * "Convert currency" in other apps' text-selection menu (ACTION_PROCESS_TEXT) and in the share sheet
  * (ACTION_SEND, for phones that hide selection-menu apps, like recent Samsungs). It shows a bubble over the
  * app the text came from, with the price converted, and tapping outside returns to that app. In editable text
- * picked from the selection menu it can also put the converted price in place of the original.
+ * picked from the selection menu it can also put the converted price in place of the original. Tapping the
+ * currency it converts to picks another one, which the bubble keeps until the app's own target changes.
  */
 class QuickConvertActivity : ComponentActivity() {
     override fun attachBaseContext(newBase: Context) {
@@ -60,6 +61,7 @@ class QuickConvertActivity : ComponentActivity() {
         repository.markQuickConvertUsed()
 
         var offline by mutableStateOf(false)
+        var chosen by mutableStateOf(repository.getQuickTarget())
         lifecycleScope.launch {
             // Stored rates answer at once; old ones are refreshed underneath and the bubble follows.
             val age = System.currentTimeMillis() - repository.getLastUpdateTimestamp()
@@ -70,15 +72,17 @@ class QuickConvertActivity : ComponentActivity() {
             val themeMode by repository.themeMode.collectAsState()
             val colorTheme by repository.colorTheme.collectAsState()
             val rates by repository.allRatesFlow.collectAsState(initial = null)
+            val recentlyUsed by repository.recentCurrenciesFlow.collectAsState(initial = emptyList())
             var copied by remember { mutableStateOf(false) }
-            val conversion = remember(rates) {
+            val conversion = remember(rates, chosen) {
                 rates?.takeIf { it.isNotEmpty() }?.let {
                     QuickConvert.convert(
                         text, it,
                         source = repository.getSourceCurrency(),
                         target = repository.getTargetCurrency(),
                         extra = repository.getExtraTargetCurrency(),
-                        local = local
+                        local = local,
+                        chosen = chosen
                     )
                 }
             }
@@ -100,7 +104,21 @@ class QuickConvertActivity : ComponentActivity() {
                             finish()
                         },
                         onOpenApp = { openInApp(conversion) },
-                        onDismiss = ::finish
+                        onDismiss = ::finish,
+                        rates = rates.orEmpty(),
+                        // The user's own currencies first, then the ones picked lately in the app.
+                        recents = listOfNotNull(
+                            conversion?.target,
+                            repository.getTargetCurrency(),
+                            repository.getSourceCurrency(),
+                            repository.getExtraTargetCurrency()
+                        ) + recentlyUsed,
+                        onChooseCurrency = { code ->
+                            repository.setQuickTarget(code)
+                            chosen = repository.getQuickTarget()
+                            copied = false
+                            lifecycleScope.launch { repository.markCurrencyUsed(code) }
+                        }
                     )
                 }
             }
@@ -125,15 +143,20 @@ class QuickConvertActivity : ComponentActivity() {
         getSystemService(ClipboardManager::class.java)?.setPrimaryClip(ClipData.newPlainText(getString(R.string.app_name), clip))
     }
 
-    /** Opens the app with the first price typed in: its currency becomes the source (the target stays different). */
+    /** Opens the app on the first price as the bubble showed it: from its currency, to the one it went to. */
     private fun openInApp(conversion: QuickConversion?) {
         val repository = (application as CurrencyApp).repository
         conversion?.lines?.firstOrNull()?.let { line ->
-            val source = repository.getSourceCurrency()
-            // The old source takes the place the price's currency had, so no currency shows twice.
-            if (line.price.currency == repository.getTargetCurrency()) repository.setTargetCurrency(source)
-            if (line.price.currency == repository.getExtraTargetCurrency()) repository.setExtraTargetCurrency(source)
-            repository.setSourceCurrency(line.price.currency)
+            val app = QuickConvert.appCurrencies(
+                price = line.price.currency,
+                to = line.to,
+                source = repository.getSourceCurrency(),
+                target = repository.getTargetCurrency(),
+                extra = repository.getExtraTargetCurrency()
+            )
+            repository.setSourceCurrency(app.source)
+            repository.setTargetCurrency(app.target)
+            repository.setExtraTargetCurrency(app.extra)
             repository.setAmount(line.price.amount.toBigDecimal().stripTrailingZeros().toPlainString())
             triggerWidgetUpdate(this)
         }

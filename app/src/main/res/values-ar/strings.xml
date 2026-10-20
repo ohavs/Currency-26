@@ -116,6 +116,14 @@
     <string name="quick_assumed">عملة مفترضة</string>
     <string name="tip_select_title">حوّل من أي تطبيق</string>
     <string name="tip_select_body">حدّد سعرًا في أي تطبيق واختر \"تحويل العملة\" من القائمة (أو مشاركة ← \"تحويل العملة\"). تظهر النتيجة فورًا دون مغادرة ما تفعله.</string>
+    <string name="select_menu_summary">حدّد سعرًا ← \"%1$s\"</string>
+    <string name="select_menu_body">حدّد سعرًا في أي تطبيق واختر \"%1$s\" من القائمة التي تظهر (أحيانًا تكون تحت ⋮). تظهر الإجابة فوق التطبيق دون مغادرته.</string>
+    <string name="select_menu_try">جرّبها هنا: اضغط مطولًا على السعر</string>
+    <string name="select_menu_samsung">في هواتف سامسونج يكون الخيار مخفيًا حتى تفعّله مرة واحدة:</string>
+    <string name="select_menu_step1">اضغط مطولًا على السعر أعلاه.</string>
+    <string name="select_menu_step2">في القائمة، اضغط على ⋮ ثم \"إدارة التطبيقات\" (الخيار الأخير).</string>
+    <string name="select_menu_step3">فعّل \"%1$s\" ثم اضغط تم.</string>
+    <string name="select_menu_share">يعمل أيضًا من مشاركة ← \"%1$s\".</string>
     <string name="tip_offer_action">عرض</string>
     <string name="tip_calc_title">آلة حاسبة وسجل</string>
     <string name="tip_calc_body">يضيف زر الآلة الحاسبة في الصف السفلي عمليات + − × ÷ لحسابات مثل %1$s، وتُحوَّل النتيجة فورًا إلى كل العملات. تُحفظ المبالغ والحسابات السابقة في السجل، أسفل البطاقات.</string>
