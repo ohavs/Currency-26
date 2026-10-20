@@ -37,9 +37,10 @@ Hebrew, and show rendered previews of visual changes (see `tools/preview`).
   and tell the owner it is safe to `/clear`. The owner asked for this every time.
 - Latest release: 5.0.23 (PR #29: an animated demo of the selection menu in Settings > "Convert from any app").
   Its run built the first signed Play bundle (artifact `currency-26-play-bundle`, run 39430944465), ready for
-  the owner's first manual upload (plan step 3.3). Upload key secrets are in and verified. GitHub Pages is still
-  off (owner's step 1.1): after the owner enables it, Actions > Pages > Run workflow (or any change to `site/`)
-  publishes the privacy policy. History, decisions and the Play launch steps: `docs/PLAY_LAUNCH_PLAN.md` (Hebrew).
+  the owner's first manual upload (plan step 3.3). Upload key secrets are in and verified. GitHub Pages is on
+  (source "GitHub Actions"); the owner's manual Pages run on 2026-10-20 published the privacy policy at
+  https://ohavs.github.io/Currency-26/privacy.html (step 1 is done). History, decisions and the Play launch
+  steps: `docs/PLAY_LAUNCH_PLAN.md` (Hebrew).
 
 ## Where things are
 - `MainActivity`, `CurrencyApp` (runs `AppLanguage.initialize` first), `QuickConvertActivity` (bubble for

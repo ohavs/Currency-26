@@ -11,10 +11,9 @@
 הכול חוץ מזה כבר נעשה. כל צעד כתוב כך שאפשר לעשות אותו מהטלפון. אחרי כל צעד אפשר להודיע לי ולהמשיך.
 
 ### 1. גיטהאב (5 דקות)
-✅ **20.10: הסודות נוספו ונבדקו.** בניית הענף פתחה את המפתח והדפיסה SHA1 ‏`A0:25:F0:85:…:56:4B`, תואם. ה־AAB ייבנה בגרסה הבאה של האפליקציה. אפשר גם להריץ ידנית: Actions ← Release ← Run workflow, ולכבות את "github_release". Pages: הפרסום רץ אוטומטית כשמשנים משהו ב־`site/`.
-1. **Settings ← Pages ← Build and deployment ← Source: "GitHub Actions"**.
-   - זה מפרסם את מדיניות הפרטיות בכתובת `https://ohavs.github.io/Currency-26/privacy.html`.
-   - אחרי השינוי אני מריץ את ה־workflow ‏Pages.
+✅ **20.10: הסודות נוספו ונבדקו.** בניית הענף פתחה את המפתח והדפיסה SHA1 ‏`A0:25:F0:85:…:56:4B`, תואם. ה־AAB ייבנה בגרסה הבאה של האפליקציה. אפשר גם להריץ ידנית: Actions ← Release ← Run workflow, ולכבות את "github_release". 
+✅ **20.10: Pages פועל.** ה־Source הוא "GitHub Actions", ומדיניות הפרטיות פורסמה ב־`https://ohavs.github.io/Currency-26/privacy.html`. מעכשיו כל שינוי ב־`site/` מפרסם אותה מחדש לבד.
+1. **Settings ← Pages ← Build and deployment ← Source: "GitHub Actions"**. (נעשה)
 2. **Settings ← Secrets and variables ← Actions ← New repository secret**, פעמיים:
    - `UPLOAD_KEYSTORE_PASSWORD` ו־`UPLOAD_KEYSTORE_BASE64`.
    - שני הערכים בקובץ `play-upload-key-secrets.txt` ששלחתי.
