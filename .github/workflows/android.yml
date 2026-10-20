@@ -25,6 +25,19 @@ jobs:
 
       - uses: gradle/actions/setup-gradle@v4
 
+      # Opens the Play upload key from its secrets, when they exist, and prints its fingerprints to compare with
+      # Play Console's "Upload key certificate" (expected SHA1 A0:25:F0:...:56:4B). Nothing secret is printed.
+      - name: Upload key
+        env:
+          UPLOAD_KEYSTORE_BASE64: ${{ secrets.UPLOAD_KEYSTORE_BASE64 }}
+          UPLOAD_KEYSTORE_PASSWORD: ${{ secrets.UPLOAD_KEYSTORE_PASSWORD }}
+        run: |
+          if [ -z "$UPLOAD_KEYSTORE_BASE64" ]; then echo "No upload key secrets yet."; exit 0; fi
+          echo "$UPLOAD_KEYSTORE_BASE64" | base64 --decode --ignore-garbage > "$RUNNER_TEMP/upload-key.jks"
+          keytool -list -v -keystore "$RUNNER_TEMP/upload-key.jks" -storepass "$UPLOAD_KEYSTORE_PASSWORD" -alias upload \
+            | grep -E "Alias name|SHA1:|SHA256:|Valid from"
+          rm "$RUNNER_TEMP/upload-key.jks"
+
       # github = the owner's build (self-update, everything open); play = Google Play (ads, Premium, R8).
       - name: Build the GitHub APKs and the Play bundle
         run: ./gradlew assembleGithubDebug assembleGithubRelease assemblePlayRelease bundlePlayRelease

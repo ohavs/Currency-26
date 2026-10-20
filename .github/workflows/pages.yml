@@ -2,6 +2,7 @@ name: Pages
 
 # Publishes site/ (the privacy policy Google Play links to) on GitHub Pages:
 # https://ohavs.github.io/Currency-26/ - needs Settings > Pages > Source: "GitHub Actions" once.
+# Runs when site/ or this file changes on main (the Claude integration cannot start workflows by hand).
 on:
   push:
     branches: [main]

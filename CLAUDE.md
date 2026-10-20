@@ -20,8 +20,14 @@ Hebrew, and show rendered previews of visual changes (see `tools/preview`).
 - **Every push to `main` is a release**: `release.yml` publishes `v5.0.<run>` with
   `currency-26-5.0.N.apk` (github flavor; the in-app updater installs it), and its `play` job builds the AAB
   with the same version once the `UPLOAD_KEYSTORE_*` secrets exist, uploading it to Play's internal track
-  (status `PLAY_STATUS`, draft until the app's first review) once `PLAY_SERVICE_ACCOUNT_JSON` exists. For
-  docs/tooling-only merges put `[skip ci]` in the merge commit title so no empty release goes out.
+  (status `PLAY_STATUS`, draft until the app's first review) once `PLAY_SERVICE_ACCOUNT_JSON` exists.
+  Pushes that only touch notes, `docs/`, `site/`, `store/`, `tools/` or the other workflows don't release
+  (`paths-ignore`), so no `[skip ci]` is needed (it would also stop `pages.yml`).
+- The Claude GitHub integration can't start workflows by hand (`run_workflow` -> 403): trigger them with a
+  push (`pages.yml` runs when `site/` or the file itself changes on main). `release.yml` has a manual
+  "Play bundle only" mode (`github_release` off) for the owner to run from the Actions tab.
+- `android.yml` opens the upload key from the secrets on every branch build and prints its fingerprints
+  (expected SHA1 `A0:25:F0:85:BF:B1:22:62:53:5F:7B:95:90:16:31:26:82:AC:56:4B`).
 - `play-listing.yml` (run by hand) uploads `store/listing` to the Play store page; `pages.yml` publishes
   `site/` (privacy policy) to https://ohavs.github.io/Currency-26/.
 - After a release, download the APK and check it: version in the manifest
