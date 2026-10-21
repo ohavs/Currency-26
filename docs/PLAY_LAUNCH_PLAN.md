@@ -62,13 +62,13 @@
       - ובשביל ההפקה אחר כך: Release to production.
    4. בגיטהאב: secret בשם `PLAY_SERVICE_ACCOUNT_JSON`, עם כל התוכן של קובץ ה־JSON.
 
-   אחרי זה אני מריץ את **Play listing**. הוא מעלה את דף החנות בכל 13 השפות, עם צילומי מסך, feature graphic ואייקון.
+   אחרי זה **אתה** לוחץ פעם אחת על Run workflow ב־https://github.com/ohavs/Currency-26/actions/workflows/play-listing.yml (לי אין הרשאה להפעיל workflow ידנית). הוא מעלה את דף החנות בכל 13 השפות, עם צילומי מסך, feature graphic ואייקון. אני בודק את התוצאה בלוג.
 7. **App content:** למלא לפי התשובות המוכנות למטה. זה רק בממשק, כ־20 דקות.
 8. **Store settings:**
    - קטגוריה: Finance.
    - אימייל ליצירת קשר: חובה, והוא מוצג בחנות. לבחירתך.
    - אתר: `https://ohavs.github.io/Currency-26/`.
-9. **בדיקה סגורה.** לחשבון אישי שנפתח אחרי 13.11.2023 זה חובה לפני Production:
+9. **בדיקה סגורה.** לחשבון אישי שנפתח אחרי 13.11.2023 זה חובה לפני Production. **זה הצעד הארוך (14 יום), אז כדאי להתחיל לאסוף בודקים כבר עכשיו:**
    - מינימום **12 בודקים שמצטרפים ונשארים 14 ימים ברצף**.
    - Testing ← Closed testing ← Create track.
    - רשימת אימיילים, או Google Group.

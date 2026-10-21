@@ -130,5 +130,5 @@ Hebrew, and show rendered previews of visual changes (see `tools/preview`).
   of `docs/PLAY_LAUNCH_PLAN.md` (GitHub Pages + secrets, AdMob ids, Play Console, service account, closed
   test with 12 testers for 14 days). When the AdMob ids arrive, put them in `gradle.properties`
   (`admobAppId`, `admobBanner`, `admobInterstitial`, `admobRewarded`). When the service account secret
-  exists, run `play-listing.yml`. After the first production review, set `PLAY_STATUS: completed`.
+  exists, the owner runs `play-listing.yml` from the Actions tab (we can't dispatch); read its log. After the first production review, set `PLAY_STATUS: completed`.
 - The Play upload key was generated in session 2026-10-20 and sent to the owner (not in git).
