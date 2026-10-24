@@ -27,7 +27,7 @@ jobs:
       - uses: gradle/actions/setup-gradle@v4
 
       - name: Build the Play APK
-        run: ./gradlew assemblePlayRelease
+        run: ./gradlew assemblePlayRelease -PadmobTestAds=true
 
       - name: Enable KVM
         run: |
