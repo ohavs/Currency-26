@@ -36,13 +36,10 @@ Hebrew, and show rendered previews of visual changes (see `tools/preview`).
   (`pyaxmlparser` or a UTF-16 search), new strings in `resources.arsc`.
 - When a task is done, save what the next session needs (this file, `docs/PLAY_LAUNCH_PLAN.md`), merge it,
   and tell the owner it is safe to `/clear`. The owner asked for this every time.
-- Latest release: 5.0.24 (PR #32: the tour's "Convert from any app" card got "Show me how", which opens
-  Settings on the sample price in a spotlight; on Samsung the section's demo acts out ⋮ > "Manage apps" >
-  switch on > Done first). Its run built a signed Play bundle (artifact `currency-26-play-bundle`, run
-  39441843630), ready for the owner's first manual upload (plan step 3.3). Upload key secrets are in and verified. GitHub Pages is on
-  (source "GitHub Actions"); the owner's manual Pages run on 2026-10-20 published the privacy policy at
-  https://ohavs.github.io/Currency-26/privacy.html (step 1 is done). History, decisions and the Play launch
-  steps: `docs/PLAY_LAUNCH_PLAN.md` (Hebrew).
+- Latest release: 5.0.25 (PR #35: real AdMob ids in the store build). Its run (40078765153) built the signed Play
+  bundle with the real ads (artifact `currency-26-play-bundle`; the log prints the AdMob app id), the one for the
+  owner's first manual upload (plan step 3.3). GitHub step 1 and AdMob step 2 are done; Play Console (step 3) is
+  next. History, decisions and the Play launch steps: `docs/PLAY_LAUNCH_PLAN.md` (Hebrew).
 
 ## Where things are
 - `MainActivity`, `CurrencyApp` (runs `AppLanguage.initialize` first), `QuickConvertActivity` (bubble for

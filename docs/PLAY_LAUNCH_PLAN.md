@@ -2,7 +2,7 @@
 
 **סטטוס (20.10.2026): הקוד וחומרי החנות מוכנים. ההמשך תלוי בצעדים של אוהב בקונסולות (הרשימה למטה).**
 
-- `applicationId = com.ohav.currency`, ‏targetSdk 36, ‏minSdk 24. גרסה אחרונה בגיטהאב: 5.0.24 (שתי הגרסאות מוזגו ל־main).
+- `applicationId = com.ohav.currency`, ‏targetSdk 36, ‏minSdk 24. גרסה אחרונה בגיטהאב: 5.0.25 (שתי הגרסאות מוזגו ל־main).
 - כל מיזוג ל־`main` עושה שני דברים:
   - משחרר את גרסת **github** ל־GitHub Releases. היא מתעדכנת מעצמה, בלי פרסומות, והכול בה פתוח.
   - בונה את גרסת **play** (AAB) באותו מספר גרסה. כשיהיו ה־secrets, היא תעלה לבד למסלול הבדיקה הפנימית ב־Play.
@@ -50,7 +50,7 @@
    - Testing ← Internal testing ← Create new release.
    - להשאיר את Play App Signing (ברירת המחדל).
    - להעלות את ה־AAB מה־artifact ‏`currency-26-play-bundle` של ריצת ה־Release האחרונה (Actions ← Release ← הריצה ← Artifacts).
-     - **להעלות את הקובץ מהריצה האחרונה (5.0.25 ואילך)**: שם כבר יש פרסומות אמיתיות. בקבצים הקודמים יש פרסומות בדיקה.
+     - **להעלות את הקובץ של 5.0.25**: https://github.com/ohavs/Currency-26/actions/runs/40078765153 (למטה, תחת Artifacts). הוא הראשון עם פרסומות אמיתיות. בקבצים הקודמים יש פרסומות בדיקה.
      - גרסה 5.0.24: ב־Actions ← Release ← הריצה של 20.10 (‏"Merge pull request #32") ← Artifacts. הקובץ חתום במפתח ההעלאה. גם הקובץ של 5.0.23 (‏"Merge pull request #29") תקין.
    - ההעלאה נועלת את `com.ohav.currency`. מכאן והלאה ההעלאות אוטומטיות.
 4. **בודקים פנימיים:**
