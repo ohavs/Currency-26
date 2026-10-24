@@ -40,7 +40,8 @@ jobs:
 
       # github = the owner's build (self-update, everything open); play = Google Play (ads, Premium, R8).
       - name: Build the GitHub APKs and the Play bundle
-        run: ./gradlew assembleGithubDebug assembleGithubRelease assemblePlayRelease bundlePlayRelease
+        # Test ads: these APKs are for trying out, and the real ids are for the store build only (release.yml).
+        run: ./gradlew assembleGithubDebug assembleGithubRelease assemblePlayRelease bundlePlayRelease -PadmobTestAds=true
 
       - name: Permissions and sizes
         run: |
@@ -48,6 +49,7 @@ jobs:
           for apk in app/build/outputs/apk/*/release/*.apk; do
             echo "== $apk $(du -h "$apk" | cut -f1)"
             "$AAPT" dump permissions "$apk"
+            "$AAPT" dump xmltree --file AndroidManifest.xml "$apk" | grep -o 'ca-app-pub-[0-9~]*' | sed 's/^/AdMob app id: /' || true
           done
           ls -la app/build/outputs/bundle/playRelease/
 

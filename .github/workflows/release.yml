@@ -118,6 +118,13 @@ jobs:
           -PappVersionCode=$((500 + GITHUB_RUN_NUMBER))
           -PappVersionName=5.0.${GITHUB_RUN_NUMBER}
 
+      - name: AdMob ids in the bundle
+        if: steps.key.outputs.ready == 'true'
+        run: |
+          id=$(unzip -p app/build/outputs/bundle/playRelease/app-play-release.aab base/manifest/AndroidManifest.xml | grep -ao 'ca-app-pub-[0-9~]*' | head -1)
+          echo "AdMob app id: $id"
+          case "$id" in *3940256099942544*) echo "::warning::This bundle carries Google's test ads.";; esac
+
       - name: Keep the bundle
         if: steps.key.outputs.ready == 'true'
         uses: actions/upload-artifact@v4

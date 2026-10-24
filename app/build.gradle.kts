@@ -68,8 +68,11 @@ android {
       dimension = "store"
       buildConfigField("boolean", "SELF_UPDATE", "false")
       signingConfig = signingConfigs.findByName("upload") ?: signingConfigs.getByName("debugConfig")
-      // AdMob ids live in gradle.properties; Google's test ids until the real ones are filled in.
-      fun admob(name: String, test: String) = providers.gradleProperty(name).orNull?.takeIf { it.isNotBlank() } ?: test
+      // AdMob ids live in gradle.properties. -PadmobTestAds=true (CI's emulator and branch builds) keeps Google's test
+      // ids: real ads shown on an emulator or tapped while testing count as invalid traffic.
+      val testAds = providers.gradleProperty("admobTestAds").orNull == "true"
+      fun admob(name: String, test: String) =
+        if (testAds) test else providers.gradleProperty(name).orNull?.takeIf { it.isNotBlank() } ?: test
       manifestPlaceholders["admobAppId"] = admob("admobAppId", "ca-app-pub-3940256099942544~3347511713")
       buildConfigField("String", "AD_UNIT_BANNER", "\"${admob("admobBanner", "ca-app-pub-3940256099942544/9214589741")}\"")
       buildConfigField("String", "AD_UNIT_INTERSTITIAL", "\"${admob("admobInterstitial", "ca-app-pub-3940256099942544/1033173712")}\"")
