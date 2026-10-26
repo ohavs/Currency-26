@@ -46,7 +46,7 @@
    - שם: Currency Converter + Widget.
    - שפת ברירת מחדל: English (United States).
    - App, ‏Free.
-3. **העלאה ראשונה, ידנית (פעם אחת בלבד):**
+3. ✅ **26.10: הקובץ הועלה.** **העלאה ראשונה, ידנית (פעם אחת בלבד):**
    - Testing ← Internal testing ← Create new release.
    - להשאיר את Play App Signing (ברירת המחדל).
    - להעלות את ה־AAB מה־artifact ‏`currency-26-play-bundle` של ריצת ה־Release האחרונה (Actions ← Release ← הריצה ← Artifacts).

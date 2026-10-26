@@ -38,8 +38,8 @@ Hebrew, and show rendered previews of visual changes (see `tools/preview`).
   and tell the owner it is safe to `/clear`. The owner asked for this every time.
 - Latest release: 5.0.25 (PR #35: real AdMob ids in the store build). Its run (40078765153) built the signed Play
   bundle with the real ads (artifact `currency-26-play-bundle`; the log prints the AdMob app id), the one for the
-  owner's first manual upload (plan step 3.3). GitHub step 1 and AdMob step 2 are done; Play Console (step 3) is
-  next. History, decisions and the Play launch steps: `docs/PLAY_LAUNCH_PLAN.md` (Hebrew).
+  owner's first manual upload (plan step 3.3). GitHub step 1 and AdMob step 2 are done; in Play Console the app exists and
+  the owner uploaded the first bundle by hand (2026-10-26, step 3.3); the rest of step 3 is next. History, decisions and the Play launch steps: `docs/PLAY_LAUNCH_PLAN.md` (Hebrew).
 
 ## Where things are
 - `MainActivity`, `CurrencyApp` (runs `AppLanguage.initialize` first), `QuickConvertActivity` (bubble for
