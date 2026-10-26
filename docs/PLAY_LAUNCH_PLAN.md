@@ -30,6 +30,7 @@
 2. ליצור שלוש יחידות פרסום: **Banner**, **Interstitial**, **Rewarded**.
    - ב־Rewarded: ‏reward amount ‏1, ‏reward item "video".
 3. **Privacy & messaging**: ליצור הודעת GDPR (European regulations) ולפרסם אותה. אם מוצע, גם הודעה ל־US state regulations.
+   - ✅ **26.10: שתי ההודעות פורסמו** (עד אז לא היו, ו־UMP לא הציג כלום). GDPR: ‏"Currency GDPR", ‏9 שפות אירופיות, Consent + Manage options, בלי Do not consent. ‏US states: הודעת opt-out, מוצגת רק דרך הגדרות ← אודות ← פרטיות בפרסומות.
 4. **לשלוח לי:**
    - App ID (‏`ca-app-pub-…~…`) ושלושת מזהי היחידות.
    - Publisher ID (‏`pub-…`), בשביל app-ads.txt.
@@ -167,7 +168,6 @@
 
 ## תשובות מוכנות לטפסים (Play Console ← App content)
 - **Privacy policy:** `https://ohavs.github.io/privacy.html` (עד 26.10 היה `/Currency-26/privacy.html`; לעדכן בקונסולה).
-  - הכתובת החדשה גם ב־AdMob ← Privacy & messaging (כתובת המדיניות בהודעות ההסכמה).
 - **Sign in details** (לשעבר App access): **Yes**. גוגל מונה עכשיו גם רכישה חד־פעמית כ"חלק מוגבל". ב־Add instructions:
   - Name ‏`Premium features`. בלי משתמש וסיסמה (או `Not required`).
   - Any other information: "No account or sign-in is needed. Everything is free except three Premium features (home-screen widget, colour themes, calculator keys). They unlock automatically for 3 days on a fresh install, with no payment or sign-up, and at any time for 24 hours by watching two rewarded videos (Settings > Premium). The optional one-time purchase \"Premium forever\" removes ads and keeps them unlocked."
