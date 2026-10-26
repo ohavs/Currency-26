@@ -123,6 +123,19 @@ Hebrew, and show rendered previews of visual changes (see `tools/preview`).
   The owner notices mismatched button sizes: keep neighbouring buttons the same height and shape.
 
 ## Next
+- **Open as of 2026-10-26 (owner's wishes, next session starts here):**
+  - Play Console: the first 9 "App content" forms are done (answers in the plan). Left: Store settings (Finance,
+    contact email: the owner picks a separate address, website left EMPTY) and the store listing (via the service
+    account + `play-listing.yml`, not by hand). The service account key is not created yet.
+  - The owner wants NO public access to any of their repos: make `ohavs/Currency-26` private (owner does it:
+    Settings > Danger zone). Before that, the privacy policy must move off GitHub Pages: Play needs a public URL,
+    so host it on Google Sites (no repo) and also show it inside the app (Settings > About). Remove the GitHub
+    issues link from the policy; use the owner's contact email. Consequences to handle: the github build's
+    in-app updater reads public releases (breaks when private; owner moves to the Play test build), the
+    unauthenticated api.github.com polling breaks (use the MCP actions tools), app-ads.txt needs a domain root
+    (Google Sites can't serve it: skip or custom domain later), Actions get 2,000 free minutes/month.
+  - Then: store assets (how they're made: `tools/store/`) and a promo video for the app; discuss which skills are
+    available for video.
 - Google Play launch: the code and the store page are ready; the owner's steps are listed in order at the top
   of `docs/PLAY_LAUNCH_PLAN.md` (GitHub Pages + secrets, AdMob ids, Play Console, service account, closed
   test with 12 testers for 14 days). AdMob is done (2026-10-24): the real ids are in `gradle.properties`
