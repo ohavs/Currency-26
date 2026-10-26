@@ -10,11 +10,9 @@ on:
     paths-ignore:
       - '**.md'
       - 'docs/**'
-      - 'site/**'
       - 'store/**'
       - 'tools/**'
       - '.github/workflows/android.yml'
-      - '.github/workflows/pages.yml'
       - '.github/workflows/play-listing.yml'
       - '.github/workflows/release.yml'
       - '.github/workflows/smoke.yml'

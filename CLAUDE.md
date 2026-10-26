@@ -23,15 +23,19 @@ Hebrew, and show rendered previews of visual changes (see `tools/preview`).
   `currency-26-5.0.N.apk` (github flavor; the in-app updater installs it), and its `play` job builds the AAB
   with the same version once the `UPLOAD_KEYSTORE_*` secrets exist, uploading it to Play's internal track
   (status `PLAY_STATUS`, draft until the app's first review) once `PLAY_SERVICE_ACCOUNT_JSON` exists.
-  Pushes that only touch notes, `docs/`, `site/`, `store/`, `tools/` or the other workflows don't release
-  (`paths-ignore`), so no `[skip ci]` is needed (it would also stop `pages.yml`).
+  Pushes that only touch notes, `docs/`, `store/`, `tools/` or the other workflows don't release
+  (`paths-ignore`), so no `[skip ci]` is needed.
 - The Claude GitHub integration can't start workflows by hand (`run_workflow` -> 403): trigger them with a
-  push (`pages.yml` runs when `site/` or the file itself changes on main). `release.yml` has a manual
+  push. `release.yml` has a manual
   "Play bundle only" mode (`github_release` off) for the owner to run from the Actions tab.
 - `android.yml` opens the upload key from the secrets on every branch build and prints its fingerprints
   (expected SHA1 `A0:25:F0:85:BF:B1:22:62:53:5F:7B:95:90:16:31:26:82:AC:56:4B`).
-- `play-listing.yml` (run by hand) uploads `store/listing` to the Play store page; `pages.yml` publishes
-  `site/` (privacy policy) to https://ohavs.github.io/Currency-26/.
+- `play-listing.yml` (run by hand) uploads `store/listing` to the Play store page.
+- The public site is its own PUBLIC repo `ohavs/ohavs.github.io` (GitHub Pages from main, no workflow; add it to
+  the session with `add_repo`): `privacy.html` (`AppLinks.PRIVACY_POLICY`, contact ohavstudio.contact@gmail.com),
+  `app-ads.txt` at the root for AdMob, and `Currency-26/` redirects from the policy's old address (builds up to
+  5.0.25 link there). The container can't reach github.io: check deploys with the actions tools
+  ("pages build and deployment").
 - After a release, download the APK and check it: version in the manifest
   (`pyaxmlparser` or a UTF-16 search), new strings in `resources.arsc`.
 - When a task is done, save what the next session needs (this file, `docs/PLAY_LAUNCH_PLAN.md`), merge it,
@@ -64,7 +68,7 @@ Hebrew, and show rendered previews of visual changes (see `tools/preview`).
 - `update/` lives in `src/github` (`AppUpdater`, `LegacyApp`); `src/play` has no-op stand-ins.
 - `ui/PremiumSheet.kt` (sheet, `PremiumPromo` for the banner slot, `LockBadge`), `widget/WidgetLocked.kt`,
   `widget/WidgetText.kt` (`AppFontText`: Rubik text as a tinted bitmap), `workers/PremiumExpiryWorker`.
-- Store: `store/listing/<locale>` (fastlane layout), `site/` (privacy policy), `tools/store/`.
+- Store: `store/listing/<locale>` (fastlane layout), `tools/store/`; the privacy policy is in `ohavs/ohavs.github.io`.
 
 ## Generated files - edit the generator, never the output
 - Strings (13 languages): `tools/i18n/base.py` (key, he, en, es) and `translations.py` (ar ru fr de pt
@@ -125,19 +129,21 @@ Hebrew, and show rendered previews of visual changes (see `tools/preview`).
 ## Next
 - **Open as of 2026-10-26 (owner's wishes, next session starts here):**
   - Play Console: the first 9 "App content" forms are done (answers in the plan). Left: Store settings (Finance,
-    contact email: the owner picks a separate address, website left EMPTY) and the store listing (via the service
-    account + `play-listing.yml`, not by hand). The service account key is not created yet.
-  - The owner wants NO public access to any of their repos: make `ohavs/Currency-26` private (owner does it:
-    Settings > Danger zone). Before that, the privacy policy must move off GitHub Pages: Play needs a public URL,
-    so host it on Google Sites (no repo) and also show it inside the app (Settings > About). Remove the GitHub
-    issues link from the policy; use the owner's contact email. Consequences to handle: the github build's
-    in-app updater reads public releases (breaks when private; owner moves to the Play test build), the
-    unauthenticated api.github.com polling breaks (use the MCP actions tools), app-ads.txt needs a domain root
-    (Google Sites can't serve it: skip or custom domain later), Actions get 2,000 free minutes/month.
+    contact email ohavstudio.contact@gmail.com, website `https://ohavs.github.io`: needed for app-ads.txt; the
+    owner wants ALL ad buyers, so app-ads.txt is not optional) and the store listing (via the service account +
+    `play-listing.yml`, not by hand). The service account key is not created yet. App content > Privacy policy
+    must be changed to `https://ohavs.github.io/privacy.html` (it was `/Currency-26/privacy.html`).
+  - The owner wants the code private: the site moved to the public `ohavs/ohavs.github.io` (2026-10-26, the owner
+    accepted a public repo holding only public files). Next the owner makes `ohavs/Currency-26` private (Settings >
+    Danger zone). Consequences: the github build's in-app updater reads public releases (breaks; the owner moves
+    to the Play test build), the unauthenticated api.github.com polling breaks (use the MCP actions tools), Actions
+    get 2,000 free minutes/month, and the old Pages project site goes away (the redirect in ohavs.github.io takes
+    over). After the app is live and linked in AdMob, check that app-ads.txt shows "Verified"; if github.io isn't
+    accepted, the owner buys a domain and we attach it to the same repo (custom domain).
   - Then: store assets (how they're made: `tools/store/`) and a promo video for the app; discuss which skills are
     available for video.
 - Google Play launch: the code and the store page are ready; the owner's steps are listed in order at the top
-  of `docs/PLAY_LAUNCH_PLAN.md` (GitHub Pages + secrets, AdMob ids, Play Console, service account, closed
+  of `docs/PLAY_LAUNCH_PLAN.md` (secrets, AdMob ids, Play Console, service account, closed
   test with 12 testers for 14 days). AdMob is done (2026-10-24): the real ids are in `gradle.properties`
   and only the store build uses them; smoke and branch builds pass `-PadmobTestAds=true` (Google's test ads,
   since real ads on an emulator are invalid traffic). Each build logs the AdMob app id it carries. When the service account secret

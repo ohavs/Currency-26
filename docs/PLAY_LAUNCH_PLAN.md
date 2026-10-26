@@ -12,8 +12,7 @@
 
 ### 1. גיטהאב (5 דקות)
 ✅ **20.10: הסודות נוספו ונבדקו.** בניית הענף פתחה את המפתח והדפיסה SHA1 ‏`A0:25:F0:85:…:56:4B`, תואם. ה־AAB ייבנה בגרסה הבאה של האפליקציה. אפשר גם להריץ ידנית: Actions ← Release ← Run workflow, ולכבות את "github_release". 
-✅ **20.10: Pages פועל.** ה־Source הוא "GitHub Actions", ומדיניות הפרטיות פורסמה ב־`https://ohavs.github.io/Currency-26/privacy.html`. מעכשיו כל שינוי ב־`site/` מפרסם אותה מחדש לבד.
-1. **Settings ← Pages ← Build and deployment ← Source: "GitHub Actions"**. (נעשה)
+✅ **26.10: האתר עבר לריפו הציבורי `ohavs/ohavs.github.io`** (אוהב פתח אותו, הקוד ב־`Currency-26` יהיה פרטי). מדיניות הפרטיות: `https://ohavs.github.io/privacy.html`, עם המייל `ohavstudio.contact@gmail.com`. `app-ads.txt` בשורש: `https://ohavs.github.io/app-ads.txt`. הכתובת הישנה `/Currency-26/privacy.html` מפנה לחדשה (הגרסה שכבר הועלתה ל־Play מקשרת אליה). `site/` ו־`pages.yml` הוסרו מ־`Currency-26`. אם AdMob לא יאמת את app-ads.txt בכתובת github.io, אוהב יקנה דומיין ונחבר אותו לאותו ריפו (custom domain).
 2. **Settings ← Secrets and variables ← Actions ← New repository secret**, פעמיים:
    - `UPLOAD_KEYSTORE_PASSWORD` ו־`UPLOAD_KEYSTORE_BASE64`.
    - שני הערכים בקובץ `play-upload-key-secrets.txt` ששלחתי.
@@ -74,8 +73,8 @@
 7. **App content:** למלא לפי התשובות המוכנות למטה. זה רק בממשק, כ־20 דקות.
 8. **Store settings:**
    - קטגוריה: Finance.
-   - אימייל ליצירת קשר: חובה, והוא מוצג בחנות. לבחירתך.
-   - אתר: `https://ohavs.github.io/Currency-26/`.
+   - אימייל ליצירת קשר: `ohavstudio.contact@gmail.com`.
+   - אתר: `https://ohavs.github.io` (חובה בשביל app-ads.txt).
 9. **בדיקה סגורה.** לחשבון אישי שנפתח אחרי 13.11.2023 זה חובה לפני Production. **זה הצעד הארוך (14 יום), אז כדאי להתחיל לאסוף בודקים כבר עכשיו:**
    - מינימום **12 בודקים שמצטרפים ונשארים 14 ימים ברצף**.
    - Testing ← Closed testing ← Create track.
@@ -89,10 +88,10 @@
 
 ### 4. אחרי שהאפליקציה מתפרסמת
 - **AdMob ← App settings:** לקשר את האפליקציה לדף החנות. AdMob בודק אותה, ועד האישור מוגשות מעט פרסומות.
-- **app-ads.txt:** צריך להיות בשורש הדומיין של "אתר המפתח".
-  - אני יכול ליצור (באישורך) ריפו `ohavs/ohavs.github.io` עם הקובץ.
-  - ולהגדיר אתר מפתח `https://ohavs.github.io`.
-  - בלי הקובץ הפרסומות עובדות, אבל חלק מהמפרסמים לא מציעים מחיר.
+- **app-ads.txt:** כבר מפורסם ב־`https://ohavs.github.io/app-ads.txt` (ריפו `ohavs/ohavs.github.io`).
+  - אוהב רוצה את כל המפרסמים, לא לוותר עליו.
+  - אחרי הקישור לדף החנות: AdMob ← Apps ← app-ads.txt, לוודא שהסטטוס "Verified" (סריקה עד כמה ימים).
+  - אם לא מאומת בגלל github.io: דומיין משלו, מחובר לאותו ריפו, ומעדכנים את אתר המפתח ב־Play.
   - תוכן הקובץ (שורה אחת): `google.com, pub-8616374968872954, DIRECT, f08c47fec0942fa0`
 
 ## החלטות מונטיזציה (מעודכן 20.10.2026, לפי אוהב)
@@ -157,7 +156,7 @@
   - `android.yml` בונה את שני ה־flavors ומריץ את הבדיקות של שניהם.
   - `release.yml`: ‏job ‏`release` (גיטהאב) ו־job ‏`play` (‏AAB, ‏artifact, והעלאה ל־internal כשיש secrets).
   - `play-listing.yml` (ידני): fastlane supply מ־`store/listing`.
-  - `pages.yml`: מפרסם את `site/` (מדיניות פרטיות ודף בית).
+  - האתר (מדיניות פרטיות, app-ads.txt, דף בית) בריפו הציבורי `ohavs/ohavs.github.io`, ‏GitHub Pages מ־main בלי workflow.
 - **חומרי חנות** (`store/listing/<locale>`):
   - טקסטים ב־13 שפות (`tools/store/listing.py`). שם, תיאור קצר ותיאור מלא. אותו טקסט גם ל־en-GB, ‏es-419, ‏fr-CA ו־pt-PT.
   - 5 צילומי מסך ו־feature graphic לכל שפה (`tools/store/screenshots.mjs`, מרינדורי `ONLY=store_` של tools/preview), ואייקון 512.
@@ -167,7 +166,7 @@
     - בצרפתית בלי "+ widget", כי השם המלא חורג מ־30 התווים.
 
 ## תשובות מוכנות לטפסים (Play Console ← App content)
-- **Privacy policy:** `https://ohavs.github.io/Currency-26/privacy.html`.
+- **Privacy policy:** `https://ohavs.github.io/privacy.html` (עד 26.10 היה `/Currency-26/privacy.html`; לעדכן בקונסולה).
 - **Sign in details** (לשעבר App access): **Yes**. גוגל מונה עכשיו גם רכישה חד־פעמית כ"חלק מוגבל". ב־Add instructions:
   - Name ‏`Premium features`. בלי משתמש וסיסמה (או `Not required`).
   - Any other information: "No account or sign-in is needed. Everything is free except three Premium features (home-screen widget, colour themes, calculator keys). They unlock automatically for 3 days on a fresh install, with no payment or sign-up, and at any time for 24 hours by watching two rewarded videos (Settings > Premium). The optional one-time purchase \"Premium forever\" removes ads and keeps them unlocked."
