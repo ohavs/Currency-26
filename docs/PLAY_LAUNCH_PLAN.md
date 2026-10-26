@@ -167,6 +167,7 @@
 
 ## תשובות מוכנות לטפסים (Play Console ← App content)
 - **Privacy policy:** `https://ohavs.github.io/privacy.html` (עד 26.10 היה `/Currency-26/privacy.html`; לעדכן בקונסולה).
+  - הכתובת החדשה גם ב־AdMob ← Privacy & messaging (כתובת המדיניות בהודעות ההסכמה).
 - **Sign in details** (לשעבר App access): **Yes**. גוגל מונה עכשיו גם רכישה חד־פעמית כ"חלק מוגבל". ב־Add instructions:
   - Name ‏`Premium features`. בלי משתמש וסיסמה (או `Not required`).
   - Any other information: "No account or sign-in is needed. Everything is free except three Premium features (home-screen widget, colour themes, calculator keys). They unlock automatically for 3 days on a fresh install, with no payment or sign-up, and at any time for 24 hours by watching two rewarded videos (Settings > Premium). The optional one-time purchase \"Premium forever\" removes ads and keeps them unlocked."

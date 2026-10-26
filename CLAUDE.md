@@ -40,7 +40,8 @@ Hebrew, and show rendered previews of visual changes (see `tools/preview`).
   (`pyaxmlparser` or a UTF-16 search), new strings in `resources.arsc`.
 - When a task is done, save what the next session needs (this file, `docs/PLAY_LAUNCH_PLAN.md`), merge it,
   and tell the owner it is safe to `/clear`. The owner asked for this every time.
-- Latest release: 5.0.25 (PR #35: real AdMob ids in the store build). Its run (40078765153) built the signed Play
+- Latest release: 5.0.26 (PR #40: the privacy policy link moved to https://ohavs.github.io/privacy.html; checked
+  in the APK). 5.0.25 (PR #35) brought the real AdMob ids to the store build; its run (40078765153) built the signed Play
   bundle with the real ads (artifact `currency-26-play-bundle`; the log prints the AdMob app id), the one for the
   owner's first manual upload (plan step 3.3). GitHub step 1 and AdMob step 2 are done; in Play Console the app exists and
   the owner uploaded the first bundle by hand (2026-10-26, step 3.3); the rest of step 3 is next. History, decisions and the Play launch steps: `docs/PLAY_LAUNCH_PLAN.md` (Hebrew).
@@ -133,6 +134,9 @@ Hebrew, and show rendered previews of visual changes (see `tools/preview`).
     owner wants ALL ad buyers, so app-ads.txt is not optional) and the store listing (via the service account +
     `play-listing.yml`, not by hand). The service account key is not created yet. App content > Privacy policy
     must be changed to `https://ohavs.github.io/privacy.html` (it was `/Currency-26/privacy.html`).
+    The same new URL goes in AdMob > Privacy & messaging (the privacy policy URL its consent messages show).
+    Completed Play checklist items are edited from the left menu (Policy and programs > App content; Store presence
+    > Store settings), not from the dashboard checklist.
   - The owner wants the code private: the site moved to the public `ohavs/ohavs.github.io` (2026-10-26, the owner
     accepted a public repo holding only public files). Next the owner makes `ohavs/Currency-26` private (Settings >
     Danger zone). Consequences: the github build's in-app updater reads public releases (breaks; the owner moves
