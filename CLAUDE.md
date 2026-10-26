@@ -134,7 +134,9 @@ Hebrew, and show rendered previews of visual changes (see `tools/preview`).
     owner wants ALL ad buyers, so app-ads.txt is not optional) and the store listing (via the service account +
     `play-listing.yml`, not by hand). The service account key is not created yet. App content > Privacy policy
     must be changed to `https://ohavs.github.io/privacy.html` (it was `/Currency-26/privacy.html`).
-    The same new URL goes in AdMob > Privacy & messaging (the privacy policy URL its consent messages show).
+    AdMob consent messages were published only on 2026-10-26 ("Currency GDPR", 9 European languages, no "Do not
+    consent" button; and a US states opt-out message): until then UMP had no form to show. AdMob has no privacy
+    URL field; it takes the app's details from the Play listing once linked.
     Completed Play checklist items are edited from the left menu (Policy and programs > App content; Store presence
     > Store settings), not from the dashboard checklist.
   - The owner wants the code private: the site moved to the public `ohavs/ohavs.github.io` (2026-10-26, the owner
