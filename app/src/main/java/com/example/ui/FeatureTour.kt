@@ -44,6 +44,7 @@ import androidx.compose.material.icons.rounded.Add
 import androidx.compose.material.icons.rounded.Calculate
 import androidx.compose.material.icons.rounded.Close
 import androidx.compose.material.icons.rounded.ContentCopy
+import androidx.compose.material.icons.rounded.SwapVert
 import androidx.compose.material.icons.rounded.TouchApp
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -68,6 +69,7 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.PathEffect
 import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.graphics.TransformOrigin
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
@@ -322,23 +324,7 @@ private fun WidgetIllustration() {
         CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Ltr) {
             Box {
                 MiniWidget(typed = typed, pressedKey = if (pressed >= 0) TAP_KEYS[pressed] else null, flagOnRight = readingRtl)
-                Box(
-                    modifier = Modifier
-                        .offset(x = finger.first - FINGER / 2, y = finger.second - FINGER / 2)
-                        .graphicsLayer {
-                            alpha = fingerAlpha
-                            val press = if (pressed >= 0) 0.82f else 1f
-                            scaleX = press
-                            scaleY = press
-                        }
-                        .size(FINGER)
-                        .clip(CircleShape)
-                        // A soft dark rim keeps the fingertip visible over the light keys.
-                        .background(palette.ink.copy(alpha = 0.22f))
-                        .padding(3.dp)
-                        .clip(CircleShape)
-                        .background(Color.White.copy(alpha = 0.95f))
-                )
+                TourFinger(finger, fingerAlpha, pressing = pressed >= 0, absolute = false)
             }
         }
     }
@@ -349,13 +335,58 @@ private const val TYPING_LOOP = 4.4f
 private val TAPS = listOf(0.7f, 1.5f, 2.3f)
 private val TAP_KEYS = listOf("1", "0", "0")
 private val MINI_WIDGET_WIDTH = 156.dp
-private val FINGER = 24.dp
 private val MINI_PADDING = 7.dp
 private val MINI_CARD = 32.dp
 private val MINI_GAP = 3.dp
 private val MINI_KEY_HEIGHT = 17.dp
 private val MINI_KEYPAD_TOP = MINI_PADDING + MINI_CARD * 2 + MINI_GAP + 6.dp
 private val MINI_KEYS = listOf(listOf("7", "8", "9"), listOf("4", "5", "6"), listOf("1", "2", "3"), listOf("C", "0", "⌫"))
+
+/**
+ * The finger in the tour's demos, as in the selection-menu demo: a hand with its fingertip on [tip], and a
+ * ripple under the fingertip while it presses. [absolute] for a parent that is not laid out left to right.
+ */
+@Composable
+private fun TourFinger(tip: Pair<Dp, Dp>, alpha: Float, pressing: Boolean, absolute: Boolean) {
+    val palette = LocalPalette.current
+    fun Modifier.at(x: Dp, y: Dp) = if (absolute) absoluteOffset(x = x, y = y) else offset(x = x, y = y)
+    Box(
+        Modifier
+            .at(tip.first - TOUCH_RING / 2, tip.second - TOUCH_RING / 2)
+            .graphicsLayer { this.alpha = if (pressing) alpha else 0f }
+            .size(TOUCH_RING)
+            .clip(CircleShape)
+            .background(palette.accent.copy(alpha = 0.45f))
+    )
+    Box(
+        Modifier
+            .at(tip.first - TOUR_HAND * TIP_X, tip.second - TOUR_HAND * TIP_Y)
+            .size(TOUR_HAND)
+            .graphicsLayer {
+                this.alpha = alpha
+                val press = if (pressing) 0.88f else 1f
+                scaleX = press
+                scaleY = press
+                transformOrigin = TransformOrigin(TIP_X, TIP_Y)
+            }
+    ) {
+        // A slightly larger hand in the background colour behind it outlines it over keys of any shade.
+        Icon(
+            Icons.Rounded.TouchApp,
+            contentDescription = null,
+            tint = palette.background,
+            modifier = Modifier.size(TOUR_HAND).graphicsLayer {
+                scaleX = 1.14f
+                scaleY = 1.14f
+                transformOrigin = TransformOrigin(TIP_X, TIP_Y)
+            }
+        )
+        Icon(Icons.Rounded.TouchApp, contentDescription = null, tint = palette.ink, modifier = Modifier.size(TOUR_HAND))
+    }
+}
+
+private val TOUR_HAND = 30.dp
+private val TOUCH_RING = 18.dp
 
 /** Center of a key in the miniature, from its top-left corner. */
 private fun keyCenter(key: String): Pair<Dp, Dp> {
@@ -407,7 +438,8 @@ private fun MiniWidget(typed: Int, pressedKey: String?, flagOnRight: Boolean) {
                     .background(palette.accent),
                 contentAlignment = Alignment.Center
             ) {
-                Text("⇅", fontSize = 9.sp, color = palette.onAccent, fontWeight = FontWeight.Bold)
+                // An icon, not "⇅": a glyph sits on the font's baseline and never quite centres.
+                Icon(Icons.Rounded.SwapVert, contentDescription = null, tint = palette.onAccent, modifier = Modifier.size(11.dp))
             }
         }
         Spacer(Modifier.height(6.dp))
@@ -653,22 +685,7 @@ private fun SelectConvertIllustration() {
                 color = palette.ink
             )
         }
-        Box(
-            modifier = Modifier
-                .offset(x = finger.first - FINGER / 2, y = finger.second - FINGER / 2)
-                .graphicsLayer {
-                    alpha = fingerAlpha
-                    val press = if (pressing) 0.82f else 1f
-                    scaleX = press
-                    scaleY = press
-                }
-                .size(FINGER)
-                .clip(CircleShape)
-                .background(palette.ink.copy(alpha = 0.22f))
-                .padding(3.dp)
-                .clip(CircleShape)
-                .background(Color.White.copy(alpha = 0.95f))
-        )
+        TourFinger(finger, fingerAlpha, pressing = pressing, absolute = false)
     }
 }
 
@@ -793,22 +810,7 @@ private fun CalculatorIllustration() {
                 }
             }
         }
-        Box(
-            modifier = Modifier
-                .absoluteOffset(x = finger.first - FINGER / 2, y = finger.second - FINGER / 2)
-                .graphicsLayer {
-                    alpha = fingerAlpha
-                    val press = if (pressed >= 0) 0.82f else 1f
-                    scaleX = press
-                    scaleY = press
-                }
-                .size(FINGER)
-                .clip(CircleShape)
-                .background(palette.ink.copy(alpha = 0.22f))
-                .padding(3.dp)
-                .clip(CircleShape)
-                .background(Color.White.copy(alpha = 0.95f))
-        )
+        TourFinger(finger, fingerAlpha, pressing = pressed >= 0, absolute = true)
     }
 }
 

@@ -727,6 +727,14 @@ fun main() {
             }
         }
     }
+    // 5.0.28: the crown on Settings while Premium is on (trial, videos or bought).
+    for ((lang, dark) in listOf("iw" to false, "iw" to true, "en" to false)) {
+        render("v28_crown_${lang}_${if (dark) "dark" else "light"}") {
+            Frame(dark, "sage", lang) {
+                CalculatorContent(state, onSwap = {}, onCurrencyClick = {}, onKeypad = {}, onOpenSettings = {}, onRefresh = {}, premiumBadge = true)
+            }
+        }
+    }
     // The typing animation at a few moments: finger arriving, "1" typed, "100" typed.
     for (frames in listOf(30, 60, 100, 160)) {
         renderTapped("tourtyping_iw_$frames", emptyList(), frames = frames) {

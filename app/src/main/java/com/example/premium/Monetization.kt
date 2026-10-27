@@ -48,4 +48,15 @@ interface Monetization {
 
     /** A natural break (back from the picker, settings or history): maybe a full-screen ad, or the review ask. */
     fun onBreak(activity: Activity)
+
+    /** Only in builds with Google's test ads (the closed test): moves Premium's clock to try the ads now. */
+    val testTools: TestTools? get() = null
+}
+
+/** Hidden in Settings (seven taps on the version) of builds with test ads. */
+interface TestTools {
+    /** Ends the trial and the first day without full-screen ads, as if the app were days old. */
+    fun endTrial()
+    /** A fresh install's trial again. */
+    fun restartTrial()
 }

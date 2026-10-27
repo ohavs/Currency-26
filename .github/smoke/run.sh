@@ -2,7 +2,7 @@
 # Smoke test of the Play build (R8, ads, billing, consent) on an emulator: start the app, open Settings and
 # the Premium sheet, start a rewarded video, open the quick-convert bubble and pick another currency in it,
 # then follow the tour's "show me how" to the price in Settings' "Convert from any app", select it and convert it
-# from the selection menu. Fails on any crash.
+# from the selection menu, and add the widget from Settings. Fails on any crash.
 # Screenshots go to smoke/ (and, shrunk, into the job log: see shots.py).
 set -u
 APK="$1"
@@ -58,7 +58,24 @@ python3 .github/smoke/tap.py "Convert currency" || { python3 .github/smoke/tap.p
 sleep 5
 shot 12-select-bubble
 
+# Settings > Widget > "Add widget to home screen": the launcher's pin dialog, then the widget on the home screen.
+adb shell input keyevent KEYCODE_BACK; sleep 2
+adb shell am force-stop $PKG
+adb shell am start -W -n $PKG/com.example.MainActivity
+sleep 6
+tap "Settings"
+tap "Widget"
+tap "Add widget to home screen" 4
+shot 13-widget-pin
+tap "Add to home screen|ADD TO HOME SCREEN|Add automatically|ADD AUTOMATICALLY|Add" 4
+adb shell input keyevent KEYCODE_HOME; sleep 10
+shot 14-widget-home
+adb shell dumpsys appwidget | grep -A3 "com.ohav.currency" | head -20
+
 adb logcat -d > smoke/logcat.txt
+echo "--- widget log ---"
+grep -iE "glance|appwidget|RemoteViews|widget" smoke/logcat.txt | grep -iE "error|exception|fail|can't|unable|W/|E/" | head -40
+
 # Only the app's own crashes count: uiautomator (the screen reads above) now and then dies on its way out.
 if grep -A2 "FATAL EXCEPTION" smoke/logcat.txt | grep -q "Process: $PKG"; then
   echo "::error::The app crashed"

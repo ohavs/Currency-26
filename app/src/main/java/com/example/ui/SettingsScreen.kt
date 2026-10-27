@@ -124,6 +124,8 @@ fun SettingsScreen(
     colorsLocked: Boolean = false,
     adPrivacyOptions: Boolean = false,
     onAdPrivacyOptions: () -> Unit = {},
+    /** Builds with Google's test ads: seven taps on the version show these. */
+    testTools: com.example.premium.TestTools? = null,
     onWidgetGuideDone: () -> Unit = {},
     /** [SAMPLE_PRICE] in the user's currency, for the "Convert from any app" demo (null before there are rates). */
     quickSample: ConvertedPrice? = null,
@@ -484,11 +486,18 @@ fun SettingsScreen(
                     )
                     LinkRow(stringResource(R.string.privacy_policy)) { runCatching { uriHandler.openUri(AppLinks.PRIVACY_POLICY) } }
                     if (adPrivacyOptions) LinkRow(stringResource(R.string.ad_privacy), onClick = onAdPrivacyOptions)
+                    var versionTaps by remember { mutableStateOf(0) }
                     Text(
                         text = stringResource(R.string.installed_version, appUpdate.installedVersion),
                         style = MaterialTheme.typography.labelMedium,
-                        color = palette.inkMuted
+                        color = palette.inkMuted,
+                        modifier = if (testTools != null) Modifier.clickable { versionTaps++ } else Modifier
                     )
+                    // For the closed test only (these builds show Google's test ads), so not translated.
+                    if (testTools != null && versionTaps >= 7) {
+                        LinkRow("Test: end the trial and the first ad-free day") { testTools.endTrial() }
+                        LinkRow("Test: restart the 3-day trial") { testTools.restartTrial() }
+                    }
                 }
             }
         }
