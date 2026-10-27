@@ -33,6 +33,12 @@ Render each language in turn (index.html is shared) to `store/video/promo-<lang>
 - v5 (2026-10-27): the owner kept the sound effects and turned the music down; every language is rendered with the
   effects only (`python3 audio/mix.py /home/user/snd/sfx-kit`, no music arguments: about -26 LUFS) until the owner
   finds a track.
+- v6 (2026-10-27): the owner's track, "Edge of Motion" by Aetheric from freetouse.com (Upbeat), trimmed by the owner
+  to 24 s: `audio/BG.mp3` (in git). `python3 audio/mix.py /home/user/snd/sfx-kit audio/BG.mp3 0` (mix about -16 LUFS,
+  peak -1.3 dBFS; the fade-out ends where the track ends). Only the sound changed, so the 13 videos were not rendered
+  again: their audio was swapped (`ffmpeg -i promo-<lang>.mp4 -i assets/audio/mix.wav -map 0:v -map 1:a -c:v copy
+  -c:a aac -b:a 192k`). Free To Use asks for a credit in the description (check their terms page; the container can't
+  reach freetouse.com).
 - Music (v4 draft, rejected by the owner): "Daybreak" by Tanner Helland from 10 s,
   [github.com/tannerhelland/free-music](https://github.com/tannerhelland/free-music), CC BY 4.0: the video's
   description must say "Music: Daybreak by Tanner Helland (CC BY 4.0)". Candidates sent to the owner: Daybreak, Thugs,
