@@ -34,7 +34,7 @@ Hebrew, and show rendered previews of visual changes (see `tools/preview`).
   (expected SHA1 `A0:25:F0:85:BF:B1:22:62:53:5F:7B:95:90:16:31:26:82:AC:56:4B`).
 - `store-assets.yml`: on changes under `store/` packs `store-images` (per language) and `store-videos` (the 13
   promo mp4s) as artifacts for the owner to download from the run page.
-- `play-listing.yml` (run by hand) uploads `store/listing` to the Play store page: fastlane ties the listing to a release, so it
+- `play-listing.yml` (runs on pushes to main that change `store/listing` or the workflow; also by hand) uploads `store/listing` to the Play store page: fastlane ties the listing to a release, so it
   targets track `alpha` and that track's newest version code (both inputs; production is empty until launch, which
   gave "Could not find release for version code ''").
 - The public site is its own PUBLIC repo `ohavs/ohavs.github.io` (GitHub Pages from main, no workflow; add it to
