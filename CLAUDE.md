@@ -153,7 +153,9 @@ Hebrew, and show rendered previews of visual changes (see `tools/preview`).
   - Store images: new set on the session branch (not merged yet); the owner is reviewing the gallery artifact and
     will send fixes by code. Skills tried (installed per container, gone after it): ParthJadhav/app-store-screenshots
     (its Next.js editor ran in the container; Style Lab looks were plain), Canva AI (broken Hebrew), logo-design
-    (owner kept the current logo). Then: a promo video (elayadesign `design-to-motion` animates screens to MP4).
+    (owner kept the current logo). Promo video (Hebrew, 9:16, HyperFrames): source `tools/video/promo` (README), output
+    `store/video/promo-he.mp4` (v3, 2026-10-27: swap chip between the flap rows, a 9-phone ring, premium as a
+    tag, the store home screen, a hand cursor); the owner is reviewing it. Photo credits (CC BY) go in its description.
 - Google Play launch: the code and the store page are ready; the owner's steps are listed in order at the top
   of `docs/PLAY_LAUNCH_PLAN.md` (secrets, AdMob ids, Play Console, service account, closed
   test with 12 testers for 14 days). AdMob is done (2026-10-24): the real ids are in `gradle.properties`
