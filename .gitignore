@@ -20,3 +20,7 @@ local.properties
 
 __pycache__/
 tools/store/.fonts/
+
+# HyperFrames render temp folders next to the output
+store/video/.*.hf-transaction-*/
+store/video/work-*/
