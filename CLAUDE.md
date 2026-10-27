@@ -78,7 +78,11 @@ Hebrew, and show rendered previews of visual changes (see `tools/preview`).
 - Icons: `tools/icons/make_icons.mjs` (one look per palette; the launcher icon is always "sage").
 - Store listing: texts in `tools/store/listing.py` (`python3 tools/store/listing.py store/listing`, checks the
   30/80/4000 limits, writes the icon); images: `cd tools/preview && ./sync.sh && ONLY=store_ gradle -q run`,
-  then `node tools/store/screenshots.mjs` (captions reuse the app's tour titles; Noto fonts from npm).
+  then `node tools/store/screenshots.mjs` (headlines and stickers in its COPY table, 13 languages; fonts from npm).
+  Style (owner's pick, 2026-10-27, after rejecting "generic" white/bento looks): brutalist, one flat colour per
+  screenshot from the launcher icon of the colour set its screen shows, slate outlines and hard shadows, Hebrew in
+  Secular One, Latin/Cyrillic in Rubik. The owner reviews every language in the artifact
+  https://claude.ai/artifact/KeKXVxz9ajFXA9YTavwjwF (codes like `de-3`); republish it after changes.
 - Textures: `tools/textures/make_textures.mjs` (tiles in `drawable-xxhdpi`, `drawable/texture_<key>.xml`
   for widgets; the "rose" sun rays are a vector mirrored in `PaletteTexture.kt`).
 - Run both with `PATH=/opt/node22/bin:$PATH NODE_PATH=$(npm root -g) node <script>` (global Playwright
@@ -146,8 +150,15 @@ Hebrew, and show rendered previews of visual changes (see `tools/preview`).
     get 2,000 free minutes/month, and the old Pages project site goes away (the redirect in ohavs.github.io takes
     over). After the app is live and linked in AdMob, check that app-ads.txt shows "Verified"; if github.io isn't
     accepted, the owner buys a domain and we attach it to the same repo (custom domain).
-  - Then: store assets (how they're made: `tools/store/`) and a promo video for the app; discuss which skills are
-    available for video.
+  - Store images: new set on the session branch (not merged yet); the owner is reviewing the gallery artifact and
+    will send fixes by code. Skills tried (installed per container, gone after it): ParthJadhav/app-store-screenshots
+    (its Next.js editor ran in the container; Style Lab looks were plain), Canva AI (broken Hebrew), logo-design
+    (owner kept the current logo). Promo video (Hebrew, 9:16, HyperFrames): source `tools/video/promo` (README), output
+    `store/video/promo-he.mp4` (v3, 2026-10-27: swap chip between the flap rows, a 9-phone ring, premium as a
+    tag, the store home screen, a hand cursor); the owner approved the store images (2026-10-27, Secular One is right) and has notes on the video
+    (next session starts with them). The video must use the same Secular One as the images: check that its
+    @font-face fonts really load in the render (the screenshots once silently fell back) and match the images'
+    weight (text-stroke). Photo credits (CC BY) go in its description.
 - Google Play launch: the code and the store page are ready; the owner's steps are listed in order at the top
   of `docs/PLAY_LAUNCH_PLAN.md` (secrets, AdMob ids, Play Console, service account, closed
   test with 12 testers for 14 days). AdMob is done (2026-10-24): the real ids are in `gradle.properties`
