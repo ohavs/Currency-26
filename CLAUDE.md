@@ -40,7 +40,7 @@ Hebrew, and show rendered previews of visual changes (see `tools/preview`).
   (`pyaxmlparser` or a UTF-16 search), new strings in `resources.arsc`.
 - When a task is done, save what the next session needs (this file, `docs/PLAY_LAUNCH_PLAN.md`), merge it,
   and tell the owner it is safe to `/clear`. The owner asked for this every time.
-- Latest release: 5.0.26 (PR #40: the privacy policy link moved to https://ohavs.github.io/privacy.html; checked
+- Latest release: 5.0.27 (PR #44: Play bundle with test ads, translation review). 5.0.26 (PR #40: the privacy policy link moved to https://ohavs.github.io/privacy.html; checked
   in the APK). 5.0.25 (PR #35) brought the real AdMob ids to the store build; its run (40078765153) built the signed Play
   bundle with the real ads (artifact `currency-26-play-bundle`; the log prints the AdMob app id), the one for the
   owner's first manual upload (plan step 3.3). GitHub step 1 and AdMob step 2 are done; in Play Console the app exists and
@@ -133,8 +133,10 @@ Hebrew, and show rendered previews of visual changes (see `tools/preview`).
 
 ## Next
 - **Open as of 2026-10-26 (owner's wishes, next session starts here):**
-  - 2026-10-27: Store settings and the privacy URL fix are done (owner). The closed test is running (the owner's
-    console asks for 20 testers x 14 days). Play bundles now carry Google's TEST ads (`PLAY_REAL_ADS: false` in
+  - 2026-10-27: Store settings and the privacy URL fix are done (owner). The closed test ("Alpha") was still Inactive on
+    2026-10-27 (no release, list not selected; list "צוות בודקים" has 17 people): the owner uploads 5.0.27 (run
+    40501759554, test ads checked in the log) there, picks the list and all countries, sends it for review, then shares
+    the opt-in link; the 14 days start after that. Internal testing doesn't count. Play bundles now carry Google's TEST ads (`PLAY_REAL_ADS: false` in
     `release.yml`) for the whole test period: the owner doesn't trust testers not to tap ads. Set it to `true` and build
     a new bundle before applying for production. The 5.0.25 bundle the testers got has real ads: the owner replaces it
     with a "Play bundle only" run. Next: service account (steps given to the owner, plan step 3.6).
