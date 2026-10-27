@@ -5,3 +5,7 @@ page.html
 node_modules/
 assets/audio/music.wav
 assets/audio/sfx.wav
+assets/img/*/
+assets/fonts/fs/
+measure_*.html
+page_*.html

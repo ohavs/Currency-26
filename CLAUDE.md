@@ -155,11 +155,11 @@ Hebrew, and show rendered previews of visual changes (see `tools/preview`).
     headlines; Spain Spanish "tipos de cambio", each language's own quotes, the menu item named the same in the store
     text and the app) and the screenshots re-rendered. Open question for the owner: amounts are formatted US-style in
     every language ("$4,980.42"; Locale.US in `AmountFormat.kt`, the calculator types "."), which a native speaker may
-    also read as a mistake. Promo video v4 (`store/video/promo-he.mp4`, source `tools/video/promo`, README): Hebrew
-    first, the other 12 languages only after the owner calls the Hebrew one perfect (closest font to Secular One for
-    scripts it lacks). v4 has sound: SFX Kit (CC0) on every action, draft music "Daybreak" (Tanner Helland, CC BY 4.0:
-    credit in the video's description); the owner was sent 5 music options to pick by ear. Only GitHub, npm and PyPI
-    are reachable for media (public GitHub repos clone anonymously).
+    also read as a mistake. Promo video v5 (`store/video/promo-<lang>.mp4`, Hebrew `promo-he.mp4`; source
+    `tools/video/promo`, README; words in its `langs.py`): the owner approved the Hebrew picture and the sound effects
+    (SFX Kit, CC0) but not the music, and asked for the other languages; all 13 were rendered with the effects only.
+    Next: the owner looks for a music track (sends it, or we fetch one from GitHub: only GitHub, npm and PyPI are
+    reachable for media; public GitHub repos clone anonymously), then `audio/mix.py` with it and re-render all 13.
 - Google Play launch: the code and the store page are ready; the owner's steps are listed in order at the top
   of `docs/PLAY_LAUNCH_PLAN.md` (secrets, AdMob ids, Play Console, service account, closed
   test with 12 testers for 14 days). AdMob is done (2026-10-24): the real ids are in `gradle.properties`
