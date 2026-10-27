@@ -133,10 +133,12 @@ Hebrew, and show rendered previews of visual changes (see `tools/preview`).
 
 ## Next
 - **Open as of 2026-10-26 (owner's wishes, next session starts here):**
-  - 2026-10-27: Store settings and the privacy URL fix are done (owner). The closed test ("Alpha") was still Inactive on
-    2026-10-27 (no release, list not selected; list "צוות בודקים" has 17 people): the owner uploads 5.0.27 (run
-    40501759554, test ads checked in the log) there, picks the list and all countries, sends it for review, then shares
-    the opt-in link; the 14 days start after that. Internal testing doesn't count. Play bundles now carry Google's TEST ads (`PLAY_REAL_ADS: false` in
+  - 2026-10-27: Store settings and the privacy URL fix are done (owner). The closed test ("Alpha") was SENT FOR REVIEW
+    on 2026-10-27: 5.0.27 (versionCode 527, run 40501759554, test ads), list "צוות בודקים" (17 people), 177 countries +
+    rest of world. Along the way the owner filled the en-US default store listing by hand (texts and images from
+    `store/listing/en-US`, AI declaration "Don't label assets") and the Advertising ID declaration (Yes; advertising +
+    analytics). The Dashboard shows "0 testers opted-in" of 12. Next: when Google approves (mail/bell), the owner copies
+    "Join on the web" from Closed testing > Alpha > Testers and sends it; the 14 days count once 12 have opted in. Internal testing doesn't count. Play bundles now carry Google's TEST ads (`PLAY_REAL_ADS: false` in
     `release.yml`) for the whole test period: the owner doesn't trust testers not to tap ads. Set it to `true` and build
     a new bundle before applying for production. The 5.0.25 bundle the testers got has real ads: the owner replaces it
     with a "Play bundle only" run. Next: service account (steps given to the owner, plan step 3.6).
