@@ -155,7 +155,10 @@ Hebrew, and show rendered previews of visual changes (see `tools/preview`).
     (its Next.js editor ran in the container; Style Lab looks were plain), Canva AI (broken Hebrew), logo-design
     (owner kept the current logo). Promo video (Hebrew, 9:16, HyperFrames): source `tools/video/promo` (README), output
     `store/video/promo-he.mp4` (v3, 2026-10-27: swap chip between the flap rows, a 9-phone ring, premium as a
-    tag, the store home screen, a hand cursor); the owner is reviewing it. Photo credits (CC BY) go in its description.
+    tag, the store home screen, a hand cursor); the owner approved the store images (2026-10-27, Secular One is right) and has notes on the video
+    (next session starts with them). The video must use the same Secular One as the images: check that its
+    @font-face fonts really load in the render (the screenshots once silently fell back) and match the images'
+    weight (text-stroke). Photo credits (CC BY) go in its description.
 - Google Play launch: the code and the store page are ready; the owner's steps are listed in order at the top
   of `docs/PLAY_LAUNCH_PLAN.md` (secrets, AdMob ids, Play Console, service account, closed
   test with 12 testers for 14 days). AdMob is done (2026-10-24): the real ids are in `gradle.properties`
