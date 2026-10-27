@@ -17,10 +17,10 @@ Chaque montant et chaque calcul sont conservés. Touchez-en un pour le retrouver
 • Calculatrice avec pourcentages : 120 + 15 %, 3 × 800 et plus, convertis pendant la saisie
 • 6 thèmes de couleur, chacun en clair et en sombre
 
-Les nouveaux utilisateurs profitent de Premium gratuitement pendant 3 jours. Ensuite, regardez 2 courtes vidéos pour l'ouvrir 24 heures, ou passez à Premium à vie en un seul paiement, qui supprime aussi les publicités. La conversion, la recherche, la devise supplémentaire, l'historique et la conversion depuis d'autres apps restent toujours gratuits.
+Les nouveaux utilisateurs profitent de Premium gratuitement pendant 3 jours. Ensuite, regardez 2 courtes vidéos pour le débloquer pendant 24 heures, ou passez à Premium à vie en un seul paiement, qui supprime aussi les publicités. La conversion, la recherche, la devise supplémentaire, l'historique et la conversion depuis d'autres apps restent toujours gratuits.
 
 ★ 13 langues
 Français, anglais, hébreu, arabe, espagnol, russe, allemand, portugais, italien, turc, chinois, japonais et hindi.
 
 Les taux sont donnés à titre indicatif et mis à jour environ une fois par jour. Votre banque ou bureau de change peut appliquer un autre taux.
-Rates By Exchange Rate API (https://www.exchangerate-api.com)
+Rates by Exchange Rate API (https://www.exchangerate-api.com)

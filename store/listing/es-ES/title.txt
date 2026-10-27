@@ -1,1 +1,1 @@
-Conversor de Divisas + Widget
+Conversor de divisas + widget

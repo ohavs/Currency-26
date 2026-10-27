@@ -52,7 +52,7 @@
     <string name="mode_light">Chiaro</string>
     <string name="mode_dark">Scuro</string>
     <string name="mode_system">Sistema</string>
-    <string name="color_theme">Tema colori</string>
+    <string name="color_theme">Tema di colori</string>
     <string name="theme_sage">Classico</string>
     <string name="theme_ocean">Mare</string>
     <string name="theme_sunset">Sabbia</string>
@@ -60,7 +60,7 @@
     <string name="theme_lavender">Notte</string>
     <string name="theme_gold">Oro</string>
     <string name="language">Lingua</string>
-    <string name="language_system">Auto</string>
+    <string name="language_system">Automatica</string>
     <string name="app_updates">Aggiornamenti dell\'app</string>
     <string name="auto_check_updates">Cerca aggiornamenti automaticamente</string>
     <string name="auto_check_updates_desc">Cerca una nuova versione a ogni apertura dell\'app</string>
@@ -115,11 +115,11 @@
     <string name="quick_no_price">Nessun prezzo trovato nel testo selezionato</string>
     <string name="quick_assumed">Valuta presunta</string>
     <string name="tip_select_title">Converti da qualsiasi app</string>
-    <string name="tip_select_body">Seleziona un prezzo in qualsiasi app e scegli \"Converti valuta\" dal menu (o Condividi → \"Converti valuta\"). Il risultato appare subito, senza lasciare ciò che stai facendo.</string>
+    <string name="tip_select_body">Seleziona un prezzo in qualsiasi app e scegli \"Converti valuta\" dal menu (o Condividi → \"Converti valuta\"). Il risultato appare subito, senza interrompere quello che stai facendo.</string>
     <string name="select_menu_summary">Seleziona un prezzo → \"%1$s\"</string>
-    <string name="select_menu_body">Seleziona un prezzo in qualsiasi app e scegli \"%1$s\" nel menu che si apre (a volte è sotto ⋮). La risposta compare sopra l\'app, senza uscirne.</string>
+    <string name="select_menu_body">Seleziona un prezzo in qualsiasi app e scegli \"%1$s\" nel menu che si apre (a volte è sotto ⋮). La risposta compare sopra l\'app, senza doverne uscire.</string>
     <string name="select_menu_try">Provalo qui: tieni premuto sul prezzo</string>
-    <string name="select_menu_samsung">Sui telefoni Samsung l\'opzione è nascosta finché non la attivi, una volta sola:</string>
+    <string name="select_menu_samsung">Sui telefoni Samsung l\'opzione è nascosta finché non la attivi (basta farlo una volta):</string>
     <string name="select_menu_step1">Tieni premuto sul prezzo qui sopra.</string>
     <string name="select_menu_step2">Nel menu tocca ⋮ e poi \"Gestisci app\" (l\'ultima opzione).</string>
     <string name="select_menu_step3">Attiva \"%1$s\" e tocca Fatto.</string>
@@ -131,9 +131,9 @@
     <string name="tip_calc_body">Il tasto calcolatrice nella riga in basso aggiunge + − × ÷ per calcoli come %1$s, e il risultato viene convertito subito in tutte le valute. Gli importi e i calcoli precedenti restano nella cronologia, sotto le schede.</string>
     <string name="tip_calc_action">Prova</string>
     <string name="premium">Premium</string>
-    <string name="premium_subtitle">Widget, temi colore e calcolatrice</string>
+    <string name="premium_subtitle">Widget, temi di colore e calcolatrice</string>
     <string name="premium_feature_widget">Widget nella schermata Home</string>
-    <string name="premium_feature_colors">Temi colore</string>
+    <string name="premium_feature_colors">Temi di colore</string>
     <string name="premium_feature_calculator">Calcolatrice e percentuali</string>
     <string name="premium_free_note">Conversione, ricerca, valuta aggiuntiva e cronologia restano gratuite.</string>
     <string name="premium_watch">Guarda %1$d brevi video</string>

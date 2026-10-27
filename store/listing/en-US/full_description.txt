@@ -17,10 +17,10 @@ Every amount and calculation is kept. Tap one to bring it back with its currenci
 • Calculator with percentages: 120 + 15%, 3 × 800 and more, converted as you type
 • 6 color themes, each in light and dark
 
-New users get Premium free for 3 days. After that, watch 2 short videos to open it for 24 hours, or get Premium forever with one payment, which also removes the ads. Converting, search, the extra currency, history and converting from other apps always stay free.
+New users get Premium free for 3 days. After that, watch 2 short videos to unlock it for 24 hours, or get Premium forever with one payment, which also removes the ads. Converting, search, the extra currency, history and converting from other apps always stay free.
 
 ★ 13 languages
 English, Hebrew, Arabic, Spanish, Russian, French, German, Portuguese, Italian, Turkish, Chinese, Japanese and Hindi.
 
 Rates are for information only and update about once a day. Your bank or exchange office may use a different rate.
-Rates By Exchange Rate API (https://www.exchangerate-api.com)
+Rates by Exchange Rate API (https://www.exchangerate-api.com)

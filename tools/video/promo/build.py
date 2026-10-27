@@ -1,6 +1,16 @@
-"""Hebrew promo v2 (see SPEC.md): the app in brief, then the widgets, the colour sets, converting from a real-looking
-web page, 160+ currencies offline, end card. Writes index.html and compositions/*.html. Run: python3 build.py"""
-import os
+"""The promo: the app in brief, then the widgets, the colour sets, converting from a real-looking web page, 160+
+currencies offline, end card. Writes index.html and compositions/*.html for one language (langs.py; Hebrew is the
+original). Run: python3 build.py [lang] (two passes for a new language: the first writes measure.html, then
+node measure.mjs <lang> measures it and build.py fits the words)."""
+import json, os, re, shutil, sys
+from langs import BOARD, T, TITLE, MENU, PREMIUM, RTL, NOTO
+
+LANG = sys.argv[1] if len(sys.argv) > 1 else 'iw'
+L = T[LANG]
+IS_RTL = LANG in RTL
+HE = LANG == 'iw'
+IMG = 'assets/img' if HE else f'assets/img/{LANG}'
+MEASURED = json.load(open(f'measure/{LANG}.json')) if os.path.exists(f'measure/{LANG}.json') else {}
 
 INK = '#1F2C35'
 W, H = 1080, 1920
@@ -11,9 +21,10 @@ CSS = """
 @font-face { font-family: Secular; src: url('assets/fonts/secular-latin.woff2') format('woff2'); unicode-range: U+0000-00FF, U+2000-206F, U+20AA, U+20AC, U+2190-21FF, U+2605; }
 @font-face { font-family: Rubik; font-weight: 700; src: url('assets/fonts/rubik_bold.ttf') format('truetype'); }
 @font-face { font-family: Rubik; font-weight: 500; src: url('assets/fonts/rubik_medium.ttf') format('truetype'); }
-#root { position: absolute; inset: 0; font-family: Secular, Rubik, sans-serif; color: INK; direction: rtl; overflow: hidden; }
-.h { position: absolute; right: 80px; left: 80px; top: 210px; font-size: 128px; line-height: .95; text-align: right; }
-.h .block { white-space: nowrap; }
+NOTO_FACES
+#root { position: absolute; inset: 0; font-family: FAMILY; color: INK; direction: DIR; overflow: hidden; }
+.h { position: absolute; right: 80px; left: 80px; top: 210px; font-size: 128px; line-height: .95; text-align: start; }
+.h, .h .block { white-space: nowrap; }
 .w { display: inline-block; }
 .block { display: inline-block; margin-top: 16px; padding: 0 .14em .08em; border: 8px solid INK; box-shadow: 14px 14px 0 INK; }
 .phone { position: absolute; width: 608px; height: 1301px; border: 10px solid INK; border-radius: 56px;
@@ -23,12 +34,57 @@ CSS = """
 .sticker { position: absolute; padding: 8px 26px 14px; border: 7px solid INK; box-shadow: 10px 10px 0 INK;
   white-space: nowrap; font-size: 58px; z-index: 5; transform-origin: 50% 50%; }
 bdi { unicode-bidi: isolate; }
-#root { -webkit-text-stroke: .035em currentColor; paint-order: stroke fill; }
-#pg, #an-menu { -webkit-text-stroke: 0; }
-.tier { position: absolute; right: 80px; top: 110px; padding: 6px 22px 10px; background: INK; color: #fff; font-size: 46px;
+STROKE
+.tier { position: absolute; START: 80px; top: 110px; padding: 6px 22px 10px; background: INK; color: #fff; font-size: 46px;
   border: 5px solid INK; box-shadow: 8px 8px 0 rgba(31,44,53,.35); }
 .tier b { color: #F2C14E; font-weight: 400; }
-""".replace('INK', INK)
+"""
+
+
+def noto_faces():
+    """The @fontsource faces of the language's Noto (bold), copied next to the video (assets/fonts/fs, not in git)."""
+    if LANG not in NOTO:
+        return ''
+    pkg, family = NOTO[LANG]
+    src = os.path.join(os.path.dirname(os.path.abspath(__file__)), '../../store/.fonts', pkg, 'package')
+    dst = f'assets/fonts/fs/{pkg}'
+    os.makedirs(dst, exist_ok=True)
+    css = open(f'{src}/700.css').read()
+    for f in set(re.findall(r'\./files/([^)]+\.woff2)', css)):
+        if not os.path.exists(f'{dst}/{f}'):
+            shutil.copy(f'{src}/files/{f}', f'{dst}/{f}')
+    css = re.sub(r", url\(\./files/[^)]+\.woff\) format\('woff'\)", '', css)
+    # Weight 400 too: the Secular rules ask for the regular weight and the words take it.
+    return css.replace('./files/', f'{dst}/') + css.replace('./files/', f'{dst}/').replace('font-weight: 700', 'font-weight: 400')
+
+
+FAMILY = 'Secular, Rubik, sans-serif' if HE else f"Rubik, {repr(NOTO[LANG][1]) + ', ' if LANG in NOTO else ''}sans-serif"
+# Other languages take the words in bold: Rubik's bold also answers for the regular weight the words ask for.
+BOLD = '' if HE else "@font-face { font-family: Rubik; font-weight: 400; src: url('assets/fonts/rubik_bold.ttf') format('truetype'); }\n"
+CSS = (CSS.replace('INK', INK).replace('NOTO_FACES', BOLD + noto_faces()).replace('FAMILY', FAMILY).replace('DIR', 'rtl' if IS_RTL else 'ltr')
+       .replace('START', 'right' if IS_RTL else 'left')
+       .replace('STROKE', '#root { -webkit-text-stroke: .035em currentColor; paint-order: stroke fill; }\n#pg, #an-menu { -webkit-text-stroke: 0; }' if HE else ''))
+
+
+def side(css):
+    """Positions written for the Hebrew (RTL) layout, mirrored for left-to-right languages."""
+    if IS_RTL:
+        return css
+    return re.sub(r'\b(left|right):', lambda m: {'left': 'right', 'right': 'left'}[m.group(1)] + ':', css)
+
+
+def rot(deg):
+    return deg if IS_RTL else -deg
+
+
+FITS = {}
+
+
+def fit(key, base, width):
+    """A font size that keeps the element `key` within `width` px: measure.mjs measures it at `base` (measure.html)
+    and writes the size that fits. Hebrew keeps its sizes as designed."""
+    FITS[key] = (base, width)
+    return base if HE else min(base, MEASURED.get('fit', {}).get(key, base))
 
 
 def words(text, cls):
@@ -50,11 +106,13 @@ window.__timelines["{sid}"] = tl;
 """
 
 
-TIER = '<div class="tier" id="{0}"><b>★</b> פרימיום</div>'
+TIER = '<div class="tier" id="{0}"><b>★</b> ' + PREMIUM.get(LANG, 'Premium') + '</div>'
+# A wipe from the start side.
+WIPE0, WIPE1 = ('inset(0 0 0 100%)', 'inset(0 0 0 0%)') if IS_RTL else ('inset(0 100% 0 0)', 'inset(0 0% 0 0)')
 
 
 def tier_in(sel, at):
-    return f'tl.fromTo("{sel}", {{ clipPath: "inset(0 0 0 100%)" }}, {{ clipPath: "inset(0 0 0 0%)", duration: 0.3, ease: "power2.inOut" }}, {at});\n'
+    return f'tl.fromTo("{sel}", {{ clipPath: "{WIPE0}" }}, {{ clipPath: "{WIPE1}", duration: 0.3, ease: "power2.inOut" }}, {at});\n'
 
 
 def blur_in(sel, at, gap=0.08):
@@ -70,15 +128,17 @@ def blur_out(sel, at, dur=0.18):
     return f'tl.to("{sel}", {{ opacity: 0, filter: "blur(8px)", duration: {dur}, ease: "power3.in" }}, {at});\n'
 
 
-def pop(sel, at, rot=-5):
-    return f'tl.fromTo("{sel}", {{ opacity: 0, scale: 0.4, rotation: {rot} }}, {{ opacity: 1, scale: 1, rotation: {rot}, duration: 0.45, ease: "back.out(1.6)" }}, {at});\n'
+def pop(sel, at, deg=-5):
+    deg = rot(deg)
+    return f'tl.fromTo("{sel}", {{ opacity: 0, scale: 0.4, rotation: {deg} }}, {{ opacity: 1, scale: 1, rotation: {deg}, duration: 0.45, ease: "back.out(1.6)" }}, {at});\n'
 
 
-def flap_board(prefix, rows, cell_w, at, x0, y0, gap=12, flip=0.07, stagger=0.045, bg='#FFFFFF', fg=INK, font='Secular, Rubik', row_gap=None):
+def flap_board(prefix, rows, cell_w, at, x0, y0, gap=12, flip=0.07, stagger=0.045, bg='#FFFFFF', fg=INK, font=None, row_gap=None):
     """A brutalist split-flap board. Each cell walks its drum forward (the drum order of the registry's split-flap
     block) until it lands on its character; the glyph is set from timeline time, so any frame renders alone. A cell
     starts at most 12 positions before its target, so a board resolves in about half a second."""
-    alphabet = ' 0123456789.+€₪$¥£ABCDEFGHIJKLMNOPQRSTUVWXYZ'
+    font = font or FLAP_FONT
+    alphabet = ' 0123456789.,+€₪$¥£₽₺₹ABCDEFGHIJKLMNOPQRSTUVWXYZ'
     cells, script = [], []
     ch = round(cell_w * 1.42)
     for r, text in enumerate(rows):
@@ -106,6 +166,7 @@ FLAP_CSS = f""".flap {{ position: absolute; text-align: center; border: 6px soli
 .flap::after {{ content: ""; position: absolute; left: 0; right: 0; top: 50%; height: 4px; margin-top: -2px; background: {INK}; opacity: .85; }}"""
 
 PHONE_X = 236
+FLAP_FONT = 'Secular, Rubik' if HE else FAMILY.replace("'", '')
 # The pointing hand of the store screenshots (tools/store/scenes.mjs, hand()), fingertip at (0.39, 0.12).
 HAND = f'''<svg viewBox="0 0 24 24" width="130" height="130" style="overflow:visible;filter:drop-shadow(6px 6px 0 {INK})">
   <path fill="#fff" stroke="{INK}" stroke-width="1.3" stroke-linejoin="round"
@@ -118,16 +179,19 @@ g = ''.join(f'tl.to("#gf", {{ backgroundColor: "{c}", duration: 0.4, ease: "powe
 scenes.append(('ground', 0, 24.5, 0, scene('ground', f'<div id="gf" style="position:absolute;inset:0;background:{SAGE}"></div>', g)))
 
 # ---- A. intro (0-2.9): the board flips the conversion, the app rises in 3D ----
-cells, flap_js = flap_board('in', ['€189', '₪763.38'], 104, 0.0, 540, 230, flip=0.05, stagger=0.03, row_gap=84)
+# The board's cells shrink for longer amounts so the row stays inside 1000 px.
+IN_N = max(len(r) for r in BOARD[LANG])
+IN_CW = min(104, int((1000 + 12) / IN_N - 12))
+cells, flap_js = flap_board('in', list(BOARD[LANG]), IN_CW, 0.0, 540, 210, flip=0.05, stagger=0.03, row_gap=170)
 intro_body = f"""
 <div id="in-board">{cells}
-  <div id="in-swap" style="position:absolute;left:{540 - 60}px;top:{230 + 148 + 42 - 44}px;width:120px;height:88px;border-radius:30px;background:{INK};
+  <div id="in-swap" style="position:absolute;left:{540 - 60}px;top:{210 + round(IN_CW * 1.42) + 85 - 44}px;width:120px;height:88px;border-radius:30px;background:{INK};
     border:6px solid #fff;box-shadow:8px 8px 0 {INK};display:flex;align-items:center;justify-content:center">
     <svg viewBox="0 0 24 24" width="62" height="62"><path fill="#fff" d="M16 17.01V10h-2v7.01h-3L15 21l4-3.99h-3zM9 3L5 6.99h3V14h2V6.99h3L9 3z"/></svg></div></div>
 <div id="in-stage" style="position:absolute;inset:0;perspective:1600px;perspective-origin:50% 40%">
   <div class="phone" id="in-phone" style="left:{PHONE_X}px;top:760px;transform-origin:50% 0%">
-    <div class="screen"><img src="assets/img/1_main.png"></div></div></div>
-<div id="in-st" class="sticker" style="left:80px;top:700px;background:{GOLD}"><bdi dir="ltr">160+</bdi> מטבעות</div>
+    <div class="screen"><img src="{IMG}/1_main.png"></div></div></div>
+<div id="in-st" class="sticker" style="{side('left:80px')};top:700px;background:{GOLD};font-size:{fit('in-st', 58, 900)}px"><bdi dir="ltr">160+</bdi> {L['cur']}</div>
 """
 # Frame 0 already shows the board's first flaps landing (the thumbnail is never empty): the cells are drawn
 # with their outline from the start.
@@ -143,17 +207,17 @@ scenes.append(('intro', 0, 2.95, 10, scene('intro', intro_body, intro_js, FLAP_C
 
 # ---- B. widgets (2.6-9.2): the home screen tilts, its widgets lift off as layers, then come forward ----
 wid_body = f"""
-<div class="h" id="wd-h">{words('הווידג\'ט', 'wdw')}<br><span class="block w wdw" style="background:#FBEBC6">על המסך הראשי.</span></div>
+<div class="h" id="wd-h" style="font-size:{fit('wd-h', 128, 900)}px">{words(L['wd'][0], 'wdw')}<br><span class="block w wdw" style="background:#FBEBC6">{L['wd'][1]}</span></div>
 <div id="wd-stage" style="position:absolute;inset:0;perspective:1800px;perspective-origin:50% 55%">
   <div id="wd-rig" style="position:absolute;left:{PHONE_X}px;top:700px;width:608px;height:1301px;transform-style:preserve-3d">
     <div class="phone" style="left:0;top:0"><div class="screen"><img src="assets/img/home_bare.png"></div></div>
-    <img id="wd-big" src="assets/img/widget_large.png" style="position:absolute;left:{24 + 44 * 1.4:.0f}px;top:{24 + 126 * 1.4:.0f}px;width:437px;height:553px;
+    <img id="wd-big" src="{IMG}/widget_large.png" style="position:absolute;left:{24 + 44 * 1.4:.0f}px;top:{24 + 126 * 1.4:.0f}px;width:437px;height:553px;
       filter:drop-shadow(14px 14px 0 {INK})">
-    <img id="wd-small" src="assets/img/widget_small.png" style="position:absolute;left:{24 + 44 * 1.4:.0f}px;top:{24 + 536 * 1.4:.0f}px;width:437px;height:189px;
+    <img id="wd-small" src="{IMG}/widget_small.png" style="position:absolute;left:{24 + 44 * 1.4:.0f}px;top:{24 + 536 * 1.4:.0f}px;width:437px;height:189px;
       filter:drop-shadow(14px 14px 0 {INK})">
   </div></div>
 {TIER.format("wd-tier")}
-<div id="wd-st2" class="sticker" style="right:70px;top:1500px;background:#fff">בלי לפתוח את האפליקציה</div>
+<div id="wd-st2" class="sticker" style="{side('right:70px')};top:1500px;background:#fff;font-size:{fit('wd-st2', 58, 920)}px">{L['st']}</div>
 """
 wid_js = f"""
 tl.fromTo("#wd-rig", {{ y: 1300 }}, {{ y: 0, duration: 0.6, ease: "expo.out" }}, 0.0);
@@ -172,27 +236,38 @@ tl.to(["#wd-big", "#wd-small", "#wd-st2"], {{ x: "+=1300", filter: "blur(18px)",
 scenes.append(('widgets', 2.6, 6.6, 11, scene('widgets', wid_body, wid_js,
                                               '#wd-big,#wd-small{transform-origin:50% 50%} #wd-rig .phone{transform-style:preserve-3d}')))
 
-# ---- C. custom (9.0-13.4): the colour sets on a turning ring; the ground floods with the front one ----
-ring = [(img, -40 * i) for i, img in enumerate(['5a_theme.png', '5b_theme.png', '5c_theme.png', '1_main.png', '3_calc.png', '5c_theme.png', '5b_theme.png', '1_main.png', '3_calc.png'])]
-ring_html = ''.join(f'<div class="phone ring-ph" style="left:-304px;top:0;transform:rotateY({-a}deg) translateZ(900px)">'
-                    f'<div class="screen"><img src="assets/img/{img}"></div></div>' for img, a in ring)
+# ---- C. custom (9.0-13.55): the colour sets glide past on a flat carousel; the ground floods with the one in front ----
+# Flat on purpose: a perspective ring stretched the screens. The strip moves from the first frame (no still image
+# before the motion), easing off as each set passes the middle: k counts the phones, o = k - a*sin(2*pi*k)/(2*pi)
+# keeps it always moving (a < 1) and slowest on whole k. Phone 1 is in the middle at 0.25 s, then one every 1.2 s,
+# in step with the ground's floods (9.05 night, 10.25 gold, 11.45 sunset, 12.65 classic).
+CAR = ['3_calc.png', '5a_theme.png', '5b_theme.png', '5c_theme.png', '1_main.png', '3_calc.png']
+CAR_SP, CAR_T0, CAR_STEP, CAR_DUR = 560, 0.25, 1.2, 4.55
+car_html = ''.join(f'<div class="phone car-ph" id="car-{n}" style="left:{540 - 304}px;top:0">'
+                   f'<div class="screen"><img src="{IMG}/{img}"></div></div>' for n, img in enumerate(CAR))
 cus_body = f"""
-<div class="h" id="cs-h" style="color:#fff">{words('הצבעים שלך.', 'csw')}<br><span class="block w csw" style="background:#FFE7A6;color:{INK}"><bdi dir="ltr">6</bdi> ערכות צבעים</span></div>
-<div style="position:absolute;inset:0;perspective:2200px;perspective-origin:50% 45%">
-  <div id="cs-ring" style="position:absolute;left:540px;top:640px;width:0;height:1301px;transform-style:preserve-3d">{ring_html}</div></div>
+<div class="h" id="cs-h" style="color:#fff;font-size:{fit('cs-h', 128, 900)}px">{words(L['cs'][0], 'csw')}<br><span class="block w csw" style="background:#FFE7A6;color:{INK}"><bdi dir="ltr">6</bdi>{'' if LANG in ('zh', 'ja') else ' '}{L['cs'][1]}</span></div>
+<div id="cs-strip" style="position:absolute;left:0;top:700px;width:1080px;height:1301px">{car_html}</div>
 {TIER.format("cs-tier")}
 """
+k0, k1 = 1 - CAR_T0 / CAR_STEP, 1 + (CAR_DUR - CAR_T0) / CAR_STEP
 cus_js = f"""
-tl.fromTo("#cs-ring", {{ rotationY: 40, z: -260, scale: 0.7, opacity: 0 }}, {{ rotationY: 0, z: -260, scale: 0.78, opacity: 1, duration: 0.6, ease: "expo.out" }}, 0.0);
+const car = [...document.querySelectorAll(".car-ph")], cv = {{ k: {k0:.4f} }};
+function placeCar() {{
+  const o = cv.k - 0.7 * Math.sin(2 * Math.PI * cv.k) / (2 * Math.PI);
+  car.forEach((el, n) => {{
+    const d = o - n, a = Math.min(Math.abs(d), 1.6);
+    gsap.set(el, {{ x: d * {CAR_SP}, y: a * 70, scale: 0.84 - 0.2 * a, rotation: d * 5, zIndex: 10 - Math.round(a * 4) }});
+  }});
+}}
+placeCar();
+tl.fromTo(cv, {{ k: {k0:.4f} }}, {{ k: {k1:.4f}, duration: {CAR_DUR}, ease: "none", onUpdate: placeCar }}, 0);
+tl.fromTo("#cs-strip", {{ opacity: 0 }}, {{ opacity: 1, duration: 0.25, ease: "power1.out" }}, 0.0);
 """ + grey_in('#cs-h .csw', 0.3) + tier_in('#cs-tier', 0.3) + f"""
-tl.to("#cs-ring", {{ rotationY: -40, duration: 0.55, ease: "power3.inOut" }}, 1.05);
-tl.to("#cs-ring", {{ rotationY: -80, duration: 0.55, ease: "power3.inOut" }}, 2.25);
-tl.to("#cs-ring", {{ rotationY: -120, duration: 0.55, ease: "power3.inOut" }}, 3.45);
 tl.to("#cs-h", {{ color: "{INK}", duration: 0.3 }}, 1.2);
-
-tl.to("#cs-ring", {{ scale: 1, y: 40, duration: 0.45, ease: "power2.inOut" }}, 4.05);
+tl.to("#cs-strip", {{ opacity: 0, filter: "blur(10px)", duration: 0.3, ease: "power2.in" }}, 4.15);
 """ + blur_out('#cs-h,#cs-tier', 4.15)
-scenes.append(('custom', 9.0, 4.55, 12, scene('custom', cus_body, cus_js, '.ring-ph{backface-visibility:hidden}')))
+scenes.append(('custom', 9.0, CAR_DUR, 12, scene('custom', cus_body, cus_js, '.car-ph{transform-origin:50% 40%}')))
 
 # ---- D. any app (13.4-18.2): a tour page; long press on the price; the menu; the real bubble ----
 # The page is a fictional booking site drawn at a 400 px phone viewport, scaled 1.4 into the 560 px screen.
@@ -220,7 +295,7 @@ page = f"""
       <span style="background:#f1f3f4;padding:4px 8px;border-radius:12px">Hotel pickup</span></div>
     <div style="display:flex;align-items:flex-end;justify-content:space-between;margin-top:16px;padding:12px;border:1px solid #e3e3e3;border-radius:12px">
       <div><div style="font:500 11px Rubik;color:#777">From</div>
-        <div style="font:700 26px Rubik"><span id="pg-price" style="position:relative;padding:0 2px">€189</span></div>
+        <div style="font:700 26px Rubik"><span id="pg-price" style="position:relative;padding:0 2px">{BOARD[LANG][0]}</span></div>
         <div style="font:500 11px Rubik;color:#777">per person</div></div>
       <div style="background:#ff6b2c;color:#fff;font:700 14px Rubik;padding:10px 14px;border-radius:10px">Check availability</div></div>
     <div style="font:700 15px Rubik;margin-top:16px">Highlights</div>
@@ -230,15 +305,17 @@ page = f"""
     <div style="font:400 12px/1.5 Rubik;color:#444;margin-top:4px">"Our guide Li made the palace come alive. The tea house was the best part."</div>
   </div></div>"""
 bub_top = 886 - 20
+# The selection menu is the phone's: Rubik for Latin and Cyrillic, Noto for the other scripts (the app's own fallback).
+MENU_FONT = 'Rubik' + (f", {NOTO[LANG][1]}" if LANG in NOTO else '')
 any_body = f"""
-<div class="h" id="an-h">{words('מכל אתר', 'anw')}<br><span class="block w anw" style="background:#E2F1FA">ומכל אפליקציה.</span></div>
+<div class="h" id="an-h" style="font-size:{fit('an-h', 128, 900)}px">{words(L['an'][0], 'anw')}<br><span class="block w anw" style="background:#E2F1FA">{L['an'][1]}</span></div>
 <div class="phone" id="an-phone" style="left:{PHONE_X}px;top:650px"><div class="screen" style="background:#fff">{page}
   <div id="an-sel" style="position:absolute;left:@PX@px;top:@PY@px;width:@PW@px;height:@PH@px;background:rgba(55,150,207,.35)"></div>
   <div id="an-menu" style="position:absolute;left:40px;top:@MY@px;display:flex;gap:22px;align-items:center;background:#fff;border-radius:16px;
-    padding:16px 24px;box-shadow:0 6px 18px rgba(0,0,0,.25);font:500 30px Rubik;direction:rtl;white-space:nowrap">
-    <span>העתקה</span><span>שיתוף</span><span id="an-item" style="color:#0b6e4f;font-weight:700">המרת מטבע</span></div>
+    padding:16px 24px;box-shadow:0 6px 18px rgba(0,0,0,.25);font:500 {fit('an-menu', 30, 480)}px {MENU_FONT};direction:{'rtl' if IS_RTL else 'ltr'};white-space:nowrap">
+    <span>{MENU[LANG][0]}</span><span>{MENU[LANG][1]}</span><span id="an-item" style="color:#0b6e4f;font-weight:700">{MENU[LANG][2]}</span></div>
   <div id="an-bubble" style="position:absolute;left:0;top:{bub_top}px;width:560px;height:{1253 - bub_top}px;overflow:hidden">
-    <img src="assets/img/4_quick.png" style="position:absolute;left:0;top:{-bub_top}px;width:560px;height:1253px"></div>
+    <img src="{IMG}/4_quick.png" style="position:absolute;left:0;top:{-bub_top}px;width:560px;height:1253px"></div>
 </div></div>
 <div id="an-finger" style="position:absolute;left:@FX@px;top:@FY@px;width:0;height:0;transform-origin:0 0">
   <div style="position:absolute;left:{-0.39 * 130:.0f}px;top:{-0.12 * 130:.0f}px">@HAND@</div></div>
@@ -265,34 +342,111 @@ tl.to("#an-phone", {{ scale: 1.25, y: -170, duration: 0.6, ease: "power2.inOut" 
 tl.to("#an-phone", {{ clipPath: "circle(0% at 50% 80%)", duration: 0.35, ease: "power3.in" }}, 4.45);
 tl.to("#an-st", {{ opacity: 0, duration: 0.12 }}, 4.45);
 """ + blur_out('#an-h', 4.4)
-any_body += f'\n<div id="an-st" class="sticker" style="left:70px;top:1560px;background:{GOLD}">לחיצה ארוכה, וזהו.</div>'
+any_body += f'\n<div id="an-st" class="sticker" style="{side('left:70px')};top:1560px;background:{GOLD};font-size:{fit('an-st', 58, 920)}px">{L['press']}</div>'
 scenes.append(('anyapp', 13.4, 4.85, 13, (any_body, any_js)))
-open('page.html', 'w').write(f'<!doctype html><meta charset="utf-8"><style>{CSS.split("#root")[0]}body{{margin:0}}</style>' + page.replace('transform:scale(1.4);', ''))
+open('page.html' if HE else f'page_{LANG}.html', 'w').write(f'<!doctype html><meta charset="utf-8"><style>{CSS.split("#root")[0]}body{{margin:0}}</style>' + page.replace('transform:scale(1.4);', ''))
 
-# ---- E. claim (18.2-21.3): currency codes flip, then 160+, then offline ----
-cells2, flap2 = flap_board('cl', ['USD EUR', 'GBP JPY', 'THB ILS'], 112, 0.15, 540, 420, flip=0.04, stagger=0.025, bg='#fff')
-cells3, flap3 = flap_board('cn', ['160+'], 190, 1.35, 540, 560, flip=0.05, stagger=0.05, bg=INK, fg='#E3F1E6')
+# ---- E. claim (18.2-21.35): the whole screen is a departures board of currency codes, rows sliding both ways, with
+# gold coins tumbling up behind them; then 160+ and offline land in front. ----
+CODES = ('USD EUR GBP JPY ILS THB CHF CAD AUD CNY INR TRY BRL MXN KRW SEK NOK PLN CZK HUF AED SGD HKD ZAR NZD DKK '
+         'RON EGP MAD JOD PHP VND IDR MYR ARS CLP COP PEN UAH GEL ISK KES NGN QAR SAR BGN RSD KZT TWD LKR NPR').split()
+
+
+def rnd(seed):
+    """A small seeded generator: the same video on every render."""
+    x = [seed]
+    def f():
+        x[0] = (x[0] * 1103515245 + 12345) % 2147483648
+        return x[0] / 2147483648
+    return f
+
+
+R = rnd(26)
+CL_ALPHA = ' ABCDEFGHIJKLMNOPQRSTUVWXYZ'
+CL_CW, CL_GAP, CL_ROWS, CL_PITCH, CL_Y0 = 78, 8, 8, 236, 40
+CL_CH = round(CL_CW * 1.42)
+rows_html, rows_js = [], []
+for r in range(CL_ROWS):
+    codes = []
+    while len(codes) < 5:
+        c = CODES[int(R() * len(CODES))]
+        if c not in codes:
+            codes.append(c)
+    text = ' '.join(codes)
+    cells = []
+    for c, ch in enumerate(text):
+        x = c * (CL_CW + CL_GAP)
+        if ch == ' ':
+            continue
+        target = CL_ALPHA.index(ch)
+        first = max(1, target - 9)
+        cid = f'cr{r}-{c}'
+        cells.append(f'<div id="{cid}" class="flap" style="left:{x}px;top:0;width:{CL_CW}px;height:{CL_CH}px;line-height:{CL_CH}px;'
+                     f'font-size:{round(CL_CW * 0.8)}px;background:#fff;color:{INK};font-family:{FLAP_FONT}">{CL_ALPHA[first]}</div>')
+        start = 0.05 + r * 0.05 + c * 0.018
+        rows_js.append(f'(function(){{ const el = document.getElementById("{cid}"); const o = {{ p: {first} }};'
+                       f' tl.fromTo(o, {{ p: {first} }}, {{ p: {target}, duration: {(target - first) * 0.045:.3f}, ease: "none", onUpdate: () => {{'
+                       f' el.textContent = B[Math.min({target}, Math.floor(o.p + 1e-6))]; }} }}, {start:.3f}); }})();')
+    width = len(text) * (CL_CW + CL_GAP)
+    left = -int(R() * 260) - 60
+    rows_html.append(f'<div class="cl-row" id="cl-row{r}" style="position:absolute;left:{left}px;top:{CL_Y0 + r * CL_PITCH}px;width:{width}px;height:{CL_CH}px">'
+                     + ''.join(cells) + '</div>')
+    drift = (1 if r % 2 else -1) * (140 + int(R() * 80))
+    rows_js.append(f'tl.fromTo("#cl-row{r}", {{ x: {-drift / 2} }}, {{ x: {drift / 2}, duration: 3.15, ease: "none" }}, 0);')
+
+# Coins: a gold disc, an inner ring and a currency sign, tumbling up behind the rows (rotationY flips them).
+COIN_SIGNS = ['₪', '$', '€', '£', '¥']
+coins_html, coins_js = [], []
+# Spread evenly: x by column (shuffled), the start heights from y = 150 down to 3000 so the rise always keeps the
+# screen filled.
+COIN_N = 18
+cols = [(n * 7) % 6 for n in range(COIN_N)]
+for n in range(COIN_N):
+    size = 110 + int(R() * 100)
+    x = int(cols[n] * 180 + R() * 70) - 30
+    y = int(150 + n * 2850 / COIN_N + R() * 90)
+    sign = COIN_SIGNS[n % len(COIN_SIGNS)]
+    coins_html.append(
+        f'<div class="coin" id="coin{n}" style="left:{x}px;top:{y}px;width:{size}px;height:{size}px;font-size:{round(size * 0.52)}px;'
+        f'line-height:{size - 12}px;border-width:{max(5, size // 22)}px;box-shadow:{size // 14}px {size // 14}px 0 {INK}">'
+        f'<div class="coin-in" style="border-width:{max(3, size // 40)}px"></div><bdi>{sign}</bdi></div>')
+    rise = 1050 + int(R() * 200)
+    spins = 1 + int(R() * 2)
+    coins_js.append(f'tl.fromTo("#coin{n}", {{ y: 0, rotation: {int(R() * 40 - 20)} }}, {{ y: {-rise}, rotation: {int(R() * 60 - 30)}, duration: 3.15, ease: "none" }}, 0);')
+    coins_js.append(f'tl.fromTo("#coin{n}", {{ rotationY: 0 }}, {{ rotationY: {360 * spins}, duration: 3.15, ease: "none" }}, 0);')
+
 cl_body = f"""
-<div id="cl-codes">{cells2}</div>
-<div id="cl-num">{cells3}</div>
-<div style="position:absolute;left:0;right:0;top:1010px;text-align:center"><span class="block" id="cl-cur" style="font-size:120px;background:#fff">מטבעות.</span></div>
-<div style="position:absolute;left:0;right:0;top:1250px;text-align:center;font-size:96px" id="cl-off">{words('גם בלי אינטרנט.', 'clw')}</div>
+<div id="cl-coins" style="position:absolute;inset:0;perspective:1400px">{''.join(coins_html)}</div>
+<div id="cl-rows">{''.join(rows_html)}</div>
+<div id="cl-claim" style="position:absolute;left:0;right:0;top:560px;height:900px">
+  <div id="cl-num">@NUM@</div>
+  <div style="position:absolute;left:0;right:0;top:450px;text-align:center"><span class="block" id="cl-cur" style="font-size:{fit('cl-cur', 120, 940)}px;background:#fff;white-space:nowrap">{L['cur']}{L['stop']}</span></div>
+  <div style="position:absolute;left:0;right:0;top:690px;text-align:center"><span class="block" id="cl-off" style="font-size:{fit('cl-off', 84, 940)}px;background:{INK};color:#E3F1E6;box-shadow:14px 14px 0 #fff;white-space:nowrap">{words(L['off'], 'clw')}</span></div>
+</div>
 """
-cl_js = flap2 + flap3 + f"""
+cells3, flap3 = flap_board('cn', ['160+'], 190, 1.2, 540, 0, flip=0.05, stagger=0.05, bg=INK, fg='#E3F1E6')
+cl_body = cl_body.replace('@NUM@', cells3)
+cl_js = 'var B = ' + repr(list(CL_ALPHA)) + ';\n' + '\n'.join(coins_js + rows_js) + '\n' + flap3 + f"""
 tl.set("#cl-num", {{ opacity: 0 }}, 0);
-tl.to("#cl-codes", {{ opacity: 0, filter: "blur(8px)", duration: 0.18, ease: "power3.in" }}, 1.2);
-tl.set("#cl-num", {{ opacity: 1 }}, 1.33);
-tl.fromTo("#cl-cur", {{ clipPath: "inset(0 0 0 100%)" }}, {{ clipPath: "inset(0 0 0 0%)", duration: 0.35, ease: "power2.inOut" }}, 1.75);
-""" + blur_in('#cl-off .clw', 2.1, 0.1) + blur_out('#cl-num,#cl-cur,#cl-off', 2.95)
-scenes.append(('claim', 18.2, 3.15, 14, scene('claim', cl_body, cl_js, FLAP_CSS)))
+tl.to("#cl-rows", {{ opacity: 0.32, duration: 0.3, ease: "power2.inOut" }}, 1.05);
+tl.set("#cl-num", {{ opacity: 1 }}, 1.18);
+tl.fromTo("#cl-cur", {{ clipPath: "inset(0 0 0 100%)" }}, {{ clipPath: "inset(0 0 0 0%)", duration: 0.35, ease: "power2.inOut" }}, 1.6);
+tl.fromTo("#cl-off", {{ opacity: 0, scale: 0.7 }}, {{ opacity: 1, scale: 1, duration: 0.35, ease: "back.out(1.6)" }}, 1.95);
+""" + blur_out('#cl-claim,#cl-rows,#cl-coins', 2.95)
+CL_CSS = FLAP_CSS + f"""
+.coin {{ position: absolute; border-radius: 50%; background: #F2C14E; border: 6px solid {INK}; color: {INK}; text-align: center;
+  transform-style: preserve-3d; }}
+.coin-in {{ position: absolute; inset: 9%; border-radius: 50%; border: 4px solid rgba(31,44,53,.45); }}
+#cl-off .w {{ display: inline; }}"""
+scenes.append(('claim', 18.2, 3.15, 14, scene('claim', cl_body, cl_js, CL_CSS)))
 
 # ---- F. end card (21.2-24.5) ----
 end_body = f"""
 <img id="en-icon" src="assets/img/icon.png" style="position:absolute;left:390px;top:520px;width:300px;height:300px;border-radius:68px;
   border:10px solid {INK};box-shadow:20px 20px 0 {INK};transform-origin:50% 50%">
-<div id="en-name" style="position:absolute;left:40px;right:40px;top:900px;text-align:center;font-size:92px;line-height:1;white-space:nowrap">{words("ממיר מטבעות + וידג'ט", 'enw')}</div>
+<div id="en-name" style="position:absolute;left:40px;right:40px;top:900px;text-align:center;line-height:1;white-space:nowrap;font-size:{fit('en-name', 92, 980)}px">{words(TITLE[LANG], 'enw')}</div>
 <div style="position:absolute;left:0;right:0;top:1080px;text-align:center">
-  <span id="en-cta" class="block" style="font-size:76px;background:{INK};color:#E3F1E6;box-shadow:12px 12px 0 #fff">חינם ב-Google Play</span></div>
+  <span id="en-cta" class="block" style="white-space:nowrap;font-size:{fit('en-cta', 76, 940)}px;background:{INK};color:#E3F1E6;box-shadow:12px 12px 0 #fff">{L["cta"]}</span></div>
 """
 end_js = f"""
 tl.fromTo("#en-icon", {{ y: -900, rotation: -14 }}, {{ y: 0, rotation: 0, duration: 0.55, ease: "back.out(1.2)" }}, 0.05);
@@ -308,24 +462,27 @@ def write(measure=None):
     for i, (sid, start, dur, z, html) in enumerate(scenes):
         if isinstance(html, tuple):  # the any-app scene: place the selection, menu and finger on the measured price
             body, js = html
-            m = measure or {'x': 26, 'y': 400, 'w': 50, 'h': 30}
+            m = (measure or {}).get('price') or {'x': 26, 'y': 400, 'w': 50, 'h': 30}
             k = 1.4
             scroll = m['y'] * k - 700
             px, py, pw, ph = m['x'] * k - 4, 700 - 4, m['w'] * k + 8, m['h'] * k + 8
             fx, fy = PHONE_X + 24 + px + pw / 2, 650 + 24 + py + ph / 2
             item_cx = 40 + 24 + 85   # the menu's leftmost item ("המרת מטבע") in RTL order
+            item_cy = 32
+            if not HE and measure and 'item' in measure:  # the item's centre in the menu, as measured
+                item_cx, item_cy = 40 + measure['item']['x'], measure['item']['y']
             for key, v in {'@PX@': px, '@PY@': py, '@PW@': pw, '@PH@': ph, '@MY@': py - 92, '@FX@': fx, '@FY@': fy}.items():
                 body = body.replace(key, f'{v:.0f}')
             body = body.replace('@HAND@', HAND)
             js = js.replace('SCROLL', f'{scroll:.0f}').replace('MENU_DX', f'{PHONE_X + 24 + item_cx - fx:.0f}').replace(
-                'MENU_DY', f'{(650 + 24 + py - 92 + 32) - fy:.0f}')
+                'MENU_DY', f'{(650 + 24 + py - 92 + item_cy) - fy:.0f}')
             html = scene(sid, body, js, '#an-phone{transform-origin:50% 70%}')
         open(f'compositions/{sid}.html', 'w').write(html)
         hosts.append(f'      <div id="{sid}" data-composition-id="{sid}" data-composition-src="compositions/{sid}.html" data-start="{start}"'
                      f' data-duration="{dur}" data-track-index="{i}" data-track-kind="graphics" data-width="{W}" data-height="{H}"'
                      f' style="z-index:{z}"></div>')
     open('index.html', 'w').write(f"""<!doctype html>
-<html lang="he" data-resolution="portrait">
+<html lang="{"he" if HE else LANG}" data-resolution="portrait">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width={W}, height={H}" />
@@ -339,6 +496,7 @@ def write(measure=None):
   <body>
     <div id="root" data-composition-id="main" data-start="0" data-duration="24.5" data-width="{W}" data-height="{H}">
 {chr(10).join(hosts)}
+      <audio id="sound" class="clip" src="assets/audio/mix.wav" data-start="0" data-duration="24.5" data-track-index="20" data-volume="1"></audio>
     </div>
     <script>
       window.__timelines["main"] = gsap.timeline({{ paused: true }});
@@ -348,8 +506,40 @@ def write(measure=None):
 """)
 
 
+def app_screens():
+    """The language's app screens from the desktop preview (tools/preview/out/store_<lang>_*.png, see README), in
+    assets/img/<lang> (not in git): the screens get the 70 px status strip of the Hebrew ones, in their top colour."""
+    from PIL import Image
+    src = os.path.join(os.path.dirname(os.path.abspath(__file__)), '../../preview/out')
+    os.makedirs(IMG, exist_ok=True)
+    for name in ['1_main', '3_calc', '4_quick', '5a_theme', '5b_theme', '5c_theme']:
+        im = Image.open(f'{src}/store_{LANG}_{name}.png').convert('RGB')
+        out = Image.new('RGB', (800, 1790), im.getpixel((5, 5)))
+        out.paste(im, (0, 70))
+        out.save(f'{IMG}/{name}.png')
+    shutil.copy(f'{src}/store_{LANG}_2a_widget.png', f'{IMG}/widget_large.png')
+    shutil.copy(f'{src}/store_{LANG}_2b_widget.png', f'{IMG}/widget_small.png')
+
+
+def measure_page():
+    """measure.html: the elements to fit at their designed sizes, the page (its price) and the selection menu, for
+    measure.mjs."""
+    items = []
+    for sid, start, dur, z, html in scenes:
+        body = html[0] if isinstance(html, tuple) else html.split(f'data-height="{H}">', 1)[1].split('</div>\n<script>')[0]
+        items.append(body)
+    head = f'<!doctype html><html lang="{LANG}"><meta charset="utf-8"><style>{CSS}{FLAP_CSS} body{{margin:0}} #root{{position:relative}}</style>'
+    open(f'measure_{LANG}.html', 'w').write(head + '<div id="root">' + '\n'.join(items) + '</div><script>window.FITS = '
+                                            + json.dumps(FITS) + '</script>')
+
+
 if __name__ == '__main__':
-    import json, sys
-    m = json.load(open('measure.json')) if os.path.exists('measure.json') else None
+    if HE:
+        m = json.load(open('measure.json')) if os.path.exists('measure.json') else None
+        m = m and {'price': m}
+    else:
+        app_screens()
+        measure_page()
+        m = MEASURED or None
     write(m)
-    print('wrote', len(scenes), 'scenes', 'measured' if m else 'unmeasured')
+    print('wrote', LANG, len(scenes), 'scenes', 'measured' if m else 'unmeasured: run node measure.mjs ' + LANG + ' and build again')

@@ -133,6 +133,11 @@ Hebrew, and show rendered previews of visual changes (see `tools/preview`).
 
 ## Next
 - **Open as of 2026-10-26 (owner's wishes, next session starts here):**
+  - 2026-10-27: Store settings and the privacy URL fix are done (owner). The closed test is running (the owner's
+    console asks for 20 testers x 14 days). Play bundles now carry Google's TEST ads (`PLAY_REAL_ADS: false` in
+    `release.yml`) for the whole test period: the owner doesn't trust testers not to tap ads. Set it to `true` and build
+    a new bundle before applying for production. The 5.0.25 bundle the testers got has real ads: the owner replaces it
+    with a "Play bundle only" run. Next: service account (steps given to the owner, plan step 3.6).
   - Play Console: the first 9 "App content" forms are done (answers in the plan). Left: Store settings (Finance,
     contact email ohavstudio.contact@gmail.com, website `https://ohavs.github.io`: needed for app-ads.txt; the
     owner wants ALL ad buyers, so app-ads.txt is not optional) and the store listing (via the service account +
@@ -150,15 +155,16 @@ Hebrew, and show rendered previews of visual changes (see `tools/preview`).
     get 2,000 free minutes/month, and the old Pages project site goes away (the redirect in ohavs.github.io takes
     over). After the app is live and linked in AdMob, check that app-ads.txt shows "Verified"; if github.io isn't
     accepted, the owner buys a domain and we attach it to the same repo (custom domain).
-  - Store images: new set on the session branch (not merged yet); the owner is reviewing the gallery artifact and
-    will send fixes by code. Skills tried (installed per container, gone after it): ParthJadhav/app-store-screenshots
-    (its Next.js editor ran in the container; Style Lab looks were plain), Canva AI (broken Hebrew), logo-design
-    (owner kept the current logo). Promo video (Hebrew, 9:16, HyperFrames): source `tools/video/promo` (README), output
-    `store/video/promo-he.mp4` (v3, 2026-10-27: swap chip between the flap rows, a 9-phone ring, premium as a
-    tag, the store home screen, a hand cursor); the owner approved the store images (2026-10-27, Secular One is right) and has notes on the video
-    (next session starts with them). The video must use the same Secular One as the images: check that its
-    @font-face fonts really load in the render (the screenshots once silently fell back) and match the images'
-    weight (text-stroke). Photo credits (CC BY) go in its description.
+  - Store images and video (2026-10-27, session branch, not merged): the owner approved the images; a Spanish
+    speaker then found mistakes, so all 12 non-Hebrew languages were reviewed (app strings, store texts, screenshot
+    headlines; Spain Spanish "tipos de cambio", each language's own quotes, the menu item named the same in the store
+    text and the app) and the screenshots re-rendered. Open question for the owner: amounts are formatted US-style in
+    every language ("$4,980.42"; Locale.US in `AmountFormat.kt`, the calculator types "."), which a native speaker may
+    also read as a mistake. Promo video v5 (`store/video/promo-<lang>.mp4`, Hebrew `promo-he.mp4`; source
+    `tools/video/promo`, README; words in its `langs.py`): the owner approved the Hebrew picture and the sound effects
+    (SFX Kit, CC0) but not the music, and asked for the other languages; all 13 were rendered with the effects only.
+    Next: the owner looks for a music track (sends it, or we fetch one from GitHub: only GitHub, npm and PyPI are
+    reachable for media; public GitHub repos clone anonymously), then `audio/mix.py` with it and re-render all 13.
 - Google Play launch: the code and the store page are ready; the owner's steps are listed in order at the top
   of `docs/PLAY_LAUNCH_PLAN.md` (secrets, AdMob ids, Play Console, service account, closed
   test with 12 testers for 14 days). AdMob is done (2026-10-24): the real ids are in `gradle.properties`

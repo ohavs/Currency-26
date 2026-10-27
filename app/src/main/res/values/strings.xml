@@ -158,7 +158,7 @@
     <string name="ad_privacy">Ad privacy choices</string>
     <string name="about">About</string>
     <string name="privacy_policy">Privacy policy</string>
-    <string name="rates_source">Rates By Exchange Rate API</string>
+    <string name="rates_source">Rates by Exchange Rate API</string>
     <string name="rates_disclaimer">Rates are for information only and update about once a day. Your bank or exchange office may use a different rate.</string>
     <string name="tomorrow_at">tomorrow %1$s</string>
 </resources>
