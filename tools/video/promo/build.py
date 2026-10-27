@@ -28,8 +28,10 @@ NOTO_FACES
 .w { display: inline-block; }
 .block { display: inline-block; margin-top: 16px; padding: 0 .14em .08em; border: 8px solid INK; box-shadow: 14px 14px 0 INK; }
 .phone { position: absolute; width: 608px; height: 1301px; border: 10px solid INK; border-radius: 56px;
-  background: INK; padding: 14px; box-shadow: 24px 24px 0 INK; }
+  background: INK; padding: 14px; box-shadow: 24px 24px 0 rgba(31,44,53,.3); }
 .screen { position: relative; width: 560px; height: 1253px; border-radius: 40px; overflow: hidden; background: #000; }
+.screen::after { content: ''; position: absolute; left: 50%; top: 14px; width: 22px; height: 22px; margin-left: -11px;
+  border-radius: 50%; background: #0b0f12; box-shadow: inset 0 0 0 3px #1c252c; z-index: 20; }
 .screen > img { position: absolute; left: 0; top: 0; width: 560px; height: 1253px; }
 .sticker { position: absolute; padding: 8px 26px 14px; border: 7px solid INK; box-shadow: 10px 10px 0 INK;
   white-space: nowrap; font-size: 58px; z-index: 5; transform-origin: 50% 50%; }
@@ -315,7 +317,8 @@ any_body = f"""
     padding:16px 24px;box-shadow:0 6px 18px rgba(0,0,0,.25);font:500 {fit('an-menu', 30, 480)}px {MENU_FONT};direction:{'rtl' if IS_RTL else 'ltr'};white-space:nowrap">
     <span>{MENU[LANG][0]}</span><span>{MENU[LANG][1]}</span><span id="an-item" style="color:#0b6e4f;font-weight:700">{MENU[LANG][2]}</span></div>
   <div id="an-bubble" style="position:absolute;left:0;top:{bub_top}px;width:560px;height:{1253 - bub_top}px;overflow:hidden">
-    <img src="{IMG}/4_quick.png" style="position:absolute;left:0;top:{-bub_top}px;width:560px;height:1253px"></div>
+    <img src="{IMG}/4_quick_cut.png" style="position:absolute;left:0;top:{-bub_top}px;width:560px;height:1253px;
+      filter:drop-shadow(0 -4px 10px rgba(0,0,0,.18))"></div>
 </div></div>
 <div id="an-finger" style="position:absolute;left:@FX@px;top:@FY@px;width:0;height:0;transform-origin:0 0">
   <div style="position:absolute;left:{-0.39 * 130:.0f}px;top:{-0.12 * 130:.0f}px">@HAND@</div></div>
@@ -521,6 +524,30 @@ def app_screens():
     shutil.copy(f'{src}/store_{LANG}_2b_widget.png', f'{IMG}/widget_small.png')
 
 
+def cut_scrim():
+    """4_quick_cut.png: the bubble without the preview's grey scrim, so it sits on the page behind it as on a phone.
+    The grey joined to the image's corners turns transparent; its antialiased rim keeps the card's colour, faded."""
+    from PIL import Image, ImageDraw, ImageFilter
+    import numpy as np
+    im = Image.open(f'{IMG}/4_quick.png').convert('RGB')
+    a = np.asarray(im).astype(np.float32)
+    grey = a[5, 5]
+    flood = im.copy()
+    for xy in [(0, 0), (im.width - 1, 0), (0, im.height - 1), (im.width - 1, im.height - 1)]:
+        ImageDraw.floodfill(flood, xy, (255, 0, 255), thresh=2)
+    bg = np.all(np.asarray(flood) == (255, 0, 255), axis=2)
+    grow = lambda m, n: np.asarray(Image.fromarray(m.astype(np.uint8) * 255).filter(ImageFilter.MaxFilter(2 * n + 1))) > 0
+    rim = grow(bg, 3) & ~bg
+    card = np.median(a[grow(bg, 8) & ~grow(bg, 4)], axis=0)
+    d = card - grey
+    t = np.clip(((a - grey) @ d) / (d @ d), 0, 1)
+    alpha = np.where(bg, 0.0, 1.0)
+    alpha[rim] = t[rim]
+    out = a.copy()
+    out[rim] = card
+    Image.fromarray(np.dstack([out, alpha * 255]).round().astype(np.uint8), 'RGBA').save(f'{IMG}/4_quick_cut.png')
+
+
 def measure_page():
     """measure.html: the elements to fit at their designed sizes, the page (its price) and the selection menu, for
     measure.mjs."""
@@ -541,5 +568,6 @@ if __name__ == '__main__':
         app_screens()
         measure_page()
         m = MEASURED or None
+    cut_scrim()
     write(m)
     print('wrote', LANG, len(scenes), 'scenes', 'measured' if m else 'unmeasured: run node measure.mjs ' + LANG + ' and build again')
