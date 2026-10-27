@@ -28,3 +28,6 @@
 -dontwarn org.bouncycastle.jsse.**
 -dontwarn org.conscrypt.**
 -dontwarn org.openjsse.**
+# WorkManager builds its input mergers by reflection (no-arg constructor); R8's full mode dropped it, so no work
+# ran in the Play build: not Glance's widget sessions ("Can't load widget"), the rate refresh or Premium's expiry.
+-keep class * extends androidx.work.InputMerger { <init>(); }

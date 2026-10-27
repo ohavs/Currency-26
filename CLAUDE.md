@@ -138,9 +138,11 @@ Hebrew, and show rendered previews of visual changes (see `tools/preview`).
   They vanish by themselves once `PLAY_REAL_ADS: true`.
 - Tour demos draw the finger as the selection-menu demo does (`TourFinger`: the TouchApp hand, tip at the spot),
   never a dot; small glyphs like "⇅" never centre in a box, use an icon.
-- Widgets need `android:initialLayout` (Glance's `glance_default_loading_layout`): without it the launcher
-  shows "Can't load widget" (seen on the minified Play build, 5.0.27). smoke.yml now adds the widget from
-  Settings and prints the app's log.
+- R8 removed the no-arg constructor of WorkManager's `OverwritingInputMerger` (made by reflection): in the Play
+  build no work ran, so widgets stayed "Can't load widget" (Glance renders in a worker) and the rate refresh and
+  Premium expiry workers never ran (5.0.27). Kept in `proguard-rules.pro`. Widgets also need `android:initialLayout`
+  (Glance's `glance_default_loading_layout`).
+  smoke.yml adds the widget from Settings and prints the app's log.
 - History panel (5.0.19): the header is just the clock icon (the link already says "History"); the clear key
   is icon-only and exactly the size of the keypad key beside it, widening to "Clear all?" on the first tap.
   The owner notices mismatched button sizes: keep neighbouring buttons the same height and shape.
