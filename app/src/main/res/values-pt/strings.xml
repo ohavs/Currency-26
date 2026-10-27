@@ -60,7 +60,7 @@
     <string name="theme_lavender">Noite</string>
     <string name="theme_gold">Ouro</string>
     <string name="language">Idioma</string>
-    <string name="language_system">Auto</string>
+    <string name="language_system">Automático</string>
     <string name="app_updates">Atualizações do app</string>
     <string name="auto_check_updates">Procurar atualizações automaticamente</string>
     <string name="auto_check_updates_desc">Procura uma nova versão sempre que o app é aberto</string>
@@ -101,7 +101,7 @@
     <string name="tip_done">Entendi</string>
     <string name="tip_skip">Pular</string>
     <string name="show_tips">Ver o tour rápido</string>
-    <string name="tip_widget_action">Mostre como</string>
+    <string name="tip_widget_action">Mostrar como</string>
     <string name="guide_add_widget">Toque aqui para adicionar o widget à tela inicial</string>
     <string name="language_suggestion">Usar o app em português?</string>
     <string name="language_suggestion_hint">Sugerido para a sua região</string>
@@ -115,11 +115,11 @@
     <string name="quick_no_price">Nenhum preço encontrado no texto selecionado</string>
     <string name="quick_assumed">Moeda presumida</string>
     <string name="tip_select_title">Converta a partir de qualquer app</string>
-    <string name="tip_select_body">Selecione um preço em qualquer app e escolha \"Converter moeda\" no menu (ou Compartilhar → \"Converter moeda\"). O resultado aparece na hora, sem sair do que você está fazendo.</string>
+    <string name="tip_select_body">Selecione um preço em qualquer app e escolha \"Converter moeda\" no menu (ou Compartilhar → \"Converter moeda\"). O resultado aparece na hora, sem você precisar parar o que está fazendo.</string>
     <string name="select_menu_summary">Selecione um preço → \"%1$s\"</string>
-    <string name="select_menu_body">Selecione um preço em qualquer app e escolha \"%1$s\" no menu que aparece (às vezes fica em ⋮). A resposta aparece sobre o app, sem sair dele.</string>
+    <string name="select_menu_body">Selecione um preço em qualquer app e escolha \"%1$s\" no menu que aparece (às vezes fica em ⋮). A resposta aparece por cima do app, sem você precisar sair dele.</string>
     <string name="select_menu_try">Experimente aqui: toque e segure o preço</string>
-    <string name="select_menu_samsung">Nos celulares Samsung a opção fica oculta até você ativá-la, uma vez só:</string>
+    <string name="select_menu_samsung">Nos celulares Samsung, a opção fica oculta até você ativá-la (basta fazer isso uma vez):</string>
     <string name="select_menu_step1">Toque e segure o preço acima.</string>
     <string name="select_menu_step2">No menu, toque em ⋮ e depois em \"Gerenciar apps\" (a última opção).</string>
     <string name="select_menu_step3">Ative \"%1$s\" e toque em Concluído.</string>

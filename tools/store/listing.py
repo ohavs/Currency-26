@@ -12,7 +12,7 @@ import sys
 from PIL import Image
 
 # Shared by every language: the rate source credit the free API asks for.
-CREDIT = "Rates By Exchange Rate API (https://www.exchangerate-api.com)"
+CREDIT = "Rates by Exchange Rate API (https://www.exchangerate-api.com)"
 
 LISTINGS = {
     "en-US": dict(
@@ -37,7 +37,7 @@ Every amount and calculation is kept. Tap one to bring it back with its currenci
 • Calculator with percentages: 120 + 15%, 3 × 800 and more, converted as you type
 • 6 color themes, each in light and dark
 
-New users get Premium free for 3 days. After that, watch 2 short videos to open it for 24 hours, or get Premium forever with one payment, which also removes the ads. Converting, search, the extra currency, history and converting from other apps always stay free.
+New users get Premium free for 3 days. After that, watch 2 short videos to unlock it for 24 hours, or get Premium forever with one payment, which also removes the ads. Converting, search, the extra currency, history and converting from other apps always stay free.
 
 ★ 13 languages
 English, Hebrew, Arabic, Spanish, Russian, French, German, Portuguese, Italian, Turkish, Chinese, Japanese and Hindi.
@@ -74,15 +74,15 @@ Rates are for information only and update about once a day. Your bank or exchang
 השערים לידיעה בלבד ומתעדכנים בערך פעם ביום. בבנק או בצ'יינג' השער עשוי להיות שונה.
 """ + CREDIT),
     "es-ES": dict(
-        title="Conversor de Divisas + Widget",
+        title="Conversor de divisas + widget",
         short="Convierte más de 160 monedas sin conexión, desde cualquier app y con widget.",
-        full="""Convierte cualquier moneda con un toque, incluso sin conexión. Escribe un importe y míralo al instante en tu moneda, con tasas de más de 160 monedas que se actualizan solas.
+        full="""Convierte cualquier moneda con un toque, incluso sin conexión. Escribe un importe y verás al instante cuánto es en tu moneda, con tipos de cambio de más de 160 monedas que se actualizan solos.
 
 ★ Simple y rápido
 • Un teclado grande y claro: el resultado cambia mientras escribes
 • Intercambia monedas con un toque o añade una tercera para convertir a dos a la vez
 • Busca una moneda por país, nombre, símbolo o código, en cualquier idioma
-• Funciona sin conexión con las últimas tasas descargadas
+• Funciona sin conexión con los últimos tipos de cambio descargados
 
 ★ Convierte desde cualquier app
 Selecciona un precio en el navegador, una app de reservas o un chat y elige "Convertir moneda" (o Compartir → "Convertir moneda"). El resultado aparece sobre la app en la que estás. Entiende $, €, ₪, "1.250,00", "1.5k" y más.
@@ -91,16 +91,16 @@ Selecciona un precio en el navegador, una app de reservas o un chat y elige "Con
 Cada importe y cada cálculo se guardan. Toca uno para recuperarlo con sus monedas.
 
 ★ Premium
-• Widget en la pantalla de inicio: escribe un importe y míralo convertido sin abrir la app
+• Widget en la pantalla de inicio: escribe un importe y verás la conversión sin abrir la app
 • Calculadora con porcentajes: 120 + 15%, 3 × 800 y más, convertidos mientras escribes
 • 6 temas de color, cada uno en claro y oscuro
 
-Los usuarios nuevos tienen Premium gratis durante 3 días. Después, mira 2 vídeos cortos para abrirlo durante 24 horas, o consigue Premium para siempre con un solo pago, que además quita los anuncios. La conversión, la búsqueda, la moneda adicional, el historial y la conversión desde otras apps siempre son gratis.
+Los usuarios nuevos tienen Premium gratis durante 3 días. Después, mira 2 vídeos cortos para desbloquearlo durante 24 horas, o consigue Premium para siempre con un solo pago, que además quita los anuncios. La conversión, la búsqueda, la moneda adicional, el historial y la conversión desde otras apps siempre son gratis.
 
 ★ 13 idiomas
 Español, inglés, hebreo, árabe, ruso, francés, alemán, portugués, italiano, turco, chino, japonés e hindi.
 
-Las tasas son solo informativas y se actualizan aproximadamente una vez al día. Tu banco o casa de cambio puede aplicar otra tasa.
+Los tipos de cambio son solo orientativos y se actualizan aproximadamente una vez al día. Tu banco o casa de cambio puede aplicar otro tipo.
 """ + CREDIT),
     "ar": dict(
         title="محوّل العملات + أداة",
@@ -122,7 +122,7 @@ Las tasas son solo informativas y se actualizan aproximadamente una vez al día.
 ★ بريميوم
 • أداة على الشاشة الرئيسية: اكتب مبلغًا وشاهده محوّلًا دون فتح التطبيق
 • آلة حاسبة مع النسب المئوية: 120 + 15% و3 × 800 وغيرها، مع التحويل أثناء الكتابة
-• 6 سمات ألوان، كلٌّ منها بوضع فاتح وداكن
+• 6 سمات لونية، كلٌّ منها بوضع فاتح وداكن
 
 يحصل المستخدمون الجدد على بريميوم مجانًا لمدة 3 أيام. بعد ذلك، شاهد مقطعي فيديو قصيرين لفتحه لمدة 24 ساعة، أو احصل على بريميوم مدى الحياة بدفعة واحدة تزيل الإعلانات أيضًا. التحويل والبحث والعملة الإضافية والسجل والتحويل من التطبيقات الأخرى تبقى مجانية دائمًا.
 
@@ -182,7 +182,7 @@ Chaque montant et chaque calcul sont conservés. Touchez-en un pour le retrouver
 • Calculatrice avec pourcentages : 120 + 15 %, 3 × 800 et plus, convertis pendant la saisie
 • 6 thèmes de couleur, chacun en clair et en sombre
 
-Les nouveaux utilisateurs profitent de Premium gratuitement pendant 3 jours. Ensuite, regardez 2 courtes vidéos pour l'ouvrir 24 heures, ou passez à Premium à vie en un seul paiement, qui supprime aussi les publicités. La conversion, la recherche, la devise supplémentaire, l'historique et la conversion depuis d'autres apps restent toujours gratuits.
+Les nouveaux utilisateurs profitent de Premium gratuitement pendant 3 jours. Ensuite, regardez 2 courtes vidéos pour le débloquer pendant 24 heures, ou passez à Premium à vie en un seul paiement, qui supprime aussi les publicités. La conversion, la recherche, la devise supplémentaire, l'historique et la conversion depuis d'autres apps restent toujours gratuits.
 
 ★ 13 langues
 Français, anglais, hébreu, arabe, espagnol, russe, allemand, portugais, italien, turc, chinois, japonais et hindi.
@@ -204,14 +204,14 @@ Les taux sont donnés à titre indicatif et mis à jour environ une fois par jou
 Markiere einen Preis im Browser, in einer Buchungs-App oder im Chat und wähle „Währung umrechnen“ (oder Teilen → „Währung umrechnen“). Das Ergebnis erscheint über der App, in der du gerade bist. Versteht $, €, ₪, „1.250,00“, „1.5k“ und mehr.
 
 ★ Verlauf
-Jeder Betrag und jede Rechnung wird gespeichert. Tippe darauf, um sie mit ihren Währungen zurückzuholen.
+Jeder Betrag und jede Rechnung wird gespeichert. Tippe auf einen Eintrag, um ihn mit seinen Währungen zurückzuholen.
 
 ★ Premium
 • Widget auf dem Startbildschirm: Betrag eingeben und das Ergebnis sehen, ohne die App zu öffnen
 • Rechner mit Prozenten: 120 + 15 %, 3 × 800 und mehr, umgerechnet beim Tippen
 • 6 Farbschemas, jeweils hell und dunkel
 
-Neue Nutzer bekommen Premium 3 Tage gratis. Danach schalten 2 kurze Videos es für 24 Stunden frei – oder du holst dir Premium für immer mit einer Zahlung, die auch die Werbung entfernt. Umrechnen, Suche, zusätzliche Währung, Verlauf und das Umrechnen aus anderen Apps bleiben immer kostenlos.
+Neue Nutzer bekommen Premium 3 Tage gratis. Danach schaltest du es mit 2 kurzen Videos für 24 Stunden frei – oder du holst dir Premium für immer mit einer Zahlung, die auch die Werbung entfernt. Umrechnen, Suche, zusätzliche Währung, Verlauf und das Umrechnen aus anderen Apps bleiben immer kostenlos.
 
 ★ 13 Sprachen
 Deutsch, Englisch, Hebräisch, Arabisch, Spanisch, Russisch, Französisch, Portugiesisch, Italienisch, Türkisch, Chinesisch, Japanisch und Hindi.
@@ -219,7 +219,7 @@ Deutsch, Englisch, Hebräisch, Arabisch, Spanisch, Russisch, Französisch, Portu
 Die Kurse dienen nur zur Information und werden etwa einmal täglich aktualisiert. Deine Bank oder Wechselstube kann einen anderen Kurs verwenden.
 """ + CREDIT),
     "pt-BR": dict(
-        title="Conversor de Moedas + Widget",
+        title="Conversor de moedas + widget",
         short="Converta mais de 160 moedas offline, de qualquer app e com widget.",
         full="""Converta qualquer moeda com um toque, mesmo offline. Digite um valor e veja na hora na sua moeda, com cotações de mais de 160 moedas que se atualizam sozinhas.
 
@@ -267,7 +267,7 @@ Ogni importo e ogni calcolo vengono salvati. Toccane uno per ritrovarlo con le s
 ★ Premium
 • Widget nella schermata Home: digita un importo e vedi la conversione senza aprire l'app
 • Calcolatrice con percentuali: 120 + 15%, 3 × 800 e altro, convertiti mentre digiti
-• 6 temi colore, ognuno chiaro e scuro
+• 6 temi di colore, ognuno in versione chiara e scura
 
 I nuovi utenti hanno Premium gratis per 3 giorni. Poi guarda 2 brevi video per sbloccarlo per 24 ore, oppure prendi Premium per sempre con un solo pagamento, che toglie anche la pubblicità. Conversione, ricerca, valuta aggiuntiva, cronologia e conversione da altre app restano sempre gratuite.
 
@@ -283,12 +283,12 @@ I tassi sono solo indicativi e si aggiornano circa una volta al giorno. La tua b
 
 ★ Basit ve hızlı
 • Büyük ve net tuş takımı: sonuç siz yazarken değişir
-• Para birimlerini tek dokunuşla değiştirin ya da aynı anda ikisine çevirmek için üçüncü bir para birimi ekleyin
+• Para birimlerinin yerini tek dokunuşla değiştirin ya da aynı anda ikisine çevirmek için üçüncü bir para birimi ekleyin
 • Para birimini ülke, ad, sembol veya koda göre, her dilde arayın
 • İndirilen son kurlarla çevrimdışı çalışır
 
 ★ Her uygulamadan çevirin
-Tarayıcıda, bir rezervasyon uygulamasında ya da sohbette bir fiyatı seçin ve "Para birimi çevir"i seçin (veya Paylaş → "Para birimi çevir"). Sonuç, bulunduğunuz uygulamanın üzerinde açılır. $, €, ₪, "1.250,00", "1.5k" ve daha fazlasını anlar.
+Tarayıcıda, bir rezervasyon uygulamasında ya da sohbette bir fiyatı seçin ve "Döviz çevir"i seçin (veya Paylaş → "Döviz çevir"). Sonuç, bulunduğunuz uygulamanın üzerinde açılır. $, €, ₪, "1.250,00", "1.5k" ve daha fazlasını anlar.
 
 ★ Geçmiş
 Her tutar ve her hesaplama saklanır. Para birimleriyle birlikte geri getirmek için birine dokunun.
@@ -298,7 +298,7 @@ Her tutar ve her hesaplama saklanır. Para birimleriyle birlikte geri getirmek i
 • Yüzdeli hesap makinesi: 120 + %15, 3 × 800 ve daha fazlası, yazarken çevrilir
 • Her biri açık ve koyu olan 6 renk teması
 
-Yeni kullanıcılar Premium'u 3 gün ücretsiz kullanır. Sonrasında 2 kısa video izleyerek 24 saat açabilir ya da reklamları da kaldıran tek bir ödemeyle ömür boyu Premium alabilirsiniz. Çevirme, arama, ek para birimi, geçmiş ve diğer uygulamalardan çevirme her zaman ücretsizdir.
+Yeni kullanıcılar Premium'u 3 gün ücretsiz kullanır. Sonrasında 2 kısa video izleyerek 24 saatliğine açabilir ya da reklamları da kaldıran tek bir ödemeyle ömür boyu Premium alabilirsiniz. Çevirme, arama, ek para birimi, geçmiş ve diğer uygulamalardan çevirme her zaman ücretsizdir.
 
 ★ 13 dil
 Türkçe, İngilizce, İbranice, Arapça, İspanyolca, Rusça, Fransızca, Almanca, Portekizce, İtalyanca, Çince, Japonca ve Hintçe.
@@ -317,7 +317,7 @@ Kurlar yalnızca bilgi amaçlıdır ve günde yaklaşık bir kez güncellenir. B
 • 离线时使用最近下载的汇率
 
 ★ 在任何应用中换算
-在浏览器、订票应用或聊天中选中一个价格，选择"换算货币"（或"分享"→"换算货币"）。结果会直接显示在当前应用上方。支持 $、€、₪、"1.250,00"、"1.5k" 等写法。
+在浏览器、订票应用或聊天中选中一个价格，选择“货币换算”（或“分享”→“货币换算”）。结果会直接显示在当前应用上方。支持 $、€、₪、“1.250,00”、“1.5k” 等写法。
 
 ★ 历史记录
 每一次金额和计算都会保存。轻点一条记录即可连同货币一起恢复。
@@ -346,7 +346,7 @@ Kurlar yalnızca bilgi amaçlıdır ve günde yaklaşık bir kez güncellenir. B
 • 最後にダウンロードしたレートでオフラインでも動作
 
 ★ どのアプリからでも換算
-ブラウザや予約アプリ、チャットで価格を選択し、「通貨を換算」を選ぶだけ（または 共有 →「通貨を換算」）。今のアプリの上に結果が表示されます。$、€、₪、「1.250,00」、「1.5k」などにも対応。
+ブラウザや予約アプリ、チャットで価格を選択し、「通貨を換算」を選ぶだけ（または［共有］→「通貨を換算」）。今のアプリの上に結果が表示されます。$、€、₪、「1.250,00」、「1.5k」などにも対応。
 
 ★ 履歴
 金額も計算もすべて保存。タップすれば通貨ごと呼び出せます。
@@ -365,27 +365,27 @@ Kurlar yalnızca bilgi amaçlıdır ve günde yaklaşık bir kez güncellenir. B
 """ + CREDIT),
     "hi-IN": dict(
         title="मुद्रा परिवर्तक + विजेट",
-        short="160+ मुद्राएँ ऑफ़लाइन बदलें, किसी भी ऐप से, होम स्क्रीन विजेट के साथ।",
-        full="""एक टैप में कोई भी मुद्रा बदलें, बिना इंटरनेट के भी। रकम लिखें और तुरंत अपनी मुद्रा में देखें — 160 से ज़्यादा मुद्राओं की दरें अपने-आप अपडेट होती हैं।
+        short="160+ मुद्राएँ ऑफ़लाइन कन्वर्ट करें, किसी भी ऐप से, होम स्क्रीन विजेट के साथ।",
+        full="""एक टैप में कोई भी मुद्रा कन्वर्ट करें, बिना इंटरनेट के भी। रकम लिखें और तुरंत अपनी मुद्रा में देखें — 160 से ज़्यादा मुद्राओं की दरें अपने-आप अपडेट होती हैं।
 
 ★ आसान और तेज़
 • बड़ा, साफ़ कीपैड: लिखते-लिखते नतीजा बदलता है
-• एक टैप में मुद्राएँ बदलें, या तीसरी मुद्रा जोड़कर एक साथ दो में बदलें
+• एक टैप में मुद्राओं की अदला-बदली करें, या तीसरी मुद्रा जोड़कर एक साथ दो मुद्राओं में कन्वर्ट करें
 • देश, नाम, चिह्न या कोड से, किसी भी भाषा में मुद्रा खोजें
 • आख़िरी डाउनलोड की गई दरों के साथ ऑफ़लाइन चलता है
 
-★ किसी भी ऐप से बदलें
-ब्राउज़र, बुकिंग ऐप या चैट में कोई कीमत चुनें और "मुद्रा बदलें" चुनें (या शेयर करें → "मुद्रा बदलें")। नतीजा उसी ऐप के ऊपर दिखता है जिसमें आप हैं। $, €, ₪, "1.250,00", "1.5k" जैसे लिखावट भी समझता है।
+★ किसी भी ऐप से कन्वर्ट करें
+ब्राउज़र, बुकिंग ऐप या चैट में कोई कीमत चुनें और "मुद्रा कन्वर्ट करें" चुनें (या शेयर करें → "मुद्रा कन्वर्ट करें")। नतीजा उसी ऐप के ऊपर दिखता है जिसमें आप हैं। $, €, ₪, "1.250,00", "1.5k" जैसी लिखावट भी समझता है।
 
 ★ इतिहास
 हर रकम और हर हिसाब सहेजा जाता है। किसी पर टैप करें और उसे मुद्राओं के साथ वापस लाएँ।
 
 ★ प्रीमियम
-• होम स्क्रीन विजेट: ऐप खोले बिना रकम लिखें और बदली हुई रकम देखें
-• प्रतिशत वाला कैलकुलेटर: 120 + 15%, 3 × 800 और भी, लिखते-लिखते बदला हुआ
+• होम स्क्रीन विजेट: ऐप खोले बिना रकम लिखें और कन्वर्ट हुई रकम देखें
+• प्रतिशत वाला कैलकुलेटर: 120 + 15%, 3 × 800 और भी, लिखते-लिखते कन्वर्ट
 • 6 रंग थीम, हर एक लाइट और डार्क में
 
-नए उपयोगकर्ताओं को प्रीमियम 3 दिन मुफ़्त मिलता है। उसके बाद 2 छोटे वीडियो देखकर इसे 24 घंटे के लिए खोलें, या एक बार भुगतान करके हमेशा के लिए प्रीमियम लें, जिससे विज्ञापन भी हट जाते हैं। मुद्रा बदलना, खोज, अतिरिक्त मुद्रा, इतिहास और दूसरे ऐप से बदलना हमेशा मुफ़्त रहते हैं।
+नए उपयोगकर्ताओं को प्रीमियम 3 दिन मुफ़्त मिलता है। उसके बाद 2 छोटे वीडियो देखकर इसे 24 घंटे के लिए अनलॉक करें, या एक बार भुगतान करके हमेशा के लिए प्रीमियम लें, जिससे विज्ञापन भी हट जाते हैं। मुद्रा कन्वर्ट करना, खोज, अतिरिक्त मुद्रा, इतिहास और दूसरे ऐप से कन्वर्ट करना हमेशा मुफ़्त रहते हैं।
 
 ★ 13 भाषाएँ
 हिन्दी, अंग्रेज़ी, हिब्रू, अरबी, स्पेनिश, रूसी, फ़्रेंच, जर्मन, पुर्तगाली, इतालवी, तुर्की, चीनी और जापानी।

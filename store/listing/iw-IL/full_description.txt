@@ -23,4 +23,4 @@
 עברית, אנגלית, ערבית, ספרדית, רוסית, צרפתית, גרמנית, פורטוגזית, איטלקית, טורקית, סינית, יפנית והינדי.
 
 השערים לידיעה בלבד ומתעדכנים בערך פעם ביום. בבנק או בצ'יינג' השער עשוי להיות שונה.
-Rates By Exchange Rate API (https://www.exchangerate-api.com)
+Rates by Exchange Rate API (https://www.exchangerate-api.com)

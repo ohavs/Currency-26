@@ -15,7 +15,7 @@ Ogni importo e ogni calcolo vengono salvati. Toccane uno per ritrovarlo con le s
 ★ Premium
 • Widget nella schermata Home: digita un importo e vedi la conversione senza aprire l'app
 • Calcolatrice con percentuali: 120 + 15%, 3 × 800 e altro, convertiti mentre digiti
-• 6 temi colore, ognuno chiaro e scuro
+• 6 temi di colore, ognuno in versione chiara e scura
 
 I nuovi utenti hanno Premium gratis per 3 giorni. Poi guarda 2 brevi video per sbloccarlo per 24 ore, oppure prendi Premium per sempre con un solo pagamento, che toglie anche la pubblicità. Conversione, ricerca, valuta aggiuntiva, cronologia e conversione da altre app restano sempre gratuite.
 
@@ -23,4 +23,4 @@ I nuovi utenti hanno Premium gratis per 3 giorni. Poi guarda 2 brevi video per s
 Italiano, inglese, ebraico, arabo, spagnolo, russo, francese, tedesco, portoghese, turco, cinese, giapponese e hindi.
 
 I tassi sono solo indicativi e si aggiornano circa una volta al giorno. La tua banca o il cambiavalute possono applicare un tasso diverso.
-Rates By Exchange Rate API (https://www.exchangerate-api.com)
+Rates by Exchange Rate API (https://www.exchangerate-api.com)

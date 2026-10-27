@@ -15,7 +15,7 @@
     <string name="close">Kapat</string>
     <string name="legacy_app_installed">Uygulamanın eski bir sürümü hâlâ yüklü</string>
     <string name="legacy_app_remove">Kaldır</string>
-    <string name="swap_currencies">Para birimlerini değiştir</string>
+    <string name="swap_currencies">Para birimlerinin yerini değiştir</string>
     <string name="change_currency">Para birimini değiştir</string>
     <string name="add_currency">Başka bir para birimi ekle</string>
     <string name="remove_currency">Para birimini kaldır</string>
@@ -96,7 +96,7 @@
     <string name="tip_widget_title">Doğrudan ana ekrandan çevirin</string>
     <string name="tip_widget_body">Widget\'ı ana ekranınıza ekleyin: bir tutar yazın ve uygulamayı açmadan çevrilmiş hâlini görün.</string>
     <string name="tip_extra_title">Aynı anda iki para birimine çevirin</string>
-    <string name="tip_extra_body">Hem euro hem dolar mı lazım? Başka bir para birimi ekleyin, her tutar ikisine de çevrilsin.</string>
+    <string name="tip_extra_body">Hem euro hem dolar mı lazım? Başka bir para birimi ekleyin, her tutar ikisine de çevrilir.</string>
     <string name="tip_next">İleri</string>
     <string name="tip_done">Anladım</string>
     <string name="tip_skip">Atla</string>
@@ -115,9 +115,9 @@
     <string name="quick_no_price">Seçilen metinde fiyat bulunamadı</string>
     <string name="quick_assumed">Tahmini para birimi</string>
     <string name="tip_select_title">Her uygulamadan çevirin</string>
-    <string name="tip_select_body">Herhangi bir uygulamada bir fiyatı seçin ve menüden \"Döviz çevir\"i seçin (veya Paylaş → \"Döviz çevir\"). Sonuç, yaptığınız işi bırakmadan hemen görünür.</string>
+    <string name="tip_select_body">Herhangi bir uygulamada bir fiyatı seçin ve menüden \"Döviz çevir\"i seçin (veya Paylaş → \"Döviz çevir\"). Yaptığınız işi bırakmanıza gerek kalmadan sonuç hemen görünür.</string>
     <string name="select_menu_summary">Bir fiyat seçin → \"%1$s\"</string>
-    <string name="select_menu_body">Herhangi bir uygulamada bir fiyat seçin ve açılan menüden \"%1$s\" seçeneğine dokunun (bazen ⋮ altındadır). Cevap, uygulamadan çıkmadan üzerinde belirir.</string>
+    <string name="select_menu_body">Herhangi bir uygulamada bir fiyat seçin ve açılan menüden \"%1$s\" seçeneğine dokunun (bazen ⋮ altındadır). Sonuç, uygulamadan çıkmanıza gerek kalmadan uygulamanın üzerinde belirir.</string>
     <string name="select_menu_try">Burada deneyin: fiyata uzun basın</string>
     <string name="select_menu_samsung">Samsung telefonlarda bu seçenek, bir kez açana kadar gizlidir:</string>
     <string name="select_menu_step1">Yukarıdaki fiyata uzun basın.</string>
@@ -152,7 +152,7 @@
     <string name="premium_pending">Satın alımınız ödemenin onaylanmasını bekliyor</string>
     <string name="premium_locked">Premium\'a dahil</string>
     <string name="premium_promo">Premium: reklamsız, widget, renkler ve hesap makinesi</string>
-    <string name="premium_settings_free">%1$d kısa video %2$d saat açar</string>
+    <string name="premium_settings_free">%1$d kısa videoyla %2$d saatlik erişim</string>
     <string name="widget_locked_title">Widget, Premium\'un bir parçası</string>
     <string name="widget_locked_action">Kilidi aç</string>
     <string name="ad_privacy">Reklam gizliliği</string>

@@ -1,1 +1,1 @@
-Conversor de Moedas + Widget
+Conversor de moedas + widget
