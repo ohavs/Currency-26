@@ -159,16 +159,15 @@ Hebrew, and show rendered previews of visual changes (see `tools/preview`).
     get 2,000 free minutes/month, and the old Pages project site goes away (the redirect in ohavs.github.io takes
     over). After the app is live and linked in AdMob, check that app-ads.txt shows "Verified"; if github.io isn't
     accepted, the owner buys a domain and we attach it to the same repo (custom domain).
-  - Store images and video (2026-10-27, session branch, not merged): the owner approved the images; a Spanish
-    speaker then found mistakes, so all 12 non-Hebrew languages were reviewed (app strings, store texts, screenshot
-    headlines; Spain Spanish "tipos de cambio", each language's own quotes, the menu item named the same in the store
-    text and the app) and the screenshots re-rendered. Open question for the owner: amounts are formatted US-style in
-    every language ("$4,980.42"; Locale.US in `AmountFormat.kt`, the calculator types "."), which a native speaker may
-    also read as a mistake. Promo video v5 (`store/video/promo-<lang>.mp4`, Hebrew `promo-he.mp4`; source
-    `tools/video/promo`, README; words in its `langs.py`): the owner approved the Hebrew picture and the sound effects
-    (SFX Kit, CC0) but not the music, and asked for the other languages; all 13 were rendered with the effects only.
-    Next: the owner looks for a music track (sends it, or we fetch one from GitHub: only GitHub, npm and PyPI are
-    reachable for media; public GitHub repos clone anonymously), then `audio/mix.py` with it and re-render all 13.
+  - Store images and video (2026-10-27, merged): the owner approved the images; a Spanish speaker found mistakes,
+    so all 12 non-Hebrew languages were reviewed (app strings, store texts, screenshot headlines) and the screenshots
+    re-rendered. Open question for the owner: amounts are formatted US-style in every language ("$4,980.42";
+    Locale.US in `AmountFormat.kt`), which a native speaker may read as a mistake. Promo video v6
+    (`store/video/promo-<lang>.mp4`, Hebrew `promo-he.mp4`; source `tools/video/promo`, README) is APPROVED by the
+    owner: SFX Kit effects + "Upbeat" by AtlasAudio (Pixabay, commercial use, no credit; the mp3 is NOT in git, the
+    owner has it), punch-hole camera, translucent phone shadow, the bubble on the page without the grey scrim.
+    Music licenses: check commercial/advertising use first (freetouse.com's free license forbids it; that track was
+    dropped; both mp3s the owner uploaded are still in git history, one more reason to make the repo private). The video still has to be uploaded to YouTube and linked in the store listing (owner).
 - Google Play launch: the code and the store page are ready; the owner's steps are listed in order at the top
   of `docs/PLAY_LAUNCH_PLAN.md` (secrets, AdMob ids, Play Console, service account, closed
   test with 12 testers for 14 days). AdMob is done (2026-10-24): the real ids are in `gradle.properties`

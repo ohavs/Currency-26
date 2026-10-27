@@ -101,11 +101,14 @@ if MUSIC is None:
     sys.exit()
 
 music = load(MUSIC, MUSIC_AT, LEN)
+# The fade-out ends where the music does (a track shorter than the video ends in silence, not on a cut).
+n = min(len(music), len(out))
 music = np.pad(music, ((0, max(0, len(out) - len(music))), (0, 0)))[: len(out)]
-ramp = np.ones(len(out), np.float32)
+ramp = np.zeros(len(out), np.float32)
+ramp[:n] = 1
 fi, fo = int(0.25 * SR), int(1.6 * SR)
 ramp[:fi] = np.linspace(0, 1, fi)
-ramp[-fo:] = np.linspace(1, 0, fo)
+ramp[n - fo:n] = np.linspace(1, 0, fo)
 music *= ramp[:, None]
 
 

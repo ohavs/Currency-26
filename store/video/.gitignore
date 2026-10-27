@@ -1,0 +1,3 @@
+# HyperFrames render temp folders next to the output
+.*.hf-transaction-*/
+work-*/

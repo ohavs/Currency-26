@@ -33,6 +33,15 @@ Render each language in turn (index.html is shared) to `store/video/promo-<lang>
 - v5 (2026-10-27): the owner kept the sound effects and turned the music down; every language is rendered with the
   effects only (`python3 audio/mix.py /home/user/snd/sfx-kit`, no music arguments: about -26 LUFS) until the owner
   finds a track.
+- v6 (2026-10-27): the owner's own track first was "Edge of Motion" (Aetheric, freetouse.com), dropped: its free
+  license forbids commercial content (promoting a product) and sharing the file. The music is now "Upbeat" by AtlasAudio
+  from Pixabay, trimmed by the owner to 24 s (Pixabay Content License: commercial use, ads included, no credit; the file itself
+  may not be redistributed, so it is NOT in git: the owner keeps it, we keep it at /home/user/snd/music.mp3).
+  `python3 audio/mix.py /home/user/snd/sfx-kit /home/user/snd/music.mp3 0` (mix about -15.5 LUFS, peak -1.5 dBFS; the
+  fade-out ends where the track ends). Before using any other track, read its license for commercial/advertising use.
+- v6 picture (owner's notes): every phone has a punch-hole camera (`.screen::after`), the phones' hard shadow is a
+  translucent ink (it read as a thicker right bezel), and the quick-convert bubble sits on the page without the
+  preview's grey scrim (`cut_scrim()` writes `4_quick_cut.png`).
 - Music (v4 draft, rejected by the owner): "Daybreak" by Tanner Helland from 10 s,
   [github.com/tannerhelland/free-music](https://github.com/tannerhelland/free-music), CC BY 4.0: the video's
   description must say "Music: Daybreak by Tanner Helland (CC BY 4.0)". Candidates sent to the owner: Daybreak, Thugs,
