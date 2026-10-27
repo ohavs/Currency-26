@@ -71,6 +71,9 @@ tap "Add to home screen|ADD TO HOME SCREEN|Add automatically|ADD AUTOMATICALLY|A
 adb shell input keyevent KEYCODE_HOME; sleep 10
 shot 14-widget-home
 adb shell dumpsys appwidget | grep -A3 "com.ohav.currency" | head -20
+APP_PID=$(adb shell pidof $PKG | tr -d '\r')
+echo "--- the app's log after adding the widget (pid $APP_PID) ---"
+[ -n "$APP_PID" ] && adb logcat -d --pid="$APP_PID" | grep -vE "AccessibilityNodeInfoDumper|Ads|chromium|DynamiteModule" | grep -E " [WEF] " | tail -60
 
 adb logcat -d > smoke/logcat.txt
 echo "--- widget log ---"
