@@ -85,6 +85,12 @@ if grep -A2 "FATAL EXCEPTION" smoke/logcat.txt | grep -q "Process: $PKG"; then
   grep -A40 "FATAL EXCEPTION" smoke/logcat.txt | head -120
   exit 1
 fi
+# Background work (Glance's widget sessions, the rate refresh) fails quietly when R8 strips what WorkManager needs.
+if grep -qE "WM-WorkerWrapper: Could not create|WM-InputMerger: Trouble|Can't load widget" smoke/logcat.txt; then
+  echo "::error::WorkManager could not run work (R8?)"
+  grep -E "WM-" smoke/logcat.txt | head -20
+  exit 1
+fi
 if grep -q "FATAL EXCEPTION" smoke/logcat.txt; then
   echo "A crash outside the app (not counted):"
   grep -A4 "FATAL EXCEPTION" smoke/logcat.txt | head -20
