@@ -42,7 +42,8 @@ Hebrew, and show rendered previews of visual changes (see `tools/preview`).
   (`pyaxmlparser` or a UTF-16 search), new strings in `resources.arsc`.
 - When a task is done, save what the next session needs (this file, `docs/PLAY_LAUNCH_PLAN.md`), merge it,
   and tell the owner it is safe to `/clear`. The owner asked for this every time.
-- Latest release: 5.0.27 (PR #44: Play bundle with test ads, translation review). 5.0.26 (PR #40: the privacy policy link moved to https://ohavs.github.io/privacy.html; checked
+- Latest release: 5.0.28 (PR #48, run 40532720077: the widget works in the Play build (WorkManager/R8), tour hand,
+  Premium crown, test tools; its Play bundle (test ads) is the one to upload to the closed test). 5.0.27 (PR #44: Play bundle with test ads, translation review). 5.0.26 (PR #40: the privacy policy link moved to https://ohavs.github.io/privacy.html; checked
   in the APK). 5.0.25 (PR #35) brought the real AdMob ids to the store build; its run (40078765153) built the signed Play
   bundle with the real ads (artifact `currency-26-play-bundle`; the log prints the AdMob app id), the one for the
   owner's first manual upload (plan step 3.3). GitHub step 1 and AdMob step 2 are done; in Play Console the app exists and
@@ -184,6 +185,10 @@ Hebrew, and show rendered previews of visual changes (see `tools/preview`).
     owner has it), punch-hole camera, translucent phone shadow, the bubble on the page without the grey scrim.
     Music licenses: check commercial/advertising use first (freetouse.com's free license forbids it; that track was
     dropped; both mp3s the owner uploaded are still in git history, one more reason to make the repo private). The video still has to be uploaded to YouTube and linked in the store listing (owner).
+  - Store images/videos for the owner: `store-assets.yml` run 40528996051 (artifacts `store-images`, `store-videos`).
+    The other languages' images go up with `play-listing.yml` once the service account exists (or by hand under
+    Main store listing > Manage translations). Videos: one YouTube link per language (unlisted is fine), at least
+    en and he.
 - Google Play launch: the code and the store page are ready; the owner's steps are listed in order at the top
   of `docs/PLAY_LAUNCH_PLAN.md` (secrets, AdMob ids, Play Console, service account, closed
   test with 12 testers for 14 days). AdMob is done (2026-10-24): the real ids are in `gradle.properties`
