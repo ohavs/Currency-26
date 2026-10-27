@@ -64,6 +64,8 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.graphics.SolidColor
+import androidx.compose.ui.graphics.vector.path
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawBehind
@@ -217,9 +219,14 @@ fun CalculatorScreen(viewModel: MainViewModel, monetization: Monetization, onRem
                     onRestoreHistory = viewModel::restoreHistory,
                     onClearHistory = viewModel::clearHistory,
                     calculatorLocked = !access.unlocked,
+                    premiumBadge = monetization.hasStore && access.unlocked,
                     adSlot = {
                         monetization.Banner(
-                            placeholder = { PremiumPromo(onClick = { viewModel.openPremium(PremiumReason.NO_ADS) }) },
+                            // With Premium (a trial or videos) the strip stays empty until its ad comes: the Premium
+                            // line would read as if they had no Premium, and the crown by Settings says they do.
+                            placeholder = {
+                                if (!access.unlocked) PremiumPromo(onClick = { viewModel.openPremium(PremiumReason.NO_ADS) })
+                            },
                             modifier = Modifier.fillMaxWidth()
                         )
                     },
@@ -256,6 +263,7 @@ fun CalculatorScreen(viewModel: MainViewModel, monetization: Monetization, onRem
                     colorsLocked = !access.unlocked,
                     adPrivacyOptions = privacyOptionsRequired,
                     onAdPrivacyOptions = { activity?.let(monetization::showPrivacyOptions) },
+                    testTools = monetization.testTools,
                     onWidgetGuideDone = viewModel::endWidgetGuide,
                     highlightSelectMenu = selectGuide,
                     onSelectGuideDone = viewModel::endSelectGuide,
@@ -352,6 +360,8 @@ fun CalculatorContent(
     onRestoreHistory: (HistoryEntry) -> Unit = {},
     onClearHistory: () -> Unit = {},
     calculatorLocked: Boolean = false,
+    /** Premium is on (bought, trial or videos): a crown on the Settings button. */
+    premiumBadge: Boolean = false,
     /** The ad strip under the keypad (Play build, without Premium forever). */
     adSlot: @Composable () -> Unit = {},
 ) {
@@ -379,7 +389,12 @@ fun CalculatorContent(
             title = "1 ${state.sourceCurrency} = ${formatRate(state.rate)} ${state.targetCurrency}",
             titleStyle = MaterialTheme.typography.titleMedium.copy(textDirection = TextDirection.Ltr),
             subtitle = subtitle,
-            navigation = { RoundIconButton(Icons.Rounded.Tune, stringResource(R.string.settings), onOpenSettings) },
+            navigation = {
+                Box {
+                    RoundIconButton(Icons.Rounded.Tune, stringResource(R.string.settings), onOpenSettings)
+                    if (premiumBadge) PremiumCrown(Modifier.align(Alignment.TopEnd).offset(x = 4.dp, y = (-4).dp))
+                }
+            },
             action = {
                 RoundIconButton(Icons.Rounded.Refresh, stringResource(R.string.refresh_rates), onRefresh, loading = state.isRefreshing)
             }
@@ -615,6 +630,40 @@ private fun LanguageSuggestionBanner(suggestion: LanguageSuggestion, onAccept: (
 }
 
 /** Offers the feature tour (its first tip's title); a tap opens it, so it never covers the keypad uninvited. */
+/** The small crown on the Settings button while Premium is on. */
+@Composable
+private fun PremiumCrown(modifier: Modifier = Modifier) {
+    val palette = LocalPalette.current
+    Box(
+        modifier = modifier
+            .size(20.dp)
+            .clip(CircleShape)
+            .background(palette.background)
+            .padding(2.dp)
+            .clip(CircleShape)
+            .background(palette.accent),
+        contentAlignment = Alignment.Center
+    ) {
+        Icon(CrownIcon, contentDescription = null, tint = palette.onAccent, modifier = Modifier.size(13.dp))
+    }
+}
+
+/** A crown (Material's icons have none): three points with balls on top, on a band. */
+private val CrownIcon: ImageVector by lazy {
+    ImageVector.Builder("Crown", 24.dp, 24.dp, 24f, 24f).apply {
+        path(fill = SolidColor(Color.Black)) {
+            moveTo(3f, 8f); lineTo(7.5f, 12f); lineTo(12f, 5f); lineTo(16.5f, 12f); lineTo(21f, 8f)
+            lineTo(19.5f, 18f); lineTo(4.5f, 18f); close()
+            moveTo(4.5f, 19.5f); lineTo(19.5f, 19.5f); lineTo(19.5f, 21.5f); lineTo(4.5f, 21.5f); close()
+        }
+        path(fill = SolidColor(Color.Black)) {
+            moveTo(1.4f, 7f); arcToRelative(1.6f, 1.6f, 0f, true, true, 3.2f, 0f); arcToRelative(1.6f, 1.6f, 0f, true, true, -3.2f, 0f)
+            moveTo(10.4f, 3.6f); arcToRelative(1.6f, 1.6f, 0f, true, true, 3.2f, 0f); arcToRelative(1.6f, 1.6f, 0f, true, true, -3.2f, 0f)
+            moveTo(19.4f, 7f); arcToRelative(1.6f, 1.6f, 0f, true, true, 3.2f, 0f); arcToRelative(1.6f, 1.6f, 0f, true, true, -3.2f, 0f)
+        }
+    }.build()
+}
+
 @Composable
 private fun TourOfferBanner(tip: FeatureTip, onOpen: () -> Unit, onDismiss: () -> Unit) {
     val palette = LocalPalette.current

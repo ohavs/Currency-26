@@ -83,6 +83,16 @@ class PremiumStore(
             .apply()
     }
 
+    /** Test builds: as if installed [ago] ms ago, with no full-screen ad shown yet. */
+    fun setInstalledAgoForTesting(ago: Long) {
+        prefs.edit()
+            .putLong(KEY_INSTALLED_AT, clock() - ago)
+            .remove(KEY_LAST_INTERSTITIAL)
+            .remove(KEY_INTERSTITIAL_COUNT)
+            .remove(KEY_INTERSTITIAL_DAY)
+            .apply()
+    }
+
     val sessions: Int get() = prefs.getInt(KEY_SESSIONS, 0)
     fun countSession() { prefs.edit().putInt(KEY_SESSIONS, sessions + 1).apply() }
 

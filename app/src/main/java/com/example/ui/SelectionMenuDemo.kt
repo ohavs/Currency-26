@@ -205,8 +205,8 @@ private val SelectionMenuInfo.overflowItems get() = if (shareLabel != null) list
 
 private val HAND = 44.dp
 /** The fingertip in the TouchApp icon, as a fraction of its size. */
-private const val TIP_X = 11.5f / 24f
-private const val TIP_Y = 6.5f / 24f
+internal const val TIP_X = 11.5f / 24f
+internal const val TIP_Y = 6.5f / 24f
 
 @Composable
 private fun SkeletonLine(fraction: Float, color: Color) {

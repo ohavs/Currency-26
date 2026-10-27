@@ -1,0 +1,37 @@
+name: Store assets
+
+# Packs the Play store images (per language) and the promo videos into two downloadable artifacts, for the owner
+# to upload by hand. Runs when they change, or from the Actions tab.
+on:
+  push:
+    paths: ['store/**', '.github/workflows/store-assets.yml']
+  workflow_dispatch:
+
+jobs:
+  pack:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Images by language
+        run: |
+          mkdir -p out/images
+          for dir in store/listing/*/; do
+            lang=$(basename "$dir")
+            mkdir -p "out/images/$lang"
+            # en-GB, es-419, fr-CA and pt-PT have texts only (without images of its own, a language gets the default ones).
+            if [ -d "$dir"images ]; then cp -r "$dir"images/. "out/images/$lang/"; fi
+            cp "$dir"*.txt "out/images/$lang/"
+          done
+          ls -R out/images | head -60
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: store-images
+          path: out/images/
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: store-videos
+          path: store/video/*.mp4
+          compression-level: 0

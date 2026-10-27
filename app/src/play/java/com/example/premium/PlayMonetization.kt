@@ -376,6 +376,22 @@ private class PlayMonetization(private val app: Application) : Monetization {
         UserMessagingPlatform.showPrivacyOptionsForm(activity) { }
     }
 
+    // --- Test builds ---
+
+    override val testTools: TestTools? = if (GOOGLE_TEST_ADS in BuildConfig.AD_UNIT_BANNER) object : TestTools {
+        override fun endTrial() {
+            store.setInstalledAgoForTesting(InterstitialPolicy.GRACE_AFTER_INSTALL_MS + HOUR_MS)
+            store.update { it.copy(trialUntil = 0L, rewardUntil = 0L, videosWatched = 0) }
+            interstitialShownThisSession = false
+            preloadInterstitial()
+        }
+
+        override fun restartTrial() {
+            store.setInstalledAgoForTesting(0L)
+            store.update { PremiumRules.newInstall(now()).copy(purchased = it.purchased, purchasePending = it.purchasePending) }
+        }
+    } else null
+
     // --- Banner ---
 
     @Composable
@@ -442,6 +458,8 @@ private class PlayMonetization(private val app: Application) : Monetization {
 
     private companion object {
         const val PRODUCT_ID = "premium_forever"
+        /** Google's publisher id for its test ads: in every ad unit id of a build that shows them. */
+        const val GOOGLE_TEST_ADS = "3940256099942544"
         /** Loaded ads expire after an hour. */
         const val AD_FRESH_MS = 50 * 60 * 1000L
         const val VIDEO_WAIT_MS = 15_000L
