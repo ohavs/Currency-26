@@ -139,6 +139,7 @@ dependencies {
   "playImplementation"(libs.play.billing)
   "playImplementation"(libs.play.services.ads)
   "playImplementation"(libs.play.review)
+  "playImplementation"(libs.play.app.update)
   "playImplementation"(libs.ump)
   implementation(libs.retrofit)
   testImplementation(libs.androidx.compose.ui.test.junit4)

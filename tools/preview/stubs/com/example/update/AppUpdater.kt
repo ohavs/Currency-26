@@ -5,6 +5,8 @@ import java.io.File
 
 /** Signature-compatible stand-in for the OkHttp/FileProvider based updater. */
 class AppUpdater(private val context: android.content.Context) {
+    val opensStore: Boolean = false
+    fun open() = Unit
     suspend fun fetchLatestRelease(): AppRelease? = null
     suspend fun download(release: AppRelease, onProgress: (Float) -> Unit): File = File("x")
     fun canInstallPackages(): Boolean = true

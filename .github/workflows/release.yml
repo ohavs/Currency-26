@@ -2,7 +2,7 @@ name: Release
 
 # Every push to main publishes a numbered GitHub release with the APK (the GitHub build: the app's in-app
 # updater installs the latest one), and builds the Google Play bundle with the same version. Once the Play
-# secrets are in place (see docs/PLAY_LAUNCH_PLAN.md) the bundle also goes to Google Play's internal test track.
+# secrets are in place (see docs/PLAY_LAUNCH_PLAN.md) the bundle also goes to Google Play's closed test (Alpha).
 on:
   push:
     branches: [main]
@@ -73,8 +73,9 @@ jobs:
     timeout-minutes: 30
     env:
       # Draft until the app's first release is reviewed (Google Play only accepts drafts for a new app);
-      # then "completed", so each push to main reaches the internal testers by itself.
-      PLAY_TRACK: internal
+      # then "completed", so each push to main reaches the testers by itself.
+      # "alpha" is the closed test ("Alpha", the one that counts for production); internal testing doesn't.
+      PLAY_TRACK: alpha
       PLAY_STATUS: draft
       # Google's test ads until the closed test ends: testers tapping real ads count as invalid traffic and can get
       # the AdMob account limited. Same sizes and flow, only labelled "Test Ad". Set to "true" for production.

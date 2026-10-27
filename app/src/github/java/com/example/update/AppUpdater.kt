@@ -20,6 +20,10 @@ import java.util.concurrent.TimeUnit
 /** Self-update from the APKs published on this repository's GitHub Releases. */
 class AppUpdater(private val context: Context) {
 
+    /** False: this build downloads and installs the APK itself ([open] is for the Play build). */
+    val opensStore: Boolean = false
+    fun open() = Unit
+
     private val client = OkHttpClient.Builder()
         .connectTimeout(15, TimeUnit.SECONDS)
         .readTimeout(60, TimeUnit.SECONDS)

@@ -184,7 +184,8 @@ class MainViewModel(
                 refreshRates()
             }
         }
-        if (BuildConfig.SELF_UPDATE && repository.checkAppUpdates.value) {
+        // The Play build always looks (it only tells, Play installs); the GitHub one when the user wants it to.
+        if (!BuildConfig.SELF_UPDATE || repository.checkAppUpdates.value) {
             checkForAppUpdate()
         }
         if (repository.languageSuggestionPending()) findLanguageSuggestion()
@@ -262,6 +263,8 @@ class MainViewModel(
                     failed = release.isFailure,
                     available = latest?.takeIf { isNewerVersion(it.versionName, current.installedVersion) }
                         ?: current.available.takeIf { release.isFailure },
+                    bannerDismissed = current.bannerDismissed ||
+                        (latest != null && latest.versionName == repository.dismissedUpdateVersion),
                 )
             }
         }
@@ -272,6 +275,7 @@ class MainViewModel(
         val current = _appUpdate.value
         val release = current.available ?: return
         if (current.downloadProgress != null) return
+        if (updater.opensStore) return updater.open()
 
         if (!updater.canInstallPackages()) {
             _appUpdate.update { it.copy(needsInstallPermission = true) }
@@ -402,6 +406,7 @@ class MainViewModel(
 
     fun dismissUpdateBanner() {
         _appUpdate.update { it.copy(bannerDismissed = true) }
+        _appUpdate.value.available?.let { repository.dismissedUpdateVersion = it.versionName }
     }
 
     fun setCheckAppUpdates(enabled: Boolean) {
