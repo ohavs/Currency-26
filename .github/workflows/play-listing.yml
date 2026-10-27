@@ -1,12 +1,17 @@
 name: Play listing
 
 # Uploads the Google Play store page from store/listing: texts in 13 languages (tools/store/listing.py),
-# screenshots and feature graphic (tools/store/screenshots.mjs) and the icon. Run it by hand (Actions >
-# Play listing > Run workflow) after they change. Needs the PLAY_SERVICE_ACCOUNT_JSON secret, and the app's
+# screenshots and feature graphic (tools/store/screenshots.mjs) and the icon. Runs by itself when they (or
+# this file) change on main, or by hand (Actions > Play listing > Run workflow). Needs the PLAY_SERVICE_ACCOUNT_JSON secret, and the app's
 # first bundle uploaded once in Play Console.
 # fastlane ties the listing to a release on a track (default: production, which is empty until launch), so
 # it is pointed at the closed test track and its newest version code (looked up unless given).
 on:
+  push:
+    branches: [main]
+    paths:
+      - 'store/listing/**'
+      - '.github/workflows/play-listing.yml'
   workflow_dispatch:
     inputs:
       track:
