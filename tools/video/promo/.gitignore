@@ -3,3 +3,5 @@ compositions/
 page.html
 .hyperframes/
 node_modules/
+assets/audio/music.wav
+assets/audio/sfx.wav

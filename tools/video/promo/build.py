@@ -118,10 +118,10 @@ g = ''.join(f'tl.to("#gf", {{ backgroundColor: "{c}", duration: 0.4, ease: "powe
 scenes.append(('ground', 0, 24.5, 0, scene('ground', f'<div id="gf" style="position:absolute;inset:0;background:{SAGE}"></div>', g)))
 
 # ---- A. intro (0-2.9): the board flips the conversion, the app rises in 3D ----
-cells, flap_js = flap_board('in', ['€189', '₪763.38'], 104, 0.0, 540, 230, flip=0.05, stagger=0.03, row_gap=84)
+cells, flap_js = flap_board('in', ['€189', '₪763.38'], 104, 0.0, 540, 210, flip=0.05, stagger=0.03, row_gap=170)
 intro_body = f"""
 <div id="in-board">{cells}
-  <div id="in-swap" style="position:absolute;left:{540 - 60}px;top:{230 + 148 + 42 - 44}px;width:120px;height:88px;border-radius:30px;background:{INK};
+  <div id="in-swap" style="position:absolute;left:{540 - 60}px;top:{210 + 148 + 85 - 44}px;width:120px;height:88px;border-radius:30px;background:{INK};
     border:6px solid #fff;box-shadow:8px 8px 0 {INK};display:flex;align-items:center;justify-content:center">
     <svg viewBox="0 0 24 24" width="62" height="62"><path fill="#fff" d="M16 17.01V10h-2v7.01h-3L15 21l4-3.99h-3zM9 3L5 6.99h3V14h2V6.99h3L9 3z"/></svg></div></div>
 <div id="in-stage" style="position:absolute;inset:0;perspective:1600px;perspective-origin:50% 40%">
@@ -172,27 +172,38 @@ tl.to(["#wd-big", "#wd-small", "#wd-st2"], {{ x: "+=1300", filter: "blur(18px)",
 scenes.append(('widgets', 2.6, 6.6, 11, scene('widgets', wid_body, wid_js,
                                               '#wd-big,#wd-small{transform-origin:50% 50%} #wd-rig .phone{transform-style:preserve-3d}')))
 
-# ---- C. custom (9.0-13.4): the colour sets on a turning ring; the ground floods with the front one ----
-ring = [(img, -40 * i) for i, img in enumerate(['5a_theme.png', '5b_theme.png', '5c_theme.png', '1_main.png', '3_calc.png', '5c_theme.png', '5b_theme.png', '1_main.png', '3_calc.png'])]
-ring_html = ''.join(f'<div class="phone ring-ph" style="left:-304px;top:0;transform:rotateY({-a}deg) translateZ(900px)">'
-                    f'<div class="screen"><img src="assets/img/{img}"></div></div>' for img, a in ring)
+# ---- C. custom (9.0-13.55): the colour sets glide past on a flat carousel; the ground floods with the one in front ----
+# Flat on purpose: a perspective ring stretched the screens. The strip moves from the first frame (no still image
+# before the motion), easing off as each set passes the middle: k counts the phones, o = k - a*sin(2*pi*k)/(2*pi)
+# keeps it always moving (a < 1) and slowest on whole k. Phone 1 is in the middle at 0.25 s, then one every 1.2 s,
+# in step with the ground's floods (9.05 night, 10.25 gold, 11.45 sunset, 12.65 classic).
+CAR = ['3_calc.png', '5a_theme.png', '5b_theme.png', '5c_theme.png', '1_main.png', '3_calc.png']
+CAR_SP, CAR_T0, CAR_STEP, CAR_DUR = 560, 0.25, 1.2, 4.55
+car_html = ''.join(f'<div class="phone car-ph" id="car-{n}" style="left:{540 - 304}px;top:0">'
+                   f'<div class="screen"><img src="assets/img/{img}"></div></div>' for n, img in enumerate(CAR))
 cus_body = f"""
 <div class="h" id="cs-h" style="color:#fff">{words('הצבעים שלך.', 'csw')}<br><span class="block w csw" style="background:#FFE7A6;color:{INK}"><bdi dir="ltr">6</bdi> ערכות צבעים</span></div>
-<div style="position:absolute;inset:0;perspective:2200px;perspective-origin:50% 45%">
-  <div id="cs-ring" style="position:absolute;left:540px;top:640px;width:0;height:1301px;transform-style:preserve-3d">{ring_html}</div></div>
+<div id="cs-strip" style="position:absolute;left:0;top:700px;width:1080px;height:1301px">{car_html}</div>
 {TIER.format("cs-tier")}
 """
+k0, k1 = 1 - CAR_T0 / CAR_STEP, 1 + (CAR_DUR - CAR_T0) / CAR_STEP
 cus_js = f"""
-tl.fromTo("#cs-ring", {{ rotationY: 40, z: -260, scale: 0.7, opacity: 0 }}, {{ rotationY: 0, z: -260, scale: 0.78, opacity: 1, duration: 0.6, ease: "expo.out" }}, 0.0);
+const car = [...document.querySelectorAll(".car-ph")], cv = {{ k: {k0:.4f} }};
+function placeCar() {{
+  const o = cv.k - 0.7 * Math.sin(2 * Math.PI * cv.k) / (2 * Math.PI);
+  car.forEach((el, n) => {{
+    const d = o - n, a = Math.min(Math.abs(d), 1.6);
+    gsap.set(el, {{ x: d * {CAR_SP}, y: a * 70, scale: 0.84 - 0.2 * a, rotation: d * 5, zIndex: 10 - Math.round(a * 4) }});
+  }});
+}}
+placeCar();
+tl.fromTo(cv, {{ k: {k0:.4f} }}, {{ k: {k1:.4f}, duration: {CAR_DUR}, ease: "none", onUpdate: placeCar }}, 0);
+tl.fromTo("#cs-strip", {{ opacity: 0 }}, {{ opacity: 1, duration: 0.25, ease: "power1.out" }}, 0.0);
 """ + grey_in('#cs-h .csw', 0.3) + tier_in('#cs-tier', 0.3) + f"""
-tl.to("#cs-ring", {{ rotationY: -40, duration: 0.55, ease: "power3.inOut" }}, 1.05);
-tl.to("#cs-ring", {{ rotationY: -80, duration: 0.55, ease: "power3.inOut" }}, 2.25);
-tl.to("#cs-ring", {{ rotationY: -120, duration: 0.55, ease: "power3.inOut" }}, 3.45);
 tl.to("#cs-h", {{ color: "{INK}", duration: 0.3 }}, 1.2);
-
-tl.to("#cs-ring", {{ scale: 1, y: 40, duration: 0.45, ease: "power2.inOut" }}, 4.05);
+tl.to("#cs-strip", {{ opacity: 0, filter: "blur(10px)", duration: 0.3, ease: "power2.in" }}, 4.15);
 """ + blur_out('#cs-h,#cs-tier', 4.15)
-scenes.append(('custom', 9.0, 4.55, 12, scene('custom', cus_body, cus_js, '.ring-ph{backface-visibility:hidden}')))
+scenes.append(('custom', 9.0, CAR_DUR, 12, scene('custom', cus_body, cus_js, '.car-ph{transform-origin:50% 40%}')))
 
 # ---- D. any app (13.4-18.2): a tour page; long press on the price; the menu; the real bubble ----
 # The page is a fictional booking site drawn at a 400 px phone viewport, scaled 1.4 into the 560 px screen.
@@ -269,22 +280,99 @@ any_body += f'\n<div id="an-st" class="sticker" style="left:70px;top:1560px;back
 scenes.append(('anyapp', 13.4, 4.85, 13, (any_body, any_js)))
 open('page.html', 'w').write(f'<!doctype html><meta charset="utf-8"><style>{CSS.split("#root")[0]}body{{margin:0}}</style>' + page.replace('transform:scale(1.4);', ''))
 
-# ---- E. claim (18.2-21.3): currency codes flip, then 160+, then offline ----
-cells2, flap2 = flap_board('cl', ['USD EUR', 'GBP JPY', 'THB ILS'], 112, 0.15, 540, 420, flip=0.04, stagger=0.025, bg='#fff')
-cells3, flap3 = flap_board('cn', ['160+'], 190, 1.35, 540, 560, flip=0.05, stagger=0.05, bg=INK, fg='#E3F1E6')
+# ---- E. claim (18.2-21.35): the whole screen is a departures board of currency codes, rows sliding both ways, with
+# gold coins tumbling up behind them; then 160+ and offline land in front. ----
+CODES = ('USD EUR GBP JPY ILS THB CHF CAD AUD CNY INR TRY BRL MXN KRW SEK NOK PLN CZK HUF AED SGD HKD ZAR NZD DKK '
+         'RON EGP MAD JOD PHP VND IDR MYR ARS CLP COP PEN UAH GEL ISK KES NGN QAR SAR BGN RSD KZT TWD LKR NPR').split()
+
+
+def rnd(seed):
+    """A small seeded generator: the same video on every render."""
+    x = [seed]
+    def f():
+        x[0] = (x[0] * 1103515245 + 12345) % 2147483648
+        return x[0] / 2147483648
+    return f
+
+
+R = rnd(26)
+CL_ALPHA = ' ABCDEFGHIJKLMNOPQRSTUVWXYZ'
+CL_CW, CL_GAP, CL_ROWS, CL_PITCH, CL_Y0 = 78, 8, 8, 236, 40
+CL_CH = round(CL_CW * 1.42)
+rows_html, rows_js = [], []
+for r in range(CL_ROWS):
+    codes = []
+    while len(codes) < 5:
+        c = CODES[int(R() * len(CODES))]
+        if c not in codes:
+            codes.append(c)
+    text = ' '.join(codes)
+    cells = []
+    for c, ch in enumerate(text):
+        x = c * (CL_CW + CL_GAP)
+        if ch == ' ':
+            continue
+        target = CL_ALPHA.index(ch)
+        first = max(1, target - 9)
+        cid = f'cr{r}-{c}'
+        cells.append(f'<div id="{cid}" class="flap" style="left:{x}px;top:0;width:{CL_CW}px;height:{CL_CH}px;line-height:{CL_CH}px;'
+                     f'font-size:{round(CL_CW * 0.8)}px;background:#fff;color:{INK};font-family:Secular, Rubik">{CL_ALPHA[first]}</div>')
+        start = 0.05 + r * 0.05 + c * 0.018
+        rows_js.append(f'(function(){{ const el = document.getElementById("{cid}"); const o = {{ p: {first} }};'
+                       f' tl.fromTo(o, {{ p: {first} }}, {{ p: {target}, duration: {(target - first) * 0.045:.3f}, ease: "none", onUpdate: () => {{'
+                       f' el.textContent = B[Math.min({target}, Math.floor(o.p + 1e-6))]; }} }}, {start:.3f}); }})();')
+    width = len(text) * (CL_CW + CL_GAP)
+    left = -int(R() * 260) - 60
+    rows_html.append(f'<div class="cl-row" id="cl-row{r}" style="position:absolute;left:{left}px;top:{CL_Y0 + r * CL_PITCH}px;width:{width}px;height:{CL_CH}px">'
+                     + ''.join(cells) + '</div>')
+    drift = (1 if r % 2 else -1) * (140 + int(R() * 80))
+    rows_js.append(f'tl.fromTo("#cl-row{r}", {{ x: {-drift / 2} }}, {{ x: {drift / 2}, duration: 3.15, ease: "none" }}, 0);')
+
+# Coins: a gold disc, an inner ring and a currency sign, tumbling up behind the rows (rotationY flips them).
+COIN_SIGNS = ['₪', '$', '€', '£', '¥']
+coins_html, coins_js = [], []
+# Spread evenly: x by column (shuffled), the start heights from y = 150 down to 3000 so the rise always keeps the
+# screen filled.
+COIN_N = 18
+cols = [(n * 7) % 6 for n in range(COIN_N)]
+for n in range(COIN_N):
+    size = 110 + int(R() * 100)
+    x = int(cols[n] * 180 + R() * 70) - 30
+    y = int(150 + n * 2850 / COIN_N + R() * 90)
+    sign = COIN_SIGNS[n % len(COIN_SIGNS)]
+    coins_html.append(
+        f'<div class="coin" id="coin{n}" style="left:{x}px;top:{y}px;width:{size}px;height:{size}px;font-size:{round(size * 0.52)}px;'
+        f'line-height:{size - 12}px;border-width:{max(5, size // 22)}px;box-shadow:{size // 14}px {size // 14}px 0 {INK}">'
+        f'<div class="coin-in" style="border-width:{max(3, size // 40)}px"></div><bdi>{sign}</bdi></div>')
+    rise = 1050 + int(R() * 200)
+    spins = 1 + int(R() * 2)
+    coins_js.append(f'tl.fromTo("#coin{n}", {{ y: 0, rotation: {int(R() * 40 - 20)} }}, {{ y: {-rise}, rotation: {int(R() * 60 - 30)}, duration: 3.15, ease: "none" }}, 0);')
+    coins_js.append(f'tl.fromTo("#coin{n}", {{ rotationY: 0 }}, {{ rotationY: {360 * spins}, duration: 3.15, ease: "none" }}, 0);')
+
 cl_body = f"""
-<div id="cl-codes">{cells2}</div>
-<div id="cl-num">{cells3}</div>
-<div style="position:absolute;left:0;right:0;top:1010px;text-align:center"><span class="block" id="cl-cur" style="font-size:120px;background:#fff">מטבעות.</span></div>
-<div style="position:absolute;left:0;right:0;top:1250px;text-align:center;font-size:96px" id="cl-off">{words('גם בלי אינטרנט.', 'clw')}</div>
+<div id="cl-coins" style="position:absolute;inset:0;perspective:1400px">{''.join(coins_html)}</div>
+<div id="cl-rows">{''.join(rows_html)}</div>
+<div id="cl-claim" style="position:absolute;left:0;right:0;top:560px;height:900px">
+  <div id="cl-num">@NUM@</div>
+  <div style="position:absolute;left:0;right:0;top:450px;text-align:center"><span class="block" id="cl-cur" style="font-size:120px;background:#fff">מטבעות.</span></div>
+  <div style="position:absolute;left:0;right:0;top:690px;text-align:center"><span class="block" id="cl-off" style="font-size:84px;background:{INK};color:#E3F1E6;box-shadow:14px 14px 0 #fff">{words('גם בלי אינטרנט.', 'clw')}</span></div>
+</div>
 """
-cl_js = flap2 + flap3 + f"""
+cells3, flap3 = flap_board('cn', ['160+'], 190, 1.2, 540, 0, flip=0.05, stagger=0.05, bg=INK, fg='#E3F1E6')
+cl_body = cl_body.replace('@NUM@', cells3)
+cl_js = 'var B = ' + repr(list(CL_ALPHA)) + ';\n' + '\n'.join(coins_js + rows_js) + '\n' + flap3 + f"""
 tl.set("#cl-num", {{ opacity: 0 }}, 0);
-tl.to("#cl-codes", {{ opacity: 0, filter: "blur(8px)", duration: 0.18, ease: "power3.in" }}, 1.2);
-tl.set("#cl-num", {{ opacity: 1 }}, 1.33);
-tl.fromTo("#cl-cur", {{ clipPath: "inset(0 0 0 100%)" }}, {{ clipPath: "inset(0 0 0 0%)", duration: 0.35, ease: "power2.inOut" }}, 1.75);
-""" + blur_in('#cl-off .clw', 2.1, 0.1) + blur_out('#cl-num,#cl-cur,#cl-off', 2.95)
-scenes.append(('claim', 18.2, 3.15, 14, scene('claim', cl_body, cl_js, FLAP_CSS)))
+tl.to("#cl-rows", {{ opacity: 0.32, duration: 0.3, ease: "power2.inOut" }}, 1.05);
+tl.set("#cl-num", {{ opacity: 1 }}, 1.18);
+tl.fromTo("#cl-cur", {{ clipPath: "inset(0 0 0 100%)" }}, {{ clipPath: "inset(0 0 0 0%)", duration: 0.35, ease: "power2.inOut" }}, 1.6);
+tl.fromTo("#cl-off", {{ opacity: 0, scale: 0.7 }}, {{ opacity: 1, scale: 1, duration: 0.35, ease: "back.out(1.6)" }}, 1.95);
+""" + blur_out('#cl-claim,#cl-rows,#cl-coins', 2.95)
+CL_CSS = FLAP_CSS + f"""
+.coin {{ position: absolute; border-radius: 50%; background: #F2C14E; border: 6px solid {INK}; color: {INK}; text-align: center;
+  transform-style: preserve-3d; }}
+.coin-in {{ position: absolute; inset: 9%; border-radius: 50%; border: 4px solid rgba(31,44,53,.45); }}
+#cl-off .w {{ display: inline; }}"""
+scenes.append(('claim', 18.2, 3.15, 14, scene('claim', cl_body, cl_js, CL_CSS)))
 
 # ---- F. end card (21.2-24.5) ----
 end_body = f"""
@@ -339,6 +427,7 @@ def write(measure=None):
   <body>
     <div id="root" data-composition-id="main" data-start="0" data-duration="24.5" data-width="{W}" data-height="{H}">
 {chr(10).join(hosts)}
+      <audio id="sound" class="clip" src="assets/audio/mix.wav" data-start="0" data-duration="24.5" data-track-index="20" data-volume="1"></audio>
     </div>
     <script>
       window.__timelines["main"] = gsap.timeline({{ paused: true }});
