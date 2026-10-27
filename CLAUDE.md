@@ -133,6 +133,11 @@ Hebrew, and show rendered previews of visual changes (see `tools/preview`).
 
 ## Next
 - **Open as of 2026-10-26 (owner's wishes, next session starts here):**
+  - 2026-10-27: Store settings and the privacy URL fix are done (owner). The closed test is running (the owner's
+    console asks for 20 testers x 14 days). Play bundles now carry Google's TEST ads (`PLAY_REAL_ADS: false` in
+    `release.yml`) for the whole test period: the owner doesn't trust testers not to tap ads. Set it to `true` and build
+    a new bundle before applying for production. The 5.0.25 bundle the testers got has real ads: the owner replaces it
+    with a "Play bundle only" run. Next: service account (steps given to the owner, plan step 3.6).
   - Play Console: the first 9 "App content" forms are done (answers in the plan). Left: Store settings (Finance,
     contact email ohavstudio.contact@gmail.com, website `https://ohavs.github.io`: needed for app-ads.txt; the
     owner wants ALL ad buyers, so app-ads.txt is not optional) and the store listing (via the service account +

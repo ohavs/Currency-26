@@ -76,6 +76,9 @@ jobs:
       # then "completed", so each push to main reaches the internal testers by itself.
       PLAY_TRACK: internal
       PLAY_STATUS: draft
+      # Google's test ads until the closed test ends: testers tapping real ads count as invalid traffic and can get
+      # the AdMob account limited. Same sizes and flow, only labelled "Test Ad". Set to "true" for production.
+      PLAY_REAL_ADS: false
     steps:
       - uses: actions/checkout@v4
 
@@ -115,13 +118,14 @@ jobs:
           ./gradlew bundlePlayRelease
           -PappVersionCode=$((500 + GITHUB_RUN_NUMBER))
           -PappVersionName=5.0.${GITHUB_RUN_NUMBER}
+          -PadmobTestAds=${{ env.PLAY_REAL_ADS != 'true' }}
 
       - name: AdMob ids in the bundle
         if: steps.key.outputs.ready == 'true'
         run: |
           id=$(unzip -p app/build/outputs/bundle/playRelease/app-play-release.aab base/manifest/AndroidManifest.xml | grep -ao 'ca-app-pub-[0-9~]*' | head -1)
           echo "AdMob app id: $id"
-          case "$id" in *3940256099942544*) echo "::warning::This bundle carries Google's test ads.";; esac
+          case "$id" in *3940256099942544*) echo "::warning::This bundle carries Google's test ads (PLAY_REAL_ADS=$PLAY_REAL_ADS).";; esac
 
       - name: Keep the bundle
         if: steps.key.outputs.ready == 'true'
