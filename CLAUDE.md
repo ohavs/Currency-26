@@ -21,8 +21,10 @@ Hebrew, and show rendered previews of visual changes (see `tools/preview`).
     step's log as `SHOT <name> <base64 chunk>` lines (read them with `get_job_logs` and join the chunks).
 - **Every push to `main` is a release**: `release.yml` publishes `v5.0.<run>` with
   `currency-26-5.0.N.apk` (github flavor; the in-app updater installs it), and its `play` job builds the AAB
-  with the same version once the `UPLOAD_KEYSTORE_*` secrets exist, uploading it to Play's internal track
-  (status `PLAY_STATUS`, draft until the app's first review) once `PLAY_SERVICE_ACCOUNT_JSON` exists.
+  with the same version once the `UPLOAD_KEYSTORE_*` secrets exist, uploading it to Play's closed test
+  (`PLAY_TRACK: alpha`; status `PLAY_STATUS`, draft until the app's first review, so the owner taps "Start rollout")
+  since `PLAY_SERVICE_ACCOUNT_JSON` exists (2026-10-27: project `currency-play` in Google Cloud, invited in Play
+  Console). Check the `play` job's "Send to Google Play" step after each release.
   Pushes that only touch notes, `docs/`, `store/`, `tools/` or the other workflows don't release
   (`paths-ignore`), so no `[skip ci]` is needed.
 - The Claude GitHub integration can't start workflows by hand (`run_workflow` -> 403): trigger them with a
@@ -144,6 +146,10 @@ Hebrew, and show rendered previews of visual changes (see `tools/preview`).
   Premium expiry workers never ran (5.0.27). Kept in `proguard-rules.pro`. Widgets also need `android:initialLayout`
   (Glance's `glance_default_loading_layout`).
   smoke.yml adds the widget from Settings and prints the app's log.
+- Updates in the Play build (5.0.29): `src/play/.../AppUpdater` asks Play (in-app updates API) for a newer version
+  and the main screen shows the same `UpdateBanner` as the GitHub build; "Update" opens the store page (never
+  forced), the X hides it for that version (`dismissedUpdateVersion`). Play reports a version code only:
+  500 + N is shown as 5.0.N. It only works for installs from Play.
 - History panel (5.0.19): the header is just the clock icon (the link already says "History"); the clear key
   is icon-only and exactly the size of the keypad key beside it, widening to "Clear all?" on the first tap.
   The owner notices mismatched button sizes: keep neighbouring buttons the same height and shape.
