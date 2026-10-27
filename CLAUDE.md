@@ -193,6 +193,8 @@ Hebrew, and show rendered previews of visual changes (see `tools/preview`).
     owner has it), punch-hole camera, translucent phone shadow, the bubble on the page without the grey scrim.
     Music licenses: check commercial/advertising use first (freetouse.com's free license forbids it; that track was
     dropped; both mp3s the owner uploaded are still in git history, one more reason to make the repo private). The video still has to be uploaded to YouTube and linked in the store listing (owner).
+  - 2026-10-27: the store page went up through the service account: `play-listing.yml` run 40544330678 (push-triggered,
+    track alpha) uploaded texts, icon, feature graphic and screenshots in every language. Left: the YouTube videos.
   - Store images/videos for the owner: `store-assets.yml` run 40528996051 (artifacts `store-images`, `store-videos`).
     The other languages' images go up with `play-listing.yml` once the service account exists (or by hand under
     Main store listing > Manage translations). Videos: one YouTube link per language (unlisted is fine), at least
