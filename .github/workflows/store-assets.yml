@@ -19,7 +19,8 @@ jobs:
           for dir in store/listing/*/; do
             lang=$(basename "$dir")
             mkdir -p "out/images/$lang"
-            cp -r "$dir"images/. "out/images/$lang/"
+            # en-GB, es-419, fr-CA and pt-PT have texts only: Play shows them the images of en-US, es-ES, fr-FR, pt-BR.
+            if [ -d "$dir"images ]; then cp -r "$dir"images/. "out/images/$lang/"; fi
             cp "$dir"*.txt "out/images/$lang/"
           done
           ls -R out/images | head -60
