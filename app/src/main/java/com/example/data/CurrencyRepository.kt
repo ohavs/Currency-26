@@ -163,6 +163,11 @@ class CurrencyRepository(
     fun getHistory(): List<HistoryEntry> = CalcHistory.decode(prefs.getString("history", null))
     fun setHistory(entries: List<HistoryEntry>) { prefs.edit().putString("history", CalcHistory.encode(entries)).apply() }
 
+    /** The version whose "new version" banner was closed: it stays closed for that version. */
+    var dismissedUpdateVersion: String?
+        get() = prefs.getString("dismissed_update", null)
+        set(value) { prefs.edit().putString("dismissed_update", value).apply() }
+
     fun setCheckAppUpdates(enabled: Boolean) {
         prefs.edit().putBoolean("check_app_updates", enabled).apply()
         _checkAppUpdates.value = enabled

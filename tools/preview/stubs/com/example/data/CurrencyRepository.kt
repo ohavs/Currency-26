@@ -22,6 +22,7 @@ class CurrencyRepository(val context: android.content.Context) {
     fun markQuickConvertUsed() {}
     fun quickConvertTipSeen(): Boolean = false
     fun markQuickConvertTipSeen() {}
+    var dismissedUpdateVersion: String? = null
     fun setCheckAppUpdates(enabled: Boolean) {}
     fun calculatorOpen(): Boolean = false
     fun setCalculatorOpen(open: Boolean) {}
