@@ -30,6 +30,8 @@ Hebrew, and show rendered previews of visual changes (see `tools/preview`).
   "Play bundle only" mode (`github_release` off) for the owner to run from the Actions tab.
 - `android.yml` opens the upload key from the secrets on every branch build and prints its fingerprints
   (expected SHA1 `A0:25:F0:85:BF:B1:22:62:53:5F:7B:95:90:16:31:26:82:AC:56:4B`).
+- `store-assets.yml`: on changes under `store/` packs `store-images` (per language) and `store-videos` (the 13
+  promo mp4s) as artifacts for the owner to download from the run page.
 - `play-listing.yml` (run by hand) uploads `store/listing` to the Play store page.
 - The public site is its own PUBLIC repo `ohavs/ohavs.github.io` (GitHub Pages from main, no workflow; add it to
   the session with `add_repo`): `privacy.html` (`AppLinks.PRIVACY_POLICY`, contact ohavstudio.contact@gmail.com),
@@ -127,6 +129,18 @@ Hebrew, and show rendered previews of visual changes (see `tools/preview`).
   instead of names while the calculator is open. Quick amounts were dropped; the history must not take a
   row of its own, so it is a link opposite "+ add currency" under the cards (in calculator mode the
   keypad's top row is full).
+- Ads and Premium (owner, 2026-10-27, asked again and confirmed): a trial or a video unlock opens the features
+  but keeps the ads; only the purchase removes them (the Banner is gone entirely then). While Premium is on the
+  Settings button wears a crown (`PremiumCrown`, a drawn `CrownIcon`) and the ad strip stays empty until its ad
+  comes (the "Premium: no ads" line is only for users without Premium).
+- Test-ads builds (Google's publisher id in the banner id) have `Monetization.testTools`: seven taps on the version
+  in Settings > About show "end the trial" (also skips the first day without full-screen ads) and "restart the trial".
+  They vanish by themselves once `PLAY_REAL_ADS: true`.
+- Tour demos draw the finger as the selection-menu demo does (`TourFinger`: the TouchApp hand, tip at the spot),
+  never a dot; small glyphs like "⇅" never centre in a box, use an icon.
+- Widgets need `android:initialLayout` (Glance's `glance_default_loading_layout`): without it the launcher
+  shows "Can't load widget" (seen on the minified Play build, 5.0.27). smoke.yml now adds the widget from
+  Settings and prints the app's log.
 - History panel (5.0.19): the header is just the clock icon (the link already says "History"); the clear key
   is icon-only and exactly the size of the keypad key beside it, widening to "Clear all?" on the first tap.
   The owner notices mismatched button sizes: keep neighbouring buttons the same height and shape.
