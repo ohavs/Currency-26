@@ -20,6 +20,7 @@ import { execSync } from 'node:child_process';
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import * as scenes from './scenes.mjs';
 
 // Global Playwright (NODE_PATH), as in tools/icons.
 const { chromium } = createRequire(import.meta.url)('playwright');
@@ -159,29 +160,36 @@ const LOOKS = [
  * the page). cropTop hides the top of the capture, like a page scrolled a little, so a tall screen's focus fits.
  */
 function phone(content, { w, x, y, rot = 0, cropTop = 0, strip = true }) {
-  const inner = w - 52, full = inner / SCREEN_RATIO, bar = strip ? full - inner * (1720 / 800) : 0;
-  return `<div class="phone" style="left:${x}px;top:${y}px;width:${w}px;transform:rotate(${rot}deg)">
+  // Bezel, padding and hard shadow scale with the phone (740 px wide in the screenshots).
+  const k = w / 740, border = Math.round(10 * k), pad = Math.round(16 * k), shadow = Math.round(26 * k);
+  const inner = w - 2 * (border + pad), full = inner / SCREEN_RATIO, bar = strip ? full - inner * (1720 / 800) : 0;
+  return `<div class="phone" style="left:${x}px;top:${y}px;width:${w}px;transform:rotate(${rot}deg);border-width:${border}px;padding:${pad}px;
+    border-radius:${Math.round(64 * k)}px;box-shadow:${shadow}px ${shadow}px 0 ${INK}">
     <div class="screen" style="height:${full * (1 - cropTop)}px;border-radius:${w * 0.07}px">
       <div style="margin-top:${-full * cropTop}px">${content(inner, bar)}</div></div></div>`;
 }
 const appScreen = (src) => (inner, bar) =>
   `<div class="strip" style="height:${bar}px"></div><img data-strip src="${src}" style="width:${inner}px;display:block">`;
 
-/** The home screen with both widgets, drawn at 640 wide and scaled into the phone. */
-function homeScreen(lang) {
-  const sw = 640, sh = sw / SCREEN_RATIO, dp = sw / 400;
-  return (inner) => `<div style="width:${inner}px;height:${inner / SCREEN_RATIO}px;overflow:hidden">
-    <div style="position:relative;width:${sw}px;height:${sh}px;transform:scale(${inner / sw});transform-origin:0 0">
-    <div style="position:absolute;inset:0;background:linear-gradient(160deg,#f3d9c4 0%,#c98f7a 55%,#6d4a5c 100%)"></div>
-    <div style="position:absolute;top:${56 * dp}px;width:100%;text-align:center;color:#fff;font:300 ${60 * dp}px Roboto,sans-serif;
-      text-shadow:0 2px 12px rgba(0,0,0,.2)" dir="ltr">09:41</div>
-    <img src="${shot(lang, '2a_widget')}" style="position:absolute;top:${150 * dp}px;left:${44 * dp}px;width:${312 * dp}px;height:${395 * dp}px;
-      filter:drop-shadow(0 8px 18px rgba(0,0,0,.25))">
-    <img src="${shot(lang, '2b_widget')}" style="position:absolute;top:${566 * dp}px;left:${44 * dp}px;width:${312 * dp}px;height:${135 * dp}px;
-      filter:drop-shadow(0 8px 18px rgba(0,0,0,.25))">
-    <div style="position:absolute;bottom:${40 * dp}px;left:0;right:0;display:flex;justify-content:center;gap:${26 * dp}px">
-      ${['#f4f1ec', '#cfe3f5', '#d9ead3', '#f7dccf'].map((c) => `<div style="width:${54 * dp}px;height:${54 * dp}px;border-radius:50%;background:${c};opacity:.9"></div>`).join('')}
-    </div></div></div>`;
+/** The home screen around both widgets (status bar, apps, dock): tools/store/scenes.mjs. */
+const homeScreen = (lang) => (inner) =>
+  scenes.homeScreen({ width: inner, large: shot(lang, '2a_widget'), small: shot(lang, '2b_widget') });
+
+/**
+ * Quick convert on a booking page: the price selected, the selection menu with the app's item, a hand tapping it,
+ * and the app's real bubble (the bottom of the 4_quick capture) over the page.
+ */
+function quickScreen(lang, rtl) {
+  const s = strings(lang), menu = [...scenes.SELECTION[lang], s.quick_convert_label];
+  return (inner, bar) => {
+    const full = inner / SCREEN_RATIO, k = inner / 800, top = 1196, scroll = 150, dp = inner / scenes.DP_W;
+    const tap = scenes.menuItemDp(menu, rtl);
+    return `<div style="position:relative;width:${inner}px;height:${full}px">
+      ${scenes.tourPage({ width: inner, height: full, scroll, selected: true, menu, rtl })}
+      <div style="position:absolute;left:${tap.x * dp - 0.39 * 90}px;top:${(tap.y - scroll) * dp - 0.1 * 90}px">${scenes.hand(90)}</div>
+      <div style="position:absolute;left:0;top:${bar + top * k}px;width:${inner}px;height:${(1720 - top) * k}px;overflow:hidden">
+        <img src="${shot(lang, '4_quick')}" style="position:absolute;left:0;top:${-top * k}px;width:${inner}px"></div></div>`;
+  };
 }
 
 /** A sticker pinned to the start or end side (start is the right side in RTL), tilted, with a hard shadow. */
@@ -201,14 +209,16 @@ ${fontsource('secular-one', ['400'])}
 ${fontsource('jetbrains-mono', ['500'])}
 ${noto}
 <style>
-${rubik(700, 'bold')}
+${rubik(400, 'regular')} ${rubik(500, 'medium')} ${rubik(700, 'bold')}
 * { box-sizing: border-box; }
 html, body { margin: 0; width: ${width}px; height: ${height}px; overflow: hidden; }
 body { position: relative; background: ${look.bg}; color: ${look.fg}; font-family: ${family}; font-weight: ${SECULAR.has(lang) ? 400 : 700}; }
-.rtl, h1, .sticker, .name { direction: ${rtl ? 'rtl' : 'ltr'}; }
+.rtl, h1, .sticker { direction: ${rtl ? 'rtl' : 'ltr'}; }
 .frame { position: absolute; inset: 28px; border: 8px solid ${look.fg}; pointer-events: none; z-index: 6; }
-.idx { position: absolute; top: 58px; ${rtl ? 'left' : 'right'}: 62px; font: 500 32px 'JetBrains Mono', monospace; letter-spacing: .04em; direction: ltr; }
-.name { position: absolute; top: 54px; ${rtl ? 'right' : 'left'}: 62px; font-size: 38px; }
+.tier { position: absolute; top: 62px; ${rtl ? 'right' : 'left'}: 62px; padding: 4px 18px 8px; background: ${INK}; color: #FFE7A6;
+  font-size: 40px; border-radius: 6px; direction: ${rtl ? 'rtl' : 'ltr'}; }
+.tier b { color: #E2AF48; font-weight: inherit; }
+${SECULAR.has(lang) ? 'h1, .sticker, .fit, .tier { -webkit-text-stroke: .035em currentColor; paint-order: stroke fill; }' : ''}
 h1 { position: absolute; top: 140px; left: 62px; right: 62px; margin: 0; font-weight: inherit; font-size: 172px; line-height: .92;
   text-align: start; ${CJK.has(lang) ? 'word-break: keep-all; line-break: strict; line-height: 1.06;' : ''} }
 h1 .block { display: inline-block; max-width: 100%; margin-top: 18px; padding: .02em .14em .1em; background: ${look.blockBg};
@@ -223,32 +233,30 @@ h1 .block { display: inline-block; max-width: 100%; margin-top: 18px; padding: .
 }
 
 const headline = ([plain, payoff]) => `<h1><span class="plain">${esc(plain)}</span><br><span class="block">${esc(payoff)}</span></h1>`;
-const chrome = (n, name) => `<div class="frame"></div><div class="idx">0${n} / 05</div><div class="name">${esc(name)}</div>`;
+const chrome = () => '<div class="frame"></div>';
+const tier = (s) => `<div class="tier"><b>★</b> ${esc(s.premium)}</div>`;
 
 // The headline may take the space above the phones (PHONE_TOP - 60); every phone starts at the same height.
 const PHONE_TOP = 880;
 
 function screenshots(lang) {
   const t = COPY[lang], s = strings(lang), rtl = RTL.has(lang);
-  const premium = `★ ${s.premium}`;
   const stk = (text, o) => sticker(rtl, text, o);
   const single = (content, rot, extra = {}) => phone(content, { w: 740, x: 170, y: PHONE_TOP + 20, rot: rtl ? -rot : rot, ...extra });
   return [
     headline(t.h1) + single(appScreen(shot(lang, '1_main')), 4)
       + stk(`${ltr('160+')} ${esc(t.cur)}`, { side: 'end', inset: 70, y: PHONE_TOP - 20, rot: 6, bg: '#E2AF48' })
       + stk(esc(t.off), { side: 'start', inset: 70, y: 1500, rot: -5, bg: '#FFFFFF' }),
-    headline(t.h2) + single(homeScreen(lang), -4, { strip: false })
-      + stk(esc(premium), { side: 'start', inset: 80, y: PHONE_TOP - 10, rot: -6, bg: '#F27E7C' }),
-    headline(t.h3) + single(appScreen(shot(lang, '3_calc')), 3)
-      + stk(ltr('120 + 15%'), { side: 'end', inset: 70, y: PHONE_TOP - 20, rot: 7, bg: '#E2F1FA', size: 60 })
-      + stk(esc(premium), { side: 'start', inset: 70, y: 1560, rot: -5, bg: '#FFFFFF' }),
-    // The bubble sits at the bottom of a tall capture: a narrower phone, scrolled a little, shows all of it.
-    headline(t.h4) + phone(appScreen(shot(lang, '4_quick')), { w: 600, x: 240, y: PHONE_TOP, rot: rtl ? -3 : 3, cropTop: 0.2 })
-      + stk(esc(s.tip_select_title), { side: 'start', inset: 50, y: 1220, rot: -6, bg: '#E3F1E6' }),
-    headline(t.h5)
+    tier(s) + headline(t.h2) + single(homeScreen(lang), -4, { strip: false }),
+    tier(s) + headline(t.h3) + single(appScreen(shot(lang, '3_calc')), 3)
+      + stk(ltr('120 + 15%'), { side: 'end', inset: 70, y: PHONE_TOP - 20, rot: 7, bg: '#E2F1FA', size: 60 }),
+    // The bubble sits at the bottom of the screen: a narrower phone, its top hidden, shows all of it.
+    headline(t.h4) + phone(quickScreen(lang, rtl), { w: 600, x: 240, y: PHONE_TOP, rot: rtl ? -3 : 3, cropTop: 0.2 })
+      + stk(esc(s.tip_select_title), { side: 'start', inset: 50, y: 1440, rot: -6, bg: '#E3F1E6' }),
+    tier(s) + headline(t.h5)
       + phone(appScreen(shot(lang, '5c_theme')), { w: 560, x: rtl ? 40 : 480, y: PHONE_TOP + 110, rot: rtl ? -8 : 8 })
       + phone(appScreen(shot(lang, '5a_theme')), { w: 600, x: rtl ? 440 : 40, y: PHONE_TOP + 40, rot: rtl ? 5 : -5 })
-      + stk(`${ltr('6')} ${esc(t.sets)} · ${esc(premium)}`, { side: 'end', inset: 60, y: PHONE_TOP - 30, rot: -5, bg: '#E2AF48', size: 46 }),
+      + stk(`${ltr('6')} ${esc(t.sets)}`, { side: 'end', inset: 60, y: PHONE_TOP - 30, rot: -5, bg: '#E2AF48' }),
   ];
 }
 
@@ -286,16 +294,29 @@ async function fit(tab, maxBottom) {
       const width = () => Math.max(el.scrollWidth, el.getBoundingClientRect().width);
       while (width() > box.clientWidth && s > 20) { s -= 2; el.style.fontSize = s + 'px'; }
     }
+    // A long sticker (a translation) shrinks until it sits inside the frame.
+    for (const el of document.querySelectorAll('.sticker')) {
+      let s = parseFloat(getComputedStyle(el).fontSize);
+      const out = () => { const r = el.getBoundingClientRect(); return r.left < 24 || r.right > innerWidth - 24; };
+      while (out() && s > 24) { s -= 2; el.style.fontSize = s + 'px'; }
+    }
     return size;
   }, maxBottom);
 }
 
 const browser = await chromium.launch();
 const tab = await (await browser.newContext({ deviceScaleFactor: 1 })).newPage();
+// Pages load from a file next to the fonts: a page set with setContent (about:blank) can't read file:// fonts or CSS,
+// and silently falls back to the system fonts.
+const PAGE = path.join(FONTS, 'page.html');
 async function save(html, size, file, maxBottom) {
   await tab.setViewportSize(size);
-  await tab.setContent(html, { waitUntil: 'networkidle' });
+  fs.mkdirSync(FONTS, { recursive: true });
+  fs.writeFileSync(PAGE, html);
+  await tab.goto('file://' + PAGE, { waitUntil: 'networkidle' });
   await tab.evaluate(() => document.fonts.ready);
+  const failed = await tab.evaluate(() => [...document.fonts].filter((f) => f.status === 'error').map((f) => f.family));
+  if (failed.length) throw new Error('fonts failed to load: ' + [...new Set(failed)].join(', '));
   const h = await fit(tab, maxBottom);
   fs.mkdirSync(path.dirname(file), { recursive: true });
   await tab.screenshot({ path: file, type: 'jpeg', quality: 92 });
@@ -307,9 +328,8 @@ for (const [lang, locale] of Object.entries(LOCALES)) {
   const dir = path.join(OUT, locale, 'images');
   fs.rmSync(path.join(dir, 'phoneScreenshots'), { recursive: true, force: true });
   const sizes = [];
-  const name = strings(lang).app_name;
   for (const [i, body] of screenshots(lang).entries()) {
-    sizes.push(await save(page(lang, body + chrome(i + 1, name), LOOKS[i]), { width: W, height: H },
+    sizes.push(await save(page(lang, body + chrome(), LOOKS[i]), { width: W, height: H },
       path.join(dir, 'phoneScreenshots', `${i + 1}.jpg`), PHONE_TOP - 50));
   }
   const title = fs.readFileSync(path.join(OUT, locale, 'title.txt'), 'utf8').trim();
