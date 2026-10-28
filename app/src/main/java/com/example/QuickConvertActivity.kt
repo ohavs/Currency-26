@@ -34,7 +34,8 @@ import kotlinx.coroutines.launch
  * (ACTION_SEND, for phones that hide selection-menu apps, like recent Samsungs). It shows a bubble over the
  * app the text came from, with the price converted, and tapping outside returns to that app. In editable text
  * picked from the selection menu it can also put the converted price in place of the original. Tapping the
- * currency it converts to picks another one, which the bubble keeps until the app's own target changes.
+ * currency it converts to picks another one, which the bubble keeps until the app's own target changes; tapping the
+ * price's currency says what it really is in (a "$" that meant Canadian dollars), for this text only.
  */
 class QuickConvertActivity : ComponentActivity() {
     override fun attachBaseContext(newBase: Context) {
@@ -62,6 +63,7 @@ class QuickConvertActivity : ComponentActivity() {
 
         var offline by mutableStateOf(false)
         var chosen by mutableStateOf(repository.getQuickTarget())
+        from = savedInstanceState?.getString(KEY_FROM)
         lifecycleScope.launch {
             // Stored rates answer at once; old ones are refreshed underneath and the bubble follows.
             val age = System.currentTimeMillis() - repository.getLastUpdateTimestamp()
@@ -74,7 +76,7 @@ class QuickConvertActivity : ComponentActivity() {
             val rates by repository.allRatesFlow.collectAsState(initial = null)
             val recentlyUsed by repository.recentCurrenciesFlow.collectAsState(initial = emptyList())
             var copied by remember { mutableStateOf(false) }
-            val conversion = remember(rates, chosen) {
+            val conversion = remember(rates, chosen, from) {
                 rates?.takeIf { it.isNotEmpty() }?.let {
                     QuickConvert.convert(
                         text, it,
@@ -82,7 +84,8 @@ class QuickConvertActivity : ComponentActivity() {
                         target = repository.getTargetCurrency(),
                         extra = repository.getExtraTargetCurrency(),
                         local = local,
-                        chosen = chosen
+                        chosen = chosen,
+                        from = from
                     )
                 }
             }
@@ -118,11 +121,24 @@ class QuickConvertActivity : ComponentActivity() {
                             chosen = repository.getQuickTarget()
                             copied = false
                             lifecycleScope.launch { repository.markCurrencyUsed(code) }
+                        },
+                        onChooseSource = { code ->
+                            from = code
+                            copied = false
+                            lifecycleScope.launch { repository.markCurrencyUsed(code) }
                         }
                     )
                 }
             }
         }
+    }
+
+    /** The currency the user said the prices are in, picked in the bubble (null: as the text reads). */
+    private var from by mutableStateOf<String?>(null)
+
+    override fun onSaveInstanceState(outState: Bundle) {
+        super.onSaveInstanceState(outState)
+        outState.putString(KEY_FROM, from)
     }
 
     /** Leaving for another app (home, recents) closes the bubble instead of leaving it behind. */
@@ -166,6 +182,7 @@ class QuickConvertActivity : ComponentActivity() {
 
     private companion object {
         const val STALE_AFTER_MS = 6 * 60 * 60 * 1000L
+        const val KEY_FROM = "from"
         val LINK = Regex("""https?://\S+""")
     }
 }

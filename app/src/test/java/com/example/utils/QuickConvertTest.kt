@@ -1,6 +1,7 @@
 package com.example.utils
 
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNull
 import org.junit.Test
 
@@ -50,6 +51,16 @@ class QuickConvertTest {
         assertEquals(listOf("ILS"), result.others.map { it.first })
         // A price already in the chosen currency goes to the target.
         assertEquals("ILS", QuickConvert.convert("€90", rates, "USD", "ILS", null, "ILS", chosen = "EUR").lines.single().to)
+    }
+
+    @Test
+    fun `a currency the user says the price is in replaces the one found`() {
+        val line = QuickConvert.convert("$100", rates, "USD", "ILS", null, "ILS", from = "EUR").lines.single()
+        assertEquals("EUR", line.price.currency)
+        assertFalse(line.price.assumed)
+        assertEquals("ILS", line.to)
+        // Saying it is in the target sends it to the next of the user's currencies.
+        assertEquals("USD", QuickConvert.convert("$100", rates, "USD", "ILS", null, "ILS", from = "ILS").lines.single().to)
     }
 
     @Test

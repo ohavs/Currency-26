@@ -156,6 +156,34 @@ private val storeRates = mapOf(
     "THB" to 35.81, "CAD" to 1.3644,
 )
 
+/**
+ * The pictures launchers show before a widget is added (`previewImage`/`previewLayout` in the widget info files in `res/xml`):
+ * the Classic set, in each app language with its listing's currencies. Copy them into the app with
+ * `tools/preview/widget_previews.sh`.
+ */
+private fun widgetPreviews() {
+    for (l in storeLangs) {
+        val rtl = l.lang == "iw" || l.lang == "ar"
+        val strings = { key: String -> androidx.compose.ui.res.HarnessStrings.get(l.lang, key) }
+        val time = String.format(strings("today_at"), "09:41")
+        val locale = java.util.Locale.forLanguageTag(if (l.lang == "iw") "he" else l.lang)
+        val p = com.example.ui.theme.Palettes.resolve("sage", false)
+        render("widget_preview_${l.lang}_large", widthDp = 300, heightDp = 380) {
+            com.example.widget.LargeWidgetMock2(
+                p, 300f, 380f, rtl, locale, amountRaw = "100", src = l.src, tgt = l.tgt,
+                rate = storeRates.getValue(l.tgt) / storeRates.getValue(l.src), extra = null, extraRate = 0.0,
+                updatedTime = time, updatedLabel = String.format(strings("updated_at"), time), launcherRtl = rtl, theme = "sage"
+            )
+        }
+        render("widget_preview_${l.lang}_small", widthDp = 240, heightDp = 100) {
+            com.example.widget.SmallWidgetMock2(
+                p, 240f, 100f, rtl, "100", l.src, l.tgt, storeRates.getValue(l.tgt) / storeRates.getValue(l.src), null, 0.0,
+                launcherRtl = rtl, theme = "sage"
+            )
+        }
+    }
+}
+
 private fun storeShots() {
     for (l in storeLangs) {
         val rtl = l.lang == "iw" || l.lang == "ar"
@@ -207,6 +235,10 @@ private fun storeShots() {
 fun main() {
     if (System.getenv("ONLY")?.startsWith("store_") == true) {
         storeShots()
+        System.exit(0)
+    }
+    if (System.getenv("ONLY")?.startsWith("widget_preview") == true) {
+        widgetPreviews()
         System.exit(0)
     }
     // v5.0.24: Samsung's one-time setup acted out (⋮ → "Manage apps" → switch on → Done), the tour card's "show me
@@ -343,7 +375,7 @@ fun main() {
                             colorTheme = spec.theme, offline = false, canReplace = spec.canReplace, copied = false,
                             onCopy = {}, onReplace = {}, onOpenApp = {}, onDismiss = {},
                             rates = pickRates, recents = listOfNotNull(chosen, spec.target, spec.source, spec.extra, "EUR", "THB"),
-                            onChooseCurrency = {}, startPicking = picking
+                            onChooseCurrency = {}, onChooseSource = {}, startPicking = picking
                         )
                     }
                 }

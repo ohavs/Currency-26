@@ -37,6 +37,7 @@ object QuickConvert {
      * the target first, so "€120" shows in shekels and "₪120" in dollars). Rates are per US dollar.
      * [local] is the currency of the country the phone is in, which settles "$", "kr" and bare numbers abroad.
      * [chosen] is a currency picked in the bubble itself; it comes before the target.
+     * [from] is the currency the user said the prices are in (picked in the bubble): it replaces what was found.
      */
     fun convert(
         text: String,
@@ -46,11 +47,13 @@ object QuickConvert {
         extra: String?,
         local: String?,
         chosen: String? = null,
+        from: String? = null,
     ): QuickConversion {
         val mine = listOfNotNull(chosen, target, source, extra).distinct()
         // A bare number is in the local currency when abroad (it isn't the target), else in the source.
         val fallback = local?.takeIf { it != target && it in rates } ?: source
         val prices = PriceParser.parse(text, rates.keys, listOfNotNull(local, source, target, extra), fallback)
+            .map { if (from != null) it.copy(currency = from, assumed = false) else it }
         val lines = prices.map { price ->
             val to = mine.firstOrNull { it != price.currency } ?: target
             ConvertedPrice(price, to, convertAmount(price.amount, price.currency, to, rates))

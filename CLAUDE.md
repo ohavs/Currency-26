@@ -152,6 +152,14 @@ Hebrew, and show rendered previews of visual changes (see `tools/preview`).
   and the main screen shows the same `UpdateBanner` as the GitHub build; "Update" opens the store page (never
   forced), the X hides it for that version (`dismissedUpdateVersion`). Play reports a version code only:
   500 + N is shown as 5.0.N. It only works for installs from Play.
+- Widget previews (5.0.29): without `previewImage`/`previewLayout` Samsung's "Add to Home screen?" showed a grey
+  "Couldn't add widget" box (the widget itself was added). The pictures are the preview tool's widget mocks in the
+  Classic set, one per language (`tools/preview/widget_previews.sh` writes `drawable[-<lang>]-nodpi/*.webp`); re-run it
+  when the widgets' look changes.
+- Banner (5.0.29): `PlayMonetization` keeps one `AdView` per activity, loaded as `start()` runs and moved between
+  screens (never destroyed when the calculator leaves), so coming back from Settings doesn't wait for a new ad.
+- Quick-convert bubble (5.0.29): tapping the price's own card (or its chip over a list) says which currency the text
+  really meant (`QuickConvert.convert(from = ...)`, this text only, not saved).
 - History panel (5.0.19): the header is just the clock icon (the link already says "History"); the clear key
   is icon-only and exactly the size of the keypad key beside it, widening to "Clear all?" on the first tap.
   The owner notices mismatched button sizes: keep neighbouring buttons the same height and shape.
