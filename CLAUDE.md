@@ -171,15 +171,12 @@ Hebrew, and show rendered previews of visual changes (see `tools/preview`).
   The owner notices mismatched button sizes: keep neighbouring buttons the same height and shape.
 
 ## Next
-- **REMIND THE OWNER at the start of every session** (asked 2026-10-28, keep until the owner says it's done, then
-  delete this item): change the reviewer note in Play Console (App content > App access / Sign in details) to the
-  new text in `docs/PLAY_LAUNCH_PLAN.md`, after the Premium changes of 5.0.31 (third currency Premium, quick convert
-  5 times a week).
 - **Open as of 2026-10-26 (owner's wishes, next session starts here):**
   - 2026-10-28 (5.0.31): the owner approved making the third currency Premium and quick convert free 5 times in any
     7 days (`QuickConvertAllowance`, uses in prefs "premium" `quick_convert_uses`), unlimited with Premium. Store texts
-    (13 languages), the free/Premium table and the reviewer note (plan doc) were updated. The owner has to paste the
-    new reviewer note into Play Console (App content > App access). Videos: the owner uploads them to YouTube and
+    (13 languages), the free/Premium table and the reviewer note (plan doc) were updated. The owner pasted the
+    new reviewer note into Play Console on 2026-10-28 (the menu moved: Monitor and improve > Policy and programs >
+    App content > Sign in details). The Dashboard showed 12 testers opted in on 2026-10-28; the 14 days are running. Videos: the owner uploads them to YouTube and
     sends the links; then add them to the listing (`video.txt` per locale for fastlane, or by hand).
   - 2026-10-27: Store settings and the privacy URL fix are done (owner). The closed test ("Alpha") was SENT FOR REVIEW
     on 2026-10-27: 5.0.27 (versionCode 527, run 40501759554, test ads), list "צוות בודקים" (17 people), 177 countries +
