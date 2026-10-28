@@ -171,6 +171,10 @@ Hebrew, and show rendered previews of visual changes (see `tools/preview`).
   The owner notices mismatched button sizes: keep neighbouring buttons the same height and shape.
 
 ## Next
+- **REMIND THE OWNER at the start of every session** (asked 2026-10-28, keep until the owner says it's done, then
+  delete this item): change the reviewer note in Play Console (App content > App access / Sign in details) to the
+  new text in `docs/PLAY_LAUNCH_PLAN.md`, after the Premium changes of 5.0.31 (third currency Premium, quick convert
+  5 times a week).
 - **Open as of 2026-10-26 (owner's wishes, next session starts here):**
   - 2026-10-28 (5.0.31): the owner approved making the third currency Premium and quick convert free 5 times in any
     7 days (`QuickConvertAllowance`, uses in prefs "premium" `quick_convert_uses`), unlimited with Premium. Store texts
