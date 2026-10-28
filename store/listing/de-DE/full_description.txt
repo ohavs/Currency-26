@@ -2,12 +2,12 @@ Rechne jede Währung mit einem Tippen um, auch offline. Gib einen Betrag ein und
 
 ★ Einfach und schnell
 • Große, klare Tastatur: Das Ergebnis ändert sich schon beim Tippen
-• Währungen mit einem Tippen tauschen oder eine dritte hinzufügen und in zwei auf einmal umrechnen
+• Währungen mit einem Tippen tauschen
 • Währungen nach Land, Name, Symbol oder Code suchen, in jeder Sprache
 • Funktioniert offline mit den zuletzt geladenen Kursen
 
 ★ Aus jeder App umrechnen
-Markiere einen Preis im Browser, in einer Buchungs-App oder im Chat und wähle „Währung umrechnen“ (oder Teilen → „Währung umrechnen“). Das Ergebnis erscheint über der App, in der du gerade bist. Versteht $, €, ₪, „1.250,00“, „1.5k“ und mehr.
+Markiere einen Preis im Browser, in einer Buchungs-App oder im Chat und wähle „Währung umrechnen“ (oder Teilen → „Währung umrechnen“). Das Ergebnis erscheint über der App, in der du gerade bist. Versteht $, €, ₪, „1.250,00“, „1.5k“ und mehr. 5-mal pro Woche kostenlos, mit Premium unbegrenzt.
 
 ★ Verlauf
 Jeder Betrag und jede Rechnung wird gespeichert. Tippe auf einen Eintrag, um ihn mit seinen Währungen zurückzuholen.
@@ -16,8 +16,10 @@ Jeder Betrag und jede Rechnung wird gespeichert. Tippe auf einen Eintrag, um ihn
 • Widget auf dem Startbildschirm: Betrag eingeben und das Ergebnis sehen, ohne die App zu öffnen
 • Rechner mit Prozenten: 120 + 15 %, 3 × 800 und mehr, umgerechnet beim Tippen
 • 6 Farbschemas, jeweils hell und dunkel
+• Eine dritte Währung: in zwei auf einmal umrechnen
+• Unbegrenzt aus jeder App umrechnen
 
-Neue Nutzer bekommen Premium 3 Tage gratis. Danach schaltest du es mit 2 kurzen Videos für 24 Stunden frei – oder du holst dir Premium für immer mit einer Zahlung, die auch die Werbung entfernt. Umrechnen, Suche, zusätzliche Währung, Verlauf und das Umrechnen aus anderen Apps bleiben immer kostenlos.
+Neue Nutzer bekommen Premium 3 Tage gratis. Danach schaltest du es mit 2 kurzen Videos für 24 Stunden frei – oder du holst dir Premium für immer mit einer Zahlung, die auch die Werbung entfernt. Umrechnen, Suche und Verlauf bleiben immer kostenlos, dazu 5 Umrechnungen pro Woche aus anderen Apps.
 
 ★ 13 Sprachen
 Deutsch, Englisch, Hebräisch, Arabisch, Spanisch, Russisch, Französisch, Portugiesisch, Italienisch, Türkisch, Chinesisch, Japanisch und Hindi.

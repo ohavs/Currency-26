@@ -2,12 +2,12 @@ Convert any currency in a tap, even offline. Type an amount and see it in your c
 
 ★ Simple and fast
 • A big, clear keypad: the result changes as you type
-• Swap currencies with one tap, or add a third currency to convert to two at once
+• Swap currencies with one tap
 • Find a currency by country, name, symbol or code, in any language
 • Works offline with the last rates you downloaded
 
 ★ Convert from any app
-Select a price in your browser, a booking app or a chat and choose "Convert currency" (or Share → "Convert currency"). The result pops up over the app you are in. It understands $, €, ₪, "1.250,00", "1.5k" and more.
+Select a price in your browser, a booking app or a chat and choose "Convert currency" (or Share → "Convert currency"). The result pops up over the app you are in. It understands $, €, ₪, "1.250,00", "1.5k" and more. Free 5 times a week, unlimited with Premium.
 
 ★ History
 Every amount and calculation is kept. Tap one to bring it back with its currencies.
@@ -16,8 +16,10 @@ Every amount and calculation is kept. Tap one to bring it back with its currenci
 • Home-screen widget: type an amount and see it converted without opening the app
 • Calculator with percentages: 120 + 15%, 3 × 800 and more, converted as you type
 • 6 color themes, each in light and dark
+• A third currency: convert to two at once
+• Unlimited converting from any app
 
-New users get Premium free for 3 days. After that, watch 2 short videos to unlock it for 24 hours, or get Premium forever with one payment, which also removes the ads. Converting, search, the extra currency, history and converting from other apps always stay free.
+New users get Premium free for 3 days. After that, watch 2 short videos to unlock it for 24 hours, or get Premium forever with one payment, which also removes the ads. Converting, search and history always stay free, and so do 5 conversions a week from other apps.
 
 ★ 13 languages
 English, Hebrew, Arabic, Spanish, Russian, French, German, Portuguese, Italian, Turkish, Chinese, Japanese and Hindi.

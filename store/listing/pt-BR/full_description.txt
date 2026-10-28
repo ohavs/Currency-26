@@ -2,12 +2,12 @@ Converta qualquer moeda com um toque, mesmo offline. Digite um valor e veja na h
 
 ★ Simples e rápido
 • Teclado grande e claro: o resultado muda enquanto você digita
-• Inverta as moedas com um toque ou adicione uma terceira para converter para duas de uma vez
+• Inverta as moedas com um toque
 • Encontre uma moeda pelo país, nome, símbolo ou código, em qualquer idioma
 • Funciona offline com as últimas cotações baixadas
 
 ★ Converta de qualquer app
-Selecione um preço no navegador, num app de reservas ou numa conversa e escolha "Converter moeda" (ou Compartilhar → "Converter moeda"). O resultado aparece sobre o app em que você está. Entende $, €, ₪, "1.250,00", "1.5k" e mais.
+Selecione um preço no navegador, num app de reservas ou numa conversa e escolha "Converter moeda" (ou Compartilhar → "Converter moeda"). O resultado aparece sobre o app em que você está. Entende $, €, ₪, "1.250,00", "1.5k" e mais. Grátis 5 vezes por semana, sem limite com o Premium.
 
 ★ Histórico
 Cada valor e cada cálculo ficam guardados. Toque em um para trazê-lo de volta com as moedas.
@@ -16,8 +16,10 @@ Cada valor e cada cálculo ficam guardados. Toque em um para trazê-lo de volta 
 • Widget na tela inicial: digite um valor e veja a conversão sem abrir o app
 • Calculadora com porcentagens: 120 + 15%, 3 × 800 e mais, convertidos enquanto você digita
 • 6 temas de cores, cada um no modo claro e escuro
+• Uma terceira moeda: converta para duas de uma vez
+• Conversão ilimitada a partir de qualquer app
 
-Novos usuários ganham Premium grátis por 3 dias. Depois, assista a 2 vídeos curtos para liberá-lo por 24 horas, ou tenha Premium para sempre com um único pagamento, que também remove os anúncios. A conversão, a busca, a moeda adicional, o histórico e a conversão a partir de outros apps são sempre grátis.
+Novos usuários ganham Premium grátis por 3 dias. Depois, assista a 2 vídeos curtos para liberá-lo por 24 horas, ou tenha Premium para sempre com um único pagamento, que também remove os anúncios. A conversão, a busca e o histórico são sempre grátis, além de 5 conversões por semana a partir de outros apps.
 
 ★ 13 idiomas
 Português, inglês, hebraico, árabe, espanhol, russo, francês, alemão, italiano, turco, chinês, japonês e hindi.

@@ -114,6 +114,10 @@
     <string name="quick_total">סה״כ</string>
     <string name="quick_no_price">לא נמצא מחיר בטקסט שסימנת</string>
     <string name="quick_assumed">מטבע משוער</string>
+    <string name="quick_free_left">נשארו השבוע %1$d מתוך %2$d המרות חינם</string>
+    <string name="quick_used_up">ניצלת את %1$d ההמרות החינמיות של השבוע</string>
+    <string name="quick_next_free">ההמרה החינמית הבאה: %1$s</string>
+    <string name="quick_unlimited">ללא הגבלה עם פרימיום</string>
     <string name="tip_select_title">המרה מכל אפליקציה</string>
     <string name="tip_select_body">סמנו מחיר בכל אפליקציה ובחרו \"המרת מטבע\" בתפריט (או \"שיתוף\" ← \"המרת מטבע\"). התוצאה קופצת מיד, בלי לעזוב את מה שאתם עושים.</string>
     <string name="select_menu_summary">סמנו מחיר ← \"%1$s\"</string>
@@ -131,11 +135,13 @@
     <string name="tip_calc_body">מקש המחשבון בשורה התחתונה מוסיף פעולות חשבון לחישובים כמו %1$s, והתוצאה מומרת מיד לכל המטבעות. סכומים וחישובים קודמים נשמרים בהיסטוריה, מתחת לכרטיסים.</string>
     <string name="tip_calc_action">לנסות</string>
     <string name="premium">פרימיום</string>
-    <string name="premium_subtitle">וידג\'ט, ערכות צבעים ומחשבון</string>
+    <string name="premium_subtitle">וידג\'ט, מטבע שלישי, מחשבון ועוד</string>
     <string name="premium_feature_widget">וידג\'ט במסך הבית</string>
     <string name="premium_feature_colors">ערכות צבעים</string>
     <string name="premium_feature_calculator">מחשבון ואחוזים</string>
-    <string name="premium_free_note">ההמרה, החיפוש, המטבע הנוסף וההיסטוריה נשארים בחינם.</string>
+    <string name="premium_feature_extra">מטבע שלישי במסך</string>
+    <string name="premium_feature_quick">המרה מכל אפליקציה בלי הגבלה</string>
+    <string name="premium_free_note">ההמרה, החיפוש וההיסטוריה נשארים בחינם, וגם %1$d המרות בשבוע מאפליקציות אחרות.</string>
     <string name="premium_watch">צפייה ב־%1$d סרטונים קצרים</string>
     <string name="premium_free_hours">%1$d שעות חינם</string>
     <string name="premium_watch_next">סרטון %1$d מתוך %2$d</string>
@@ -151,7 +157,7 @@
     <string name="premium_extend">עוד %1$d סרטונים מוסיפים %2$d שעות</string>
     <string name="premium_pending">הרכישה ממתינה לאישור התשלום</string>
     <string name="premium_locked">חלק מפרימיום</string>
-    <string name="premium_promo">פרימיום: בלי פרסומות, עם וידג\'ט, צבעים ומחשבון</string>
+    <string name="premium_promo">פרימיום: בלי פרסומות, וידג\'ט, מחשבון ועוד</string>
     <string name="premium_settings_free">%1$d סרטונים קצרים פותחים %2$d שעות</string>
     <string name="widget_locked_title">הווידג\'ט הוא חלק מפרימיום</string>
     <string name="widget_locked_action">פתיחה</string>

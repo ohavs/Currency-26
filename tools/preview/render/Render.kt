@@ -399,6 +399,37 @@ fun main() {
     }
     @Composable fun LockedCalc(s: com.example.ui.CalculatorState = calcState(null)) =
         CalculatorContent(s, onSwap = {}, onCurrencyClick = {}, onKeypad = {}, onOpenSettings = {}, onRefresh = {}, calculatorLocked = true, adSlot = promo)
+    // v5.0.31: the third currency and converting from other apps (5 a week free) are Premium.
+    for (lang in listOf("iw", "en", "es", "de", "ru", "ar", "ja")) {
+        @Composable fun LockedExtra() = CalculatorContent(
+            calcState(null), onSwap = {}, onCurrencyClick = {}, onKeypad = {}, onOpenSettings = {}, onRefresh = {},
+            calculatorLocked = true, extraLocked = true, onAddCurrency = {}, adSlot = promo
+        )
+        render("v31_a_locked_extra_$lang") { Frame(false, "sage", lang) { LockedExtra() } }
+        renderTapped("v31_b_sheet_extra_$lang", emptyList()) { Frame(false, "sage", lang) { LockedExtra(); sheet(com.example.premium.PremiumReason.EXTRA_CURRENCY, freeState)() } }
+        for ((suffix, locked) in listOf("left" to false, "used_up" to true)) {
+            renderTapped("v31_c_quick_${suffix}_$lang", emptyList(), frames = 40) {
+                androidx.compose.ui.res.HarnessStrings.language = lang
+                val locale = java.util.Locale.forLanguageTag(if (lang == "iw") "he" else lang)
+                MyApplicationTheme(themeMode = "light", colorThemeStr = "sage") {
+                    CompositionLocalProvider(
+                        LocalLayoutDirection provides if (lang == "iw" || lang == "ar") LayoutDirection.Rtl else LayoutDirection.Ltr,
+                        com.example.ui.LocalAppLocale provides locale
+                    ) {
+                        Box(Modifier.fillMaxSize().background(androidx.compose.ui.graphics.Color(0xFFF4F4F6))) {
+                            FakeBrowserPage("€120", false)
+                            com.example.ui.QuickConvertSheet(
+                                conversion = com.example.utils.QuickConvert.convert("€120", pickRates, "USD", "ILS", null, "ILS"),
+                                colorTheme = "sage", locked = locked, nextFree = now + 26 * hourMs, freeLeft = if (locked) null else 3,
+                                offline = false, canReplace = false, copied = false,
+                                onCopy = {}, onReplace = {}, onOpenApp = {}, onDismiss = {}
+                            )
+                        }
+                    }
+                }
+            }
+        }
+    }
     for ((lang, dark, theme) in listOf(Triple("iw", false, "sage"), Triple("en", false, "sage"), Triple("iw", true, "sage"), Triple("ar", false, "sage"), Triple("ru", false, "sage"))) {
         val tag = "${lang}_${if (dark) "dark" else "light"}"
         render("v21_a_locked_calc_$tag") { Frame(dark, theme, lang) { LockedCalc() } }

@@ -123,7 +123,10 @@ class MainActivity : ComponentActivity() {
     }
 
     private fun handleWidgetIntent(intent: Intent?) {
-        if (intent?.action == ACTION_OPEN_PREMIUM) viewModel.openPremium(PremiumReason.WIDGET)
+        if (intent?.action == ACTION_OPEN_PREMIUM) {
+            val reason = intent.getStringExtra(EXTRA_PREMIUM_REASON)?.let { name -> PremiumReason.values().firstOrNull { it.name == name } }
+            viewModel.openPremium(reason ?: PremiumReason.WIDGET)
+        }
         if (intent?.action == ACTION_PICK_CURRENCY) {
             val slot = intent.getStringExtra(EXTRA_PICK_SLOT)
                 ?.let { name -> CurrencySlot.values().firstOrNull { it.name == name } }
@@ -136,6 +139,7 @@ class MainActivity : ComponentActivity() {
         const val ACTION_PICK_CURRENCY = "com.example.action.PICK_CURRENCY"
         const val ACTION_OPEN_PREMIUM = "com.example.action.OPEN_PREMIUM"
         const val EXTRA_PICK_SLOT = "pick_slot"
+        private const val EXTRA_PREMIUM_REASON = "premium_reason"
         /** Written by older widget versions. */
         private const val EXTRA_PICK_SOURCE = "pick_source"
 
@@ -148,10 +152,11 @@ class MainActivity : ComponentActivity() {
                 .putExtra(EXTRA_PICK_SLOT, slot.name)
                 .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP)
 
-        /** The locked widget's "Unlock": the app opens on the Premium sheet. */
-        fun openPremiumIntent(context: Context): Intent =
+        /** The locked widget's "Unlock" (or the bubble's, out of free conversions): the app opens on the Premium sheet. */
+        fun openPremiumIntent(context: Context, reason: PremiumReason = PremiumReason.WIDGET): Intent =
             Intent(context, MainActivity::class.java)
                 .setAction(ACTION_OPEN_PREMIUM)
+                .putExtra(EXTRA_PREMIUM_REASON, reason.name)
                 .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP)
 
         fun openAppIntent(context: Context): Intent =

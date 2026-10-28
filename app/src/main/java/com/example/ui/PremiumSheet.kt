@@ -37,6 +37,8 @@ import androidx.compose.material.icons.rounded.Close
 import androidx.compose.material.icons.rounded.Lock
 import androidx.compose.material.icons.rounded.Palette
 import androidx.compose.material.icons.rounded.PlayCircle
+import androidx.compose.material.icons.automirrored.rounded.PlaylistAdd
+import androidx.compose.material.icons.rounded.TouchApp
 import androidx.compose.material.icons.rounded.Widgets
 import androidx.compose.material.icons.rounded.WorkspacePremium
 import androidx.compose.material3.CircularProgressIndicator
@@ -64,6 +66,7 @@ import com.example.R
 import com.example.premium.Access
 import com.example.premium.PremiumReason
 import com.example.premium.PremiumRules
+import com.example.premium.QuickConvertAllowance
 import com.example.premium.VideoStatus
 import com.example.ui.theme.LocalPalette
 import com.example.utils.formatUntil
@@ -169,6 +172,8 @@ fun PremiumSheet(
                 PremiumReason.WIDGET to (Icons.Rounded.Widgets to R.string.premium_feature_widget),
                 PremiumReason.COLORS to (Icons.Rounded.Palette to R.string.premium_feature_colors),
                 PremiumReason.CALCULATOR to (Icons.Rounded.Calculate to R.string.premium_feature_calculator),
+                PremiumReason.EXTRA_CURRENCY to (Icons.AutoMirrored.Rounded.PlaylistAdd to R.string.premium_feature_extra),
+                PremiumReason.QUICK_CONVERT to (Icons.Rounded.TouchApp to R.string.premium_feature_quick),
             ).sortedByDescending { it.first == reason }
             Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                 features.forEach { (key, feature) ->
@@ -231,7 +236,7 @@ fun PremiumSheet(
 
             Spacer(Modifier.height(8.dp))
             Text(
-                stringResource(R.string.premium_free_note),
+                stringResource(R.string.premium_free_note, QuickConvertAllowance.FREE_PER_WEEK),
                 style = MaterialTheme.typography.bodySmall,
                 color = palette.inkMuted,
                 textAlign = TextAlign.Center,

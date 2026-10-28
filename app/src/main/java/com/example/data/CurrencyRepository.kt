@@ -69,6 +69,23 @@ class CurrencyRepository(
         editor.apply()
     }
 
+    /** Without Premium the third currency is put aside, to come back with Premium. True when one was. */
+    fun parkExtraTargetCurrency(): Boolean {
+        val code = getExtraTargetCurrency() ?: return false
+        prefs.edit().putString("target2_parked", code).putString("target2", null).apply()
+        return true
+    }
+
+    /** Premium again: the third currency put aside comes back, unless its place was taken. True when it did. */
+    fun restoreExtraTargetCurrency(): Boolean {
+        val code = prefs.getString("target2_parked", null) ?: return false
+        val restored = getExtraTargetCurrency() == null && code != getSourceCurrency() && code != getTargetCurrency()
+        val editor = prefs.edit().remove("target2_parked")
+        if (restored) editor.putString("target2", code)
+        editor.apply()
+        return restored
+    }
+
     fun extraCurrencyEverUsed(): Boolean = prefs.getBoolean("extra_currency_used", false)
 
     fun tourTimesShown(): Int = prefs.getInt("tour_times_shown", 0)

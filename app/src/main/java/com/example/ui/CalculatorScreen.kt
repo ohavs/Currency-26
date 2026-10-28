@@ -40,6 +40,7 @@ import androidx.compose.material.icons.rounded.DeleteOutline
 import androidx.compose.material.icons.rounded.Edit
 import androidx.compose.material.icons.rounded.History
 import androidx.compose.material.icons.rounded.Lightbulb
+import androidx.compose.material.icons.rounded.Lock
 import androidx.compose.material.icons.rounded.Refresh
 import androidx.compose.material.icons.rounded.SwapVert
 import androidx.compose.material.icons.rounded.SystemUpdate
@@ -219,6 +220,8 @@ fun CalculatorScreen(viewModel: MainViewModel, monetization: Monetization, onRem
                     onRestoreHistory = viewModel::restoreHistory,
                     onClearHistory = viewModel::clearHistory,
                     calculatorLocked = !access.unlocked,
+                    onAddCurrency = viewModel::addExtraCurrency,
+                    extraLocked = !access.unlocked,
                     premiumBadge = monetization.hasStore && access.unlocked,
                     adSlot = {
                         monetization.Banner(
@@ -293,7 +296,7 @@ fun CalculatorScreen(viewModel: MainViewModel, monetization: Monetization, onRem
                     onShowSelectGuide = viewModel::startSelectGuide,
                     onAddCurrency = {
                         viewModel.dismissTour()
-                        viewModel.openCurrencySelector(CurrencySlot.EXTRA_TARGET)
+                        viewModel.addExtraCurrency()
                     },
                     onTryCalculator = {
                         viewModel.dismissTour()
@@ -360,6 +363,9 @@ fun CalculatorContent(
     onRestoreHistory: (HistoryEntry) -> Unit = {},
     onClearHistory: () -> Unit = {},
     calculatorLocked: Boolean = false,
+    /** "+ add currency" (null: the picker for the third currency); [extraLocked] shows it is Premium. */
+    onAddCurrency: (() -> Unit)? = null,
+    extraLocked: Boolean = false,
     /** Premium is on (bought, trial or videos): a crown on the Settings button. */
     premiumBadge: Boolean = false,
     /** The ad strip under the keypad (Play build, without Premium forever). */
@@ -464,7 +470,8 @@ fun CalculatorContent(
         )
 
         CardLinks(
-            onAddCurrency = if (extraCode == null) ({ onCurrencyClick(CurrencySlot.EXTRA_TARGET) }) else null,
+            onAddCurrency = if (extraCode == null) (onAddCurrency ?: { onCurrencyClick(CurrencySlot.EXTRA_TARGET) }) else null,
+            addLocked = extraLocked,
             historyOpen = state.showHistory,
             onHistory = if (state.showHistory) onCloseHistory else onOpenHistory
         )
@@ -1175,21 +1182,21 @@ private fun Modifier.dashedBorder(color: Color) = drawBehind {
  * additional currency) and the history on the other, highlighted while it is open.
  */
 @Composable
-private fun CardLinks(onAddCurrency: (() -> Unit)?, historyOpen: Boolean, onHistory: () -> Unit) {
+private fun CardLinks(onAddCurrency: (() -> Unit)?, historyOpen: Boolean, onHistory: () -> Unit, addLocked: Boolean = false) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
             .padding(vertical = 2.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        if (onAddCurrency != null) CardLink(Icons.Rounded.Add, stringResource(R.string.add_currency), onAddCurrency)
+        if (onAddCurrency != null) CardLink(Icons.Rounded.Add, stringResource(R.string.add_currency), onAddCurrency, locked = addLocked)
         Spacer(Modifier.weight(1f))
         CardLink(Icons.Rounded.History, stringResource(R.string.history), onHistory, selected = historyOpen)
     }
 }
 
 @Composable
-private fun CardLink(icon: ImageVector, text: String, onClick: () -> Unit, selected: Boolean = false) {
+private fun CardLink(icon: ImageVector, text: String, onClick: () -> Unit, selected: Boolean = false, locked: Boolean = false) {
     val palette = LocalPalette.current
     val background by animateColorAsState(if (selected) palette.card else palette.card.copy(alpha = 0f), label = "link")
     val content = if (selected) palette.ink else palette.inkMuted
@@ -1204,6 +1211,18 @@ private fun CardLink(icon: ImageVector, text: String, onClick: () -> Unit, selec
         Icon(icon, contentDescription = null, tint = if (selected) palette.accent else content, modifier = Modifier.size(18.dp))
         Spacer(Modifier.width(6.dp))
         Text(text, style = MaterialTheme.typography.labelLarge, color = content, maxLines = 1)
+        if (locked) {
+            Spacer(Modifier.width(6.dp))
+            Box(
+                modifier = Modifier
+                    .size(18.dp)
+                    .clip(CircleShape)
+                    .background(palette.accent),
+                contentAlignment = Alignment.Center
+            ) {
+                Icon(Icons.Rounded.Lock, contentDescription = stringResource(R.string.premium_locked), tint = palette.onAccent, modifier = Modifier.size(11.dp))
+            }
+        }
     }
 }
 

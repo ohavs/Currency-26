@@ -114,6 +114,10 @@
     <string name="quick_total">Итого</string>
     <string name="quick_no_price">В выделенном тексте не найдена цена</string>
     <string name="quick_assumed">Валюта определена предположительно</string>
+    <string name="quick_free_left">Осталось бесплатных конвертаций на этой неделе: %1$d из %2$d</string>
+    <string name="quick_used_up">Бесплатные конвертации этой недели (%1$d) закончились</string>
+    <string name="quick_next_free">Следующая бесплатная: %1$s</string>
+    <string name="quick_unlimited">Без ограничений с Премиумом</string>
     <string name="tip_select_title">Конвертация из любого приложения</string>
     <string name="tip_select_body">Выделите цену в любом приложении и выберите «Конвертировать валюту» в меню (или «Поделиться» → «Конвертировать валюту»). Результат появится сразу, и отрываться от дела не придётся.</string>
     <string name="select_menu_summary">Выделите цену → «%1$s»</string>
@@ -131,11 +135,13 @@
     <string name="tip_calc_body">Кнопка калькулятора в нижнем ряду добавляет + − × ÷ для расчётов вроде %1$s, а результат сразу пересчитывается во все валюты. Прежние суммы и расчёты сохраняются в истории, под карточками.</string>
     <string name="tip_calc_action">Попробовать</string>
     <string name="premium">Премиум</string>
-    <string name="premium_subtitle">Виджет, цветовые темы и калькулятор</string>
+    <string name="premium_subtitle">Виджет, третья валюта, калькулятор и другое</string>
     <string name="premium_feature_widget">Виджет на главном экране</string>
     <string name="premium_feature_colors">Цветовые темы</string>
     <string name="premium_feature_calculator">Калькулятор и проценты</string>
-    <string name="premium_free_note">Конвертация, поиск, дополнительная валюта и история остаются бесплатными.</string>
+    <string name="premium_feature_extra">Третья валюта на экране</string>
+    <string name="premium_feature_quick">Безлимитная конвертация из любого приложения</string>
+    <string name="premium_free_note">Конвертация, поиск и история остаются бесплатными, а также %1$d конвертаций в неделю из других приложений.</string>
     <string name="premium_watch">Посмотрите %1$d коротких видео</string>
     <string name="premium_free_hours">%1$d ч бесплатно</string>
     <string name="premium_watch_next">Видео %1$d из %2$d</string>
@@ -151,7 +157,7 @@
     <string name="premium_extend">Ещё %1$d видео добавят %2$d ч</string>
     <string name="premium_pending">Покупка ожидает подтверждения оплаты</string>
     <string name="premium_locked">Входит в Премиум</string>
-    <string name="premium_promo">Премиум: без рекламы, с виджетом, темами и калькулятором</string>
+    <string name="premium_promo">Премиум: без рекламы, виджет, калькулятор и другое</string>
     <string name="premium_settings_free">%1$d коротких видео открывают доступ на %2$d ч</string>
     <string name="widget_locked_title">Виджет входит в Премиум</string>
     <string name="widget_locked_action">Открыть</string>

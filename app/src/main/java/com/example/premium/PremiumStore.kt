@@ -99,6 +99,11 @@ class PremiumStore(
     val reviewAsked: Boolean get() = prefs.getBoolean(KEY_REVIEW_ASKED, false)
     fun markReviewAsked() { prefs.edit().putBoolean(KEY_REVIEW_ASKED, true).apply() }
 
+    /** When the free conversions from other apps of the last week were made (see [QuickConvertAllowance]). */
+    var quickConvertUses: List<Long>
+        get() = prefs.getString(KEY_QUICK_USES, null).orEmpty().split(',').mapNotNull { it.toLongOrNull() }
+        set(value) { prefs.edit().putString(KEY_QUICK_USES, value.joinToString(",")).apply() }
+
     private fun read() = PremiumState(
         purchased = prefs.getBoolean(KEY_PURCHASED, false),
         purchasePending = prefs.getBoolean(KEY_PENDING, false),
@@ -137,5 +142,6 @@ class PremiumStore(
         const val KEY_INTERSTITIAL_COUNT = "interstitial_count"
         const val KEY_SESSIONS = "sessions"
         const val KEY_REVIEW_ASKED = "review_asked"
+        const val KEY_QUICK_USES = "quick_convert_uses"
     }
 }

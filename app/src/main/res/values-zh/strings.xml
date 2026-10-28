@@ -114,6 +114,10 @@
     <string name="quick_total">合计</string>
     <string name="quick_no_price">所选文本中未找到价格</string>
     <string name="quick_assumed">推测的货币</string>
+    <string name="quick_free_left">本周还剩 %1$d/%2$d 次免费换算</string>
+    <string name="quick_used_up">本周的 %1$d 次免费换算已用完</string>
+    <string name="quick_next_free">下次免费：%1$s</string>
+    <string name="quick_unlimited">高级版不限次数</string>
     <string name="tip_select_title">在任何应用中换算</string>
     <string name="tip_select_body">在任何应用中选中价格，然后在菜单中选择“货币换算”（或“分享”→“货币换算”）。结果会立即弹出，无需离开当前应用。</string>
     <string name="select_menu_summary">选中价格 →“%1$s”</string>
@@ -131,11 +135,13 @@
     <string name="tip_calc_body">底行的计算器键可加入 + − × ÷，用于 %1$s 这样的计算，结果会立即换算成所有货币。以前的金额和计算都保存在卡片下方的历史记录中。</string>
     <string name="tip_calc_action">试一试</string>
     <string name="premium">高级版</string>
-    <string name="premium_subtitle">小组件、颜色主题和计算器</string>
+    <string name="premium_subtitle">小组件、第三种货币、计算器等</string>
     <string name="premium_feature_widget">主屏幕小组件</string>
     <string name="premium_feature_colors">颜色主题</string>
     <string name="premium_feature_calculator">计算器和百分比</string>
-    <string name="premium_free_note">换算、搜索、附加货币和历史记录始终免费。</string>
+    <string name="premium_feature_extra">屏幕上显示第三种货币</string>
+    <string name="premium_feature_quick">在任何应用中无限次换算</string>
+    <string name="premium_free_note">换算、搜索和历史记录始终免费，每周还可从其他应用免费换算 %1$d 次。</string>
     <string name="premium_watch">观看 %1$d 个短视频</string>
     <string name="premium_free_hours">免费 %1$d 小时</string>
     <string name="premium_watch_next">第 %1$d 个视频，共 %2$d 个</string>
@@ -151,7 +157,7 @@
     <string name="premium_extend">再看 %1$d 个视频可增加 %2$d 小时</string>
     <string name="premium_pending">你的购买正在等待付款确认</string>
     <string name="premium_locked">高级版功能</string>
-    <string name="premium_promo">高级版：无广告，并提供小组件、颜色和计算器</string>
+    <string name="premium_promo">高级版：无广告，并提供小组件、计算器等</string>
     <string name="premium_settings_free">%1$d 个短视频可解锁 %2$d 小时</string>
     <string name="widget_locked_title">小组件是高级版功能</string>
     <string name="widget_locked_action">解锁</string>

@@ -114,6 +114,10 @@
     <string name="quick_total">Total</string>
     <string name="quick_no_price">Aucun prix trouvé dans le texte sélectionné</string>
     <string name="quick_assumed">Devise supposée</string>
+    <string name="quick_free_left">Encore %1$d conversions gratuites sur %2$d cette semaine</string>
+    <string name="quick_used_up">Les %1$d conversions gratuites de la semaine sont épuisées</string>
+    <string name="quick_next_free">Prochaine conversion gratuite : %1$s</string>
+    <string name="quick_unlimited">Illimité avec Premium</string>
     <string name="tip_select_title">Convertissez depuis n\'importe quelle app</string>
     <string name="tip_select_body">Sélectionnez un prix dans n\'importe quelle app et choisissez « Convertir une devise » dans le menu (ou Partager → « Convertir une devise »). Le résultat s\'affiche aussitôt, sans interrompre ce que vous faites.</string>
     <string name="select_menu_summary">Sélectionnez un prix → « %1$s »</string>
@@ -131,11 +135,13 @@
     <string name="tip_calc_body">La touche calculatrice de la rangée du bas ajoute + − × ÷ pour des calculs comme %1$s, et le résultat est aussitôt converti dans toutes les devises. Les montants et calculs précédents sont gardés dans l\'historique, sous les cartes.</string>
     <string name="tip_calc_action">Essayer</string>
     <string name="premium">Premium</string>
-    <string name="premium_subtitle">Widget, thèmes de couleur et calculatrice</string>
+    <string name="premium_subtitle">Widget, troisième devise, calculatrice et plus</string>
     <string name="premium_feature_widget">Widget sur l\'écran d\'accueil</string>
     <string name="premium_feature_colors">Thèmes de couleur</string>
     <string name="premium_feature_calculator">Calculatrice et pourcentages</string>
-    <string name="premium_free_note">La conversion, la recherche, la devise supplémentaire et l\'historique restent gratuits.</string>
+    <string name="premium_feature_extra">Une troisième devise à l\'écran</string>
+    <string name="premium_feature_quick">Conversion illimitée depuis n\'importe quelle app</string>
+    <string name="premium_free_note">La conversion, la recherche et l\'historique restent gratuits, ainsi que %1$d conversions par semaine depuis d\'autres apps.</string>
     <string name="premium_watch">Regardez %1$d courtes vidéos</string>
     <string name="premium_free_hours">%1$d h gratuites</string>
     <string name="premium_watch_next">Vidéo %1$d sur %2$d</string>
@@ -151,7 +157,7 @@
     <string name="premium_extend">%1$d vidéos de plus ajoutent %2$d h</string>
     <string name="premium_pending">Votre achat attend la confirmation du paiement</string>
     <string name="premium_locked">Inclus dans Premium</string>
-    <string name="premium_promo">Premium : sans pub, avec widget, couleurs et calculatrice</string>
+    <string name="premium_promo">Premium : sans pub, widget, calculatrice et plus</string>
     <string name="premium_settings_free">%1$d courtes vidéos débloquent %2$d h</string>
     <string name="widget_locked_title">Le widget fait partie de Premium</string>
     <string name="widget_locked_action">Débloquer</string>
