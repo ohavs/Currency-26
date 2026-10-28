@@ -192,6 +192,7 @@ class MainViewModel(
         viewModelScope.launch {
             var wasUnlocked = monetization.access.value.unlocked
             monetization.access.collect { access ->
+                applyExtraAccess(access.unlocked)
                 if (!access.unlocked) {
                     // Premium ran out with the calculator open: its result stays as the amount.
                     if (_state.value.expression != null) closeCalculator()
@@ -221,8 +222,23 @@ class MainViewModel(
             PremiumReason.CALCULATOR -> if (_state.value.expression == null) toggleCalculator()
             PremiumReason.COLORS -> if (theme != null) setColorTheme(theme)
             PremiumReason.WIDGET -> addWidgetToHomeScreen()
+            PremiumReason.EXTRA_CURRENCY -> if (_state.value.extraTargetCurrency == null) openCurrencySelector(CurrencySlot.EXTRA_TARGET)
             else -> Unit
         }
+    }
+
+    /** The third currency is Premium: it is put aside while locked, and comes back with Premium. */
+    private fun applyExtraAccess(unlocked: Boolean) {
+        val changed = if (unlocked) repository.restoreExtraTargetCurrency() else repository.parkExtraTargetCurrency()
+        if (!changed) return
+        _state.update { it.copy(extraTargetCurrency = repository.getExtraTargetCurrency()) }
+        notifyWidgets()
+    }
+
+    /** "+ add currency" (and the tour's button): the picker for the third currency, or Premium while it is locked. */
+    fun addExtraCurrency() {
+        if (!monetization.access.value.unlocked) return openPremium(PremiumReason.EXTRA_CURRENCY)
+        openCurrencySelector(CurrencySlot.EXTRA_TARGET)
     }
 
     private fun findLanguageSuggestion() {
@@ -428,6 +444,8 @@ class MainViewModel(
 
     /** Picks up changes made from the widget (amount, swap) while the app was in the background. */
     fun reloadSelection() {
+        // "Open in app" from the bubble may have set a third currency.
+        if (!monetization.access.value.unlocked) repository.parkExtraTargetCurrency()
         val amount = repository.getAmount()
         _state.update {
             val changed = amount != it.sourceAmountRaw

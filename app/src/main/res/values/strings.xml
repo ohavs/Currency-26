@@ -114,6 +114,10 @@
     <string name="quick_total">Total</string>
     <string name="quick_no_price">No price found in the selected text</string>
     <string name="quick_assumed">Currency assumed</string>
+    <string name="quick_free_left">%1$d of %2$d free conversions left this week</string>
+    <string name="quick_used_up">This week\'s %1$d free conversions are used up</string>
+    <string name="quick_next_free">Next free one: %1$s</string>
+    <string name="quick_unlimited">Unlimited with Premium</string>
     <string name="tip_select_title">Convert from any app</string>
     <string name="tip_select_body">Select a price in any app and choose \"Convert currency\" from the menu (or Share → \"Convert currency\"). The result pops up right away, without leaving what you\'re doing.</string>
     <string name="select_menu_summary">Select a price → \"%1$s\"</string>
@@ -131,11 +135,13 @@
     <string name="tip_calc_body">The calculator key in the bottom row adds + − × ÷ for sums like %1$s, and the result is converted to every currency right away. Past amounts and calculations are kept in History, under the cards.</string>
     <string name="tip_calc_action">Try it</string>
     <string name="premium">Premium</string>
-    <string name="premium_subtitle">Widget, color themes and calculator</string>
+    <string name="premium_subtitle">Widget, third currency, calculator and more</string>
     <string name="premium_feature_widget">Home-screen widget</string>
     <string name="premium_feature_colors">Color themes</string>
     <string name="premium_feature_calculator">Calculator and percentages</string>
-    <string name="premium_free_note">Converting, search, the extra currency and history stay free.</string>
+    <string name="premium_feature_extra">A third currency on screen</string>
+    <string name="premium_feature_quick">Unlimited converting from any app</string>
+    <string name="premium_free_note">Converting, search and history stay free, plus %1$d conversions a week from other apps.</string>
     <string name="premium_watch">Watch %1$d short videos</string>
     <string name="premium_free_hours">%1$d hours free</string>
     <string name="premium_watch_next">Video %1$d of %2$d</string>
@@ -151,7 +157,7 @@
     <string name="premium_extend">%1$d more videos add %2$d hours</string>
     <string name="premium_pending">Your purchase is waiting for the payment to go through</string>
     <string name="premium_locked">Part of Premium</string>
-    <string name="premium_promo">Premium: no ads, plus widget, colors and calculator</string>
+    <string name="premium_promo">Premium: no ads, widget, calculator and more</string>
     <string name="premium_settings_free">%1$d short videos unlock %2$d hours</string>
     <string name="widget_locked_title">The widget is part of Premium</string>
     <string name="widget_locked_action">Unlock</string>

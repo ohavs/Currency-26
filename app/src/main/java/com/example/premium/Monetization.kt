@@ -49,6 +49,15 @@ interface Monetization {
     /** A natural break (back from the picker, settings or history): maybe a full-screen ad, or the review ask. */
     fun onBreak(activity: Activity)
 
+    /** Free conversions from other apps left now; null when they are unlimited (Premium, or the GitHub build). */
+    fun quickConvertsLeft(): Int? = null
+
+    /** While none is left: when the next free conversion from another app comes back. */
+    fun nextFreeQuickConvert(): Long? = null
+
+    /** The bubble showed a conversion of text from another app (counted only without Premium). */
+    fun noteQuickConvert() = Unit
+
     /** Only in builds with Google's test ads (the closed test): moves Premium's clock to try the ads now. */
     val testTools: TestTools? get() = null
 }

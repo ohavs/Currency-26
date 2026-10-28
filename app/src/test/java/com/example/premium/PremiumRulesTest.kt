@@ -75,4 +75,35 @@ class PremiumRulesTest {
     assertTrue("but yes during the trial", may(access = PremiumState(trialUntil = t0 + hour).access(t0)))
     assertFalse("never with Premium forever", may(access = PremiumState(purchased = true).access(t0)))
   }
+
+  @Test
+  fun `five free conversions from other apps in any seven days`() {
+    val locked = PremiumState().access(t0)
+    var uses = emptyList<Long>()
+    repeat(5) { i ->
+      assertEquals(5 - i, QuickConvertAllowance.left(locked, uses, t0 + i * hour))
+      uses = QuickConvertAllowance.afterUse(uses, t0 + i * hour)
+    }
+    val now = t0 + 10 * hour
+    assertEquals(0, QuickConvertAllowance.left(locked, uses, now))
+    assertEquals("the first use comes back a week after it", t0 + 7 * 24 * hour, QuickConvertAllowance.nextFreeAt(uses, now))
+    assertEquals(1, QuickConvertAllowance.left(locked, uses, t0 + 7 * 24 * hour))
+    assertNull(QuickConvertAllowance.nextFreeAt(uses, t0 + 7 * 24 * hour))
+    assertEquals(5, QuickConvertAllowance.left(locked, uses, t0 + 8 * 24 * hour))
+  }
+
+  @Test
+  fun `Premium makes converting from other apps unlimited`() {
+    val uses = List(5) { t0 + it }
+    assertNull(QuickConvertAllowance.left(PremiumState(trialUntil = t0 + hour).access(t0 + 10), uses, t0 + 10))
+    assertNull(QuickConvertAllowance.left(PremiumState(rewardUntil = t0 + hour).access(t0 + 10), uses, t0 + 10))
+    assertNull(QuickConvertAllowance.left(PremiumState(purchased = true).access(t0 + 10), uses, t0 + 10))
+  }
+
+  @Test
+  fun `only the last week is kept, and a clock set back frees the uses`() {
+    val uses = List(5) { t0 + it * hour }
+    assertEquals(5, QuickConvertAllowance.afterUse(uses, t0 + 6 * hour).size)
+    assertEquals(5, QuickConvertAllowance.left(PremiumState().access(t0 - hour), uses, t0 - hour))
+  }
 }

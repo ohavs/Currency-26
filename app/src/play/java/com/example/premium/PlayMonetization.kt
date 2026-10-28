@@ -319,6 +319,18 @@ private class PlayMonetization(private val app: Application) : Monetization {
     private var interstitialAt = 0L
     private var interstitialLoading = false
 
+    override fun quickConvertsLeft(): Int? {
+        store.refresh()
+        return QuickConvertAllowance.left(store.access.value, store.quickConvertUses, now())
+    }
+
+    override fun nextFreeQuickConvert(): Long? = QuickConvertAllowance.nextFreeAt(store.quickConvertUses, now())
+
+    override fun noteQuickConvert() {
+        if (store.access.value.unlocked) return
+        store.quickConvertUses = QuickConvertAllowance.afterUse(store.quickConvertUses, now())
+    }
+
     override fun noteConversion() {
         conversions++
         if (conversions == 1) preloadInterstitial()
@@ -391,6 +403,7 @@ private class PlayMonetization(private val app: Application) : Monetization {
 
         override fun restartTrial() {
             store.setInstalledAgoForTesting(0L)
+            store.quickConvertUses = emptyList()
             store.update { PremiumRules.newInstall(now()).copy(purchased = it.purchased, purchasePending = it.purchasePending) }
         }
     } else null

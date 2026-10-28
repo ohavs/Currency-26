@@ -86,6 +86,20 @@ fun main() {
     locked.onKeypadPress("C"); locked.onKeypadPress("7"); locked.onKeypadPress("5")
     check("typing a new amount counts one conversion", premium.conversions == before + 1)
 
+ 
+    // The third currency is Premium: locked, "+ add" opens the sheet; unlocking opens its picker; it is put aside
+    // when Premium ends and comes back with it.
+    locked.addExtraCurrency()
+    check("locked third currency opens Premium", locked.premiumSheet.value == com.example.premium.PremiumReason.EXTRA_CURRENCY && !l().showCurrencySelector)
+    premium.set(com.example.premium.PremiumState(purchased = true))
+    check("unlocking opens the picker for the third currency", l().showCurrencySelector && l().pickerSlot == com.example.data.CurrencySlot.EXTRA_TARGET)
+    locked.selectCurrency("EUR")
+    check("the third currency is shown with Premium", l().extraTargetCurrency == "EUR")
+    premium.set(com.example.premium.PremiumState())
+    check("without Premium it is put aside", l().extraTargetCurrency == null)
+    premium.set(com.example.premium.PremiumState(purchased = true))
+    check("with Premium again it comes back", l().extraTargetCurrency == "EUR")
+
     println(if (failures == 0) "all checks passed" else "$failures checks failed")
     if (failures > 0) kotlin.system.exitProcess(1)
 }

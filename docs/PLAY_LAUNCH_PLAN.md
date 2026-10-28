@@ -102,8 +102,8 @@
 
 | | |
 |---|---|
-| **חינם תמיד** | המרה, חיפוש, מטבע נוסף (שלישי), היסטוריה, "סמן והמר" מכל אפליקציה, מצב כהה/בהיר, כל השפות |
-| **פרימיום** | **ווידג'ט**, **החלפת ערכות צבעים**, **מחשבון** (אופרטורים, אחוזים, סוגריים) |
+| **חינם תמיד** | המרה, חיפוש, היסטוריה, "סמן והמר" מכל אפליקציה **5 פעמים בכל 7 ימים** (חלון מתגלגל), מצב כהה/בהיר, כל השפות |
+| **פרימיום** | **ווידג'ט**, **החלפת ערכות צבעים**, **מחשבון** (אופרטורים, אחוזים, סוגריים), **מטבע שלישי**, **"סמן והמר" בלי הגבלה** (מ־5.0.31, החלטת אוהב 28.10) |
 | **ניסיון** | משתמש חדש מקבל 3 ימי פרימיום |
 | **סרטונים** | **2 סרטונים ← 24 שעות פרימיום**. כל זוג נוסף מוסיף יום, עד 72 שעות קדימה. סרטון אחד נשמר עד 24 שעות עד שרואים את השני |
 | **רכישה** | "פרימיום לתמיד", חד־פעמית, ₪14.90 (`premium_forever`): כל הפיצ'רים, **בלי שום פרסומות** |
@@ -112,6 +112,7 @@
 | **לא** | פרסומת פתיחה, פרסומות בבועת "סמן והמר", פרסומת בזמן הקלדה |
 | **דירוג** | בקשת דירוג אחת (In-App Review) אחרי 4 ימים ו־5 סשנים, בהפסקה טבעית שלא הוצגה בה פרסומת |
 
+- **מטבע שלישי ו"סמן והמר" (5.0.31):** "+ הוספת מטבע נוסף" מקבל מנעול; בלי פרימיום מטבע שלישי קיים מוסתר (נשמר בצד, `target2_parked`) וחוזר כשהפרימיום חוזר. בבועה: המרה נספרת רק כשהיא באמת הציגה מחיר, מתחת לכפתורים "נשארו השבוע X מתוך 5". כשנגמרו, הבועה מציגה "ניצלת את 5 ההמרות החינמיות של השבוע", מתי חוזרת הבאה, וכפתור "ללא הגבלה עם פרימיום" שפותח את גיליון הפרימיום באפליקציה. בזמן ניסיון/סרטונים/רכישה אין ספירה. כלי הבדיקה "restart the trial" גם מאפס את הספירה.
 - **נעילה:** מקש המחשבון וערכות הצבעים מקבלים מנעול קטן. לחיצה פותחת את גיליון הפרימיום, והפיצ'ר שנלחץ מופיע בו ראשון.
 - **אחרי פתיחה (סרטונים או רכישה):** הפעולה שהמשתמש ביקש מתבצעת לבד: המחשבון נפתח, הערכה שנבחרה מוחלת, או מתחילה הוספת ווידג'ט.
 - **כשהפרימיום נגמר:**
@@ -172,7 +173,7 @@
 - **Privacy policy:** `https://ohavs.github.io/privacy.html` (עד 26.10 היה `/Currency-26/privacy.html`; לעדכן בקונסולה).
 - **Sign in details** (לשעבר App access): **Yes**. גוגל מונה עכשיו גם רכישה חד־פעמית כ"חלק מוגבל". ב־Add instructions:
   - Name ‏`Premium features`. בלי משתמש וסיסמה (או `Not required`).
-  - Any other information: "No account or sign-in is needed. Everything is free except three Premium features (home-screen widget, colour themes, calculator keys). They unlock automatically for 3 days on a fresh install, with no payment or sign-up, and at any time for 24 hours by watching two rewarded videos (Settings > Premium). The optional one-time purchase \"Premium forever\" removes ads and keeps them unlocked."
+  - Any other information: "No account or sign-in is needed. Everything is free except the Premium features (home-screen widget, colour themes, calculator keys, a third currency on the main screen, and converting selected text from other apps more than 5 times a week). They unlock automatically for 3 days on a fresh install, with no payment or sign-up, and at any time for 24 hours by watching two rewarded videos (Settings > Premium). The optional one-time purchase \"Premium forever\" removes ads and keeps them unlocked."
 - **Ads:** Yes, my app contains ads.
 - **Content rating (IARC):**
   - קטגוריה: "Utility, Productivity, Communication, or Other".

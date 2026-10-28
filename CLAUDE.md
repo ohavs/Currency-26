@@ -159,6 +159,11 @@ Hebrew, and show rendered previews of visual changes (see `tools/preview`).
   when the widgets' look changes.
 - Banner (5.0.30): `PlayMonetization` keeps one `AdView` per activity, loaded as `start()` runs and moved between
   screens (never destroyed when the calculator leaves), so coming back from Settings doesn't wait for a new ad.
+- Premium gates (5.0.31): "+ add currency" wears a lock and opens the sheet (`EXTRA_CURRENCY`); without Premium a
+  third currency is parked (`target2_parked`) and comes back with Premium (also re-parked in `reloadSelection`, since
+  "open in app" from the bubble may set one). The bubble counts a free use only once it shows a converted price
+  (once per bubble, kept across rotation); out of uses it shows when the next one returns and opens the app's sheet
+  (`openPremiumIntent(reason = QUICK_CONVERT)`).
 - Quick-convert bubble (5.0.30): tapping the price's own card (or its chip over a list) says which currency the text
   really meant (`QuickConvert.convert(from = ...)`, this text only, not saved).
 - History panel (5.0.19): the header is just the clock icon (the link already says "History"); the clear key
@@ -167,10 +172,11 @@ Hebrew, and show rendered previews of visual changes (see `tools/preview`).
 
 ## Next
 - **Open as of 2026-10-26 (owner's wishes, next session starts here):**
-  - 2026-10-28: the owner asked whether the third currency and quick convert should become Premium ("reasons to buy
-    or watch many videos"). Proposed: third currency fully Premium; quick convert free 3 times a day, then a locked
-    bubble (videos/purchase). Awaiting the owner's answer; if yes, also update the store texts, the reviewer note
-    (plan doc) and the free/Premium table.
+  - 2026-10-28 (5.0.31): the owner approved making the third currency Premium and quick convert free 5 times in any
+    7 days (`QuickConvertAllowance`, uses in prefs "premium" `quick_convert_uses`), unlimited with Premium. Store texts
+    (13 languages), the free/Premium table and the reviewer note (plan doc) were updated. The owner has to paste the
+    new reviewer note into Play Console (App content > App access). Videos: the owner uploads them to YouTube and
+    sends the links; then add them to the listing (`video.txt` per locale for fastlane, or by hand).
   - 2026-10-27: Store settings and the privacy URL fix are done (owner). The closed test ("Alpha") was SENT FOR REVIEW
     on 2026-10-27: 5.0.27 (versionCode 527, run 40501759554, test ads), list "צוות בודקים" (17 people), 177 countries +
     rest of world. Along the way the owner filled the en-US default store listing by hand (texts and images from

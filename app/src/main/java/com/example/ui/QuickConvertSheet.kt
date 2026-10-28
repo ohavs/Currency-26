@@ -35,7 +35,9 @@ import androidx.compose.material.icons.rounded.CloudOff
 import androidx.compose.material.icons.rounded.ContentCopy
 import androidx.compose.material.icons.rounded.ExpandMore
 import androidx.compose.material.icons.rounded.FindReplace
+import androidx.compose.material.icons.rounded.Lock
 import androidx.compose.material.icons.rounded.SearchOff
+import androidx.compose.material.icons.rounded.WorkspacePremium
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -62,6 +64,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.R
+import com.example.premium.QuickConvertAllowance
 import com.example.ui.theme.LocalPalette
 import com.example.ui.theme.paletteTexture
 import com.example.utils.ConvertedPrice
@@ -72,6 +75,7 @@ import com.example.utils.currencyName
 import com.example.utils.formatAmount
 import com.example.utils.formatOriginal
 import com.example.utils.formatRate
+import com.example.utils.formatUntil
 import com.example.utils.getCurrencyInfo
 import com.example.utils.withSymbol
 
@@ -80,12 +84,18 @@ import com.example.utils.withSymbol
  * [conversion] is null while the very first rates load ([offline] when they could not); tapping outside the
  * card dismisses it. Tapping the currency it converts to opens a picker in the bubble ([onChooseCurrency]), and so
  * does tapping the price's own currency, when the text meant another one ([onChooseSource]); [recents] are offered
- * first there.
+ * first there. A [locked] bubble (this week's free conversions are used up) converts nothing and offers Premium
+ * ([onUnlock]), saying when the next free one comes back ([nextFree]); [freeLeft] is how many free ones are left
+ * after this one (null with Premium).
  */
 @Composable
 fun QuickConvertSheet(
     conversion: QuickConversion?,
     colorTheme: String,
+    locked: Boolean = false,
+    nextFree: Long? = null,
+    freeLeft: Int? = null,
+    onUnlock: () -> Unit = {},
     offline: Boolean,
     canReplace: Boolean,
     copied: Boolean,
@@ -137,6 +147,7 @@ fun QuickConvertSheet(
                 .padding(16.dp)
         ) {
             when {
+                locked -> UsedUp(nextFree, onUnlock)
                 picking != null && conversion != null -> {
                     val source = picking == PICK_SOURCE
                     CurrencyPage(
@@ -186,6 +197,16 @@ fun QuickConvertSheet(
                             contentDescription = stringResource(R.string.quick_open),
                             onClick = onOpenApp,
                             containerColor = palette.card
+                        )
+                    }
+                    if (freeLeft != null) {
+                        Spacer(Modifier.height(10.dp))
+                        Text(
+                            stringResource(R.string.quick_free_left, freeLeft, QuickConvertAllowance.FREE_PER_WEEK),
+                            style = MaterialTheme.typography.labelMedium,
+                            color = palette.inkMuted,
+                            textAlign = TextAlign.Center,
+                            modifier = Modifier.fillMaxWidth()
                         )
                     }
                 }
@@ -411,6 +432,46 @@ private fun ListRow(original: String, converted: String) {
             color = palette.ink
         )
     }
+}
+
+/** This week's free conversions are used up: when the next one comes back, and Premium for no limit. */
+@Composable
+private fun UsedUp(nextFree: Long?, onUnlock: () -> Unit) {
+    val palette = LocalPalette.current
+    Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(4.dp)) {
+        Box(
+            modifier = Modifier
+                .size(40.dp)
+                .clip(RoundedCornerShape(14.dp))
+                .background(palette.accent),
+            contentAlignment = Alignment.Center
+        ) {
+            Icon(Icons.Rounded.Lock, contentDescription = null, tint = palette.onAccent, modifier = Modifier.size(22.dp))
+        }
+        Spacer(Modifier.width(12.dp))
+        Column(Modifier.weight(1f)) {
+            Text(
+                stringResource(R.string.quick_used_up, QuickConvertAllowance.FREE_PER_WEEK),
+                style = MaterialTheme.typography.titleMedium,
+                color = palette.ink
+            )
+            if (nextFree != null) {
+                val time = formatUntil(
+                    nextFree, System.currentTimeMillis(), LocalAppLocale.current,
+                    todayFormat = stringResource(R.string.today_at),
+                    tomorrowFormat = stringResource(R.string.tomorrow_at)
+                )
+                Text(stringResource(R.string.quick_next_free, time), style = MaterialTheme.typography.bodyMedium, color = palette.inkMuted)
+            }
+        }
+    }
+    Spacer(Modifier.height(14.dp))
+    PillButton(
+        text = stringResource(R.string.quick_unlimited),
+        icon = Icons.Rounded.WorkspacePremium,
+        onClick = onUnlock,
+        modifier = Modifier.fillMaxWidth()
+    )
 }
 
 /** Nothing to convert (no price in the text, or no rates yet): say so, and offer the app itself. */

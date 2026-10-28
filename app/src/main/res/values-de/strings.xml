@@ -114,6 +114,10 @@
     <string name="quick_total">Summe</string>
     <string name="quick_no_price">Im markierten Text wurde kein Preis gefunden</string>
     <string name="quick_assumed">Währung vermutet</string>
+    <string name="quick_free_left">Noch %1$d von %2$d kostenlosen Umrechnungen diese Woche</string>
+    <string name="quick_used_up">Die %1$d kostenlosen Umrechnungen dieser Woche sind aufgebraucht</string>
+    <string name="quick_next_free">Nächste kostenlose: %1$s</string>
+    <string name="quick_unlimited">Unbegrenzt mit Premium</string>
     <string name="tip_select_title">Aus jeder App umrechnen</string>
     <string name="tip_select_body">Markiere einen Preis in einer beliebigen App und wähle „Währung umrechnen“ im Menü (oder Teilen → „Währung umrechnen“). Das Ergebnis erscheint sofort, ohne dass du die App verlassen musst.</string>
     <string name="select_menu_summary">Preis markieren → „%1$s“</string>
@@ -131,11 +135,13 @@
     <string name="tip_calc_body">Die Rechner-Taste in der unteren Reihe fügt + − × ÷ hinzu, für Rechnungen wie %1$s, und das Ergebnis wird sofort in alle Währungen umgerechnet. Frühere Beträge und Rechnungen findest du im Verlauf unter den Karten.</string>
     <string name="tip_calc_action">Ausprobieren</string>
     <string name="premium">Premium</string>
-    <string name="premium_subtitle">Widget, Farbschemas und Rechner</string>
+    <string name="premium_subtitle">Widget, dritte Währung, Rechner und mehr</string>
     <string name="premium_feature_widget">Widget auf dem Startbildschirm</string>
     <string name="premium_feature_colors">Farbschemas</string>
     <string name="premium_feature_calculator">Rechner und Prozente</string>
-    <string name="premium_free_note">Umrechnen, Suche, zusätzliche Währung und Verlauf bleiben kostenlos.</string>
+    <string name="premium_feature_extra">Eine dritte Währung auf dem Bildschirm</string>
+    <string name="premium_feature_quick">Unbegrenzt aus jeder App umrechnen</string>
+    <string name="premium_free_note">Umrechnen, Suche und Verlauf bleiben kostenlos, dazu %1$d Umrechnungen pro Woche aus anderen Apps.</string>
     <string name="premium_watch">%1$d kurze Videos ansehen</string>
     <string name="premium_free_hours">%1$d Std. gratis</string>
     <string name="premium_watch_next">Video %1$d von %2$d</string>
@@ -151,7 +157,7 @@
     <string name="premium_extend">%1$d weitere Videos bringen %2$d Std. dazu</string>
     <string name="premium_pending">Dein Kauf wartet auf die Bestätigung der Zahlung</string>
     <string name="premium_locked">Teil von Premium</string>
-    <string name="premium_promo">Premium: keine Werbung, dazu Widget, Farben und Rechner</string>
+    <string name="premium_promo">Premium: keine Werbung, Widget, Rechner und mehr</string>
     <string name="premium_settings_free">%1$d kurze Videos schalten %2$d Std. frei</string>
     <string name="widget_locked_title">Das Widget gehört zu Premium</string>
     <string name="widget_locked_action">Freischalten</string>

@@ -114,6 +114,10 @@
     <string name="quick_total">कुल</string>
     <string name="quick_no_price">चुने गए टेक्स्ट में कोई कीमत नहीं मिली</string>
     <string name="quick_assumed">अनुमानित मुद्रा</string>
+    <string name="quick_free_left">इस हफ़्ते %2$d में से %1$d मुफ़्त कन्वर्ज़न बाकी</string>
+    <string name="quick_used_up">इस हफ़्ते के %1$d मुफ़्त कन्वर्ज़न खत्म हो गए</string>
+    <string name="quick_next_free">अगला मुफ़्त: %1$s</string>
+    <string name="quick_unlimited">प्रीमियम के साथ असीमित</string>
     <string name="tip_select_title">किसी भी ऐप से कन्वर्ट करें</string>
     <string name="tip_select_body">किसी भी ऐप में कीमत चुनें और मेन्यू से \"मुद्रा कन्वर्ट करें\" चुनें (या शेयर करें → \"मुद्रा कन्वर्ट करें\")। आप जो कर रहे हैं उसे छोड़े बिना नतीजा तुरंत दिखेगा।</string>
     <string name="select_menu_summary">कीमत चुनें → \"%1$s\"</string>
@@ -131,11 +135,13 @@
     <string name="tip_calc_body">नीचे की पंक्ति की कैलकुलेटर कुंजी %1$s जैसे हिसाब के लिए + − × ÷ जोड़ती है, और नतीजा तुरंत सभी मुद्राओं में कन्वर्ट हो जाता है। पिछली राशियाँ और हिसाब कार्डों के नीचे इतिहास में रहते हैं।</string>
     <string name="tip_calc_action">आज़माएँ</string>
     <string name="premium">प्रीमियम</string>
-    <string name="premium_subtitle">विजेट, रंग थीम और कैलकुलेटर</string>
+    <string name="premium_subtitle">विजेट, तीसरी मुद्रा, कैलकुलेटर और बहुत कुछ</string>
     <string name="premium_feature_widget">होम स्क्रीन विजेट</string>
     <string name="premium_feature_colors">रंग थीम</string>
     <string name="premium_feature_calculator">कैलकुलेटर और प्रतिशत</string>
-    <string name="premium_free_note">मुद्रा कन्वर्ट करना, खोज, अतिरिक्त मुद्रा और इतिहास मुफ़्त रहते हैं।</string>
+    <string name="premium_feature_extra">स्क्रीन पर तीसरी मुद्रा</string>
+    <string name="premium_feature_quick">किसी भी ऐप से असीमित कन्वर्ट</string>
+    <string name="premium_free_note">कन्वर्ट करना, खोज और इतिहास मुफ़्त रहते हैं, साथ ही दूसरे ऐप्स से हर हफ़्ते %1$d बार कन्वर्ट करना भी।</string>
     <string name="premium_watch">%1$d छोटे वीडियो देखें</string>
     <string name="premium_free_hours">%1$d घंटे मुफ़्त</string>
     <string name="premium_watch_next">वीडियो %1$d / %2$d</string>
@@ -151,7 +157,7 @@
     <string name="premium_extend">%1$d और वीडियो से %2$d घंटे जुड़ेंगे</string>
     <string name="premium_pending">आपकी खरीदारी भुगतान की पुष्टि का इंतज़ार कर रही है</string>
     <string name="premium_locked">प्रीमियम का हिस्सा</string>
-    <string name="premium_promo">प्रीमियम: बिना विज्ञापन, विजेट, रंग और कैलकुलेटर के साथ</string>
+    <string name="premium_promo">प्रीमियम: बिना विज्ञापन, विजेट, कैलकुलेटर और बहुत कुछ</string>
     <string name="premium_settings_free">%1$d छोटे वीडियो से %2$d घंटे खुलते हैं</string>
     <string name="widget_locked_title">विजेट प्रीमियम का हिस्सा है</string>
     <string name="widget_locked_action">अनलॉक करें</string>

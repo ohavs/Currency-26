@@ -114,6 +114,10 @@
     <string name="quick_total">合計</string>
     <string name="quick_no_price">選択したテキストに価格が見つかりません</string>
     <string name="quick_assumed">推定した通貨</string>
+    <string name="quick_free_left">今週の無料換算：残り%1$d回（%2$d回中）</string>
+    <string name="quick_used_up">今週の無料換算（%1$d回）を使い切りました</string>
+    <string name="quick_next_free">次の無料換算：%1$s</string>
+    <string name="quick_unlimited">プレミアムなら無制限</string>
     <string name="tip_select_title">どのアプリからでも換算</string>
     <string name="tip_select_body">どのアプリでも価格を選択し、メニューから「通貨を換算」を選びます（または［共有］→「通貨を換算」）。今の画面のまま、すぐに結果が表示されます。</string>
     <string name="select_menu_summary">価格を選択 →「%1$s」</string>
@@ -131,11 +135,13 @@
     <string name="tip_calc_body">下の段の電卓キーで + − × ÷ が使え、%1$s のような計算ができます。結果はすぐにすべての通貨に換算されます。これまでの金額と計算は、カードの下の履歴に残ります。</string>
     <string name="tip_calc_action">試してみる</string>
     <string name="premium">プレミアム</string>
-    <string name="premium_subtitle">ウィジェット、カラーテーマ、電卓</string>
+    <string name="premium_subtitle">ウィジェット、3つ目の通貨、電卓など</string>
     <string name="premium_feature_widget">ホーム画面のウィジェット</string>
     <string name="premium_feature_colors">カラーテーマ</string>
     <string name="premium_feature_calculator">電卓とパーセント計算</string>
-    <string name="premium_free_note">換算、検索、追加の通貨、履歴はずっと無料です。</string>
+    <string name="premium_feature_extra">3つ目の通貨を表示</string>
+    <string name="premium_feature_quick">どのアプリからでも無制限に換算</string>
+    <string name="premium_free_note">換算、検索、履歴はずっと無料。他のアプリからの換算も週%1$d回まで無料です。</string>
     <string name="premium_watch">短い動画を%1$d本見る</string>
     <string name="premium_free_hours">%1$d時間無料</string>
     <string name="premium_watch_next">動画 %1$d / %2$d</string>
@@ -151,7 +157,7 @@
     <string name="premium_extend">あと%1$d本で%2$d時間延長</string>
     <string name="premium_pending">購入は支払いの確認待ちです</string>
     <string name="premium_locked">プレミアム機能</string>
-    <string name="premium_promo">プレミアム：広告なし、ウィジェット・カラー・電卓つき</string>
+    <string name="premium_promo">プレミアム：広告なし、ウィジェット・電卓などつき</string>
     <string name="premium_settings_free">短い動画%1$d本で%2$d時間利用可能</string>
     <string name="widget_locked_title">ウィジェットはプレミアム機能です</string>
     <string name="widget_locked_action">ロック解除</string>

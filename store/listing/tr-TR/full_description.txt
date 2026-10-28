@@ -2,12 +2,12 @@ Her para birimini tek dokunuşla, internet olmadan bile çevirin. Bir tutar yaz�
 
 ★ Basit ve hızlı
 • Büyük ve net tuş takımı: sonuç siz yazarken değişir
-• Para birimlerinin yerini tek dokunuşla değiştirin ya da aynı anda ikisine çevirmek için üçüncü bir para birimi ekleyin
+• Para birimlerinin yerini tek dokunuşla değiştirin
 • Para birimini ülke, ad, sembol veya koda göre, her dilde arayın
 • İndirilen son kurlarla çevrimdışı çalışır
 
 ★ Her uygulamadan çevirin
-Tarayıcıda, bir rezervasyon uygulamasında ya da sohbette bir fiyatı seçin ve "Döviz çevir"i seçin (veya Paylaş → "Döviz çevir"). Sonuç, bulunduğunuz uygulamanın üzerinde açılır. $, €, ₪, "1.250,00", "1.5k" ve daha fazlasını anlar.
+Tarayıcıda, bir rezervasyon uygulamasında ya da sohbette bir fiyatı seçin ve "Döviz çevir"i seçin (veya Paylaş → "Döviz çevir"). Sonuç, bulunduğunuz uygulamanın üzerinde açılır. $, €, ₪, "1.250,00", "1.5k" ve daha fazlasını anlar. Haftada 5 kez ücretsiz, Premium ile sınırsız.
 
 ★ Geçmiş
 Her tutar ve her hesaplama saklanır. Para birimleriyle birlikte geri getirmek için birine dokunun.
@@ -16,8 +16,10 @@ Her tutar ve her hesaplama saklanır. Para birimleriyle birlikte geri getirmek i
 • Ana ekran widget'ı: bir tutar yazın, uygulamayı açmadan çevrilmiş hâlini görün
 • Yüzdeli hesap makinesi: 120 + %15, 3 × 800 ve daha fazlası, yazarken çevrilir
 • Her biri açık ve koyu olan 6 renk teması
+• Üçüncü bir para birimi: aynı anda ikisine çevirin
+• Her uygulamadan sınırsız çevirme
 
-Yeni kullanıcılar Premium'u 3 gün ücretsiz kullanır. Sonrasında 2 kısa video izleyerek 24 saatliğine açabilir ya da reklamları da kaldıran tek bir ödemeyle ömür boyu Premium alabilirsiniz. Çevirme, arama, ek para birimi, geçmiş ve diğer uygulamalardan çevirme her zaman ücretsizdir.
+Yeni kullanıcılar Premium'u 3 gün ücretsiz kullanır. Sonrasında 2 kısa video izleyerek 24 saatliğine açabilir ya da reklamları da kaldıran tek bir ödemeyle ömür boyu Premium alabilirsiniz. Çevirme, arama ve geçmiş her zaman ücretsizdir; diğer uygulamalardan haftada 5 çevirme de ücretsizdir.
 
 ★ 13 dil
 Türkçe, İngilizce, İbranice, Arapça, İspanyolca, Rusça, Fransızca, Almanca, Portekizce, İtalyanca, Çince, Japonca ve Hintçe.

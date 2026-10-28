@@ -114,6 +114,10 @@
     <string name="quick_total">Totale</string>
     <string name="quick_no_price">Nessun prezzo trovato nel testo selezionato</string>
     <string name="quick_assumed">Valuta presunta</string>
+    <string name="quick_free_left">Ti restano %1$d conversioni gratuite su %2$d questa settimana</string>
+    <string name="quick_used_up">Hai usato le %1$d conversioni gratuite di questa settimana</string>
+    <string name="quick_next_free">Prossima gratuita: %1$s</string>
+    <string name="quick_unlimited">Senza limiti con Premium</string>
     <string name="tip_select_title">Converti da qualsiasi app</string>
     <string name="tip_select_body">Seleziona un prezzo in qualsiasi app e scegli \"Converti valuta\" dal menu (o Condividi → \"Converti valuta\"). Il risultato appare subito, senza interrompere quello che stai facendo.</string>
     <string name="select_menu_summary">Seleziona un prezzo → \"%1$s\"</string>
@@ -131,11 +135,13 @@
     <string name="tip_calc_body">Il tasto calcolatrice nella riga in basso aggiunge + − × ÷ per calcoli come %1$s, e il risultato viene convertito subito in tutte le valute. Gli importi e i calcoli precedenti restano nella cronologia, sotto le schede.</string>
     <string name="tip_calc_action">Prova</string>
     <string name="premium">Premium</string>
-    <string name="premium_subtitle">Widget, temi di colore e calcolatrice</string>
+    <string name="premium_subtitle">Widget, terza valuta, calcolatrice e altro</string>
     <string name="premium_feature_widget">Widget nella schermata Home</string>
     <string name="premium_feature_colors">Temi di colore</string>
     <string name="premium_feature_calculator">Calcolatrice e percentuali</string>
-    <string name="premium_free_note">Conversione, ricerca, valuta aggiuntiva e cronologia restano gratuite.</string>
+    <string name="premium_feature_extra">Una terza valuta sullo schermo</string>
+    <string name="premium_feature_quick">Conversioni illimitate da qualsiasi app</string>
+    <string name="premium_free_note">Conversione, ricerca e cronologia restano gratuite, più %1$d conversioni a settimana da altre app.</string>
     <string name="premium_watch">Guarda %1$d brevi video</string>
     <string name="premium_free_hours">%1$d ore gratis</string>
     <string name="premium_watch_next">Video %1$d di %2$d</string>
@@ -151,7 +157,7 @@
     <string name="premium_extend">Altri %1$d video aggiungono %2$d ore</string>
     <string name="premium_pending">L\'acquisto è in attesa della conferma del pagamento</string>
     <string name="premium_locked">Incluso in Premium</string>
-    <string name="premium_promo">Premium: niente pubblicità, più widget, colori e calcolatrice</string>
+    <string name="premium_promo">Premium: niente pubblicità, widget, calcolatrice e altro</string>
     <string name="premium_settings_free">%1$d brevi video sbloccano %2$d ore</string>
     <string name="widget_locked_title">Il widget fa parte di Premium</string>
     <string name="widget_locked_action">Sblocca</string>

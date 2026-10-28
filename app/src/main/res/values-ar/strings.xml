@@ -114,6 +114,10 @@
     <string name="quick_total">المجموع</string>
     <string name="quick_no_price">لم يتم العثور على سعر في النص المحدد</string>
     <string name="quick_assumed">عملة مفترضة</string>
+    <string name="quick_free_left">تبقّى لك %1$d من %2$d تحويلات مجانية هذا الأسبوع</string>
+    <string name="quick_used_up">استخدمت تحويلات هذا الأسبوع المجانية (%1$d)</string>
+    <string name="quick_next_free">التحويل المجاني التالي: %1$s</string>
+    <string name="quick_unlimited">بلا حدود مع بريميوم</string>
     <string name="tip_select_title">حوّل من أي تطبيق</string>
     <string name="tip_select_body">حدّد سعرًا في أي تطبيق واختر \"تحويل العملة\" من القائمة (أو مشاركة ← \"تحويل العملة\"). تظهر النتيجة فورًا دون مغادرة ما تفعله.</string>
     <string name="select_menu_summary">حدّد سعرًا ← \"%1$s\"</string>
@@ -131,11 +135,13 @@
     <string name="tip_calc_body">يضيف زر الآلة الحاسبة في الصف السفلي عمليات + − × ÷ لحسابات مثل %1$s، وتُحوَّل النتيجة فورًا إلى كل العملات. تُحفظ المبالغ والحسابات السابقة في السجل، أسفل البطاقات.</string>
     <string name="tip_calc_action">جرّبه</string>
     <string name="premium">بريميوم</string>
-    <string name="premium_subtitle">الأداة وسمات الألوان والآلة الحاسبة</string>
+    <string name="premium_subtitle">الأداة وعملة ثالثة والآلة الحاسبة والمزيد</string>
     <string name="premium_feature_widget">أداة على الشاشة الرئيسية</string>
     <string name="premium_feature_colors">سمات الألوان</string>
     <string name="premium_feature_calculator">الآلة الحاسبة والنسب المئوية</string>
-    <string name="premium_free_note">التحويل والبحث والعملة الإضافية والسجل تبقى مجانية.</string>
+    <string name="premium_feature_extra">عملة ثالثة على الشاشة</string>
+    <string name="premium_feature_quick">تحويل غير محدود من أي تطبيق</string>
+    <string name="premium_free_note">التحويل والبحث والسجل تبقى مجانية، ومعها %1$d تحويلات أسبوعيًا من التطبيقات الأخرى.</string>
     <string name="premium_watch">شاهد %1$d مقاطع فيديو قصيرة</string>
     <string name="premium_free_hours">%1$d ساعة مجانًا</string>
     <string name="premium_watch_next">الفيديو %1$d من %2$d</string>
@@ -151,7 +157,7 @@
     <string name="premium_extend">%1$d مقاطع أخرى تضيف %2$d ساعة</string>
     <string name="premium_pending">عملية الشراء بانتظار تأكيد الدفع</string>
     <string name="premium_locked">جزء من بريميوم</string>
-    <string name="premium_promo">بريميوم: بلا إعلانات، مع الأداة والألوان والآلة الحاسبة</string>
+    <string name="premium_promo">بريميوم: بلا إعلانات، مع الأداة والآلة الحاسبة والمزيد</string>
     <string name="premium_settings_free">%1$d مقاطع فيديو قصيرة تفتح %2$d ساعة</string>
     <string name="widget_locked_title">الأداة جزء من بريميوم</string>
     <string name="widget_locked_action">فتح</string>

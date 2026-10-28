@@ -2,12 +2,12 @@ Converti qualsiasi valuta con un tocco, anche offline. Digita un importo e vedil
 
 ★ Semplice e veloce
 • Un tastierino grande e chiaro: il risultato cambia mentre digiti
-• Inverti le valute con un tocco o aggiungine una terza per convertire in due contemporaneamente
+• Inverti le valute con un tocco
 • Cerca una valuta per paese, nome, simbolo o codice, in qualsiasi lingua
 • Funziona offline con gli ultimi tassi scaricati
 
 ★ Converti da qualsiasi app
-Seleziona un prezzo nel browser, in un'app di prenotazioni o in una chat e scegli "Converti valuta" (oppure Condividi → "Converti valuta"). Il risultato compare sopra l'app che stai usando. Riconosce $, €, ₪, "1.250,00", "1.5k" e altro.
+Seleziona un prezzo nel browser, in un'app di prenotazioni o in una chat e scegli "Converti valuta" (oppure Condividi → "Converti valuta"). Il risultato compare sopra l'app che stai usando. Riconosce $, €, ₪, "1.250,00", "1.5k" e altro. Gratis 5 volte a settimana, senza limiti con Premium.
 
 ★ Cronologia
 Ogni importo e ogni calcolo vengono salvati. Toccane uno per ritrovarlo con le sue valute.
@@ -16,8 +16,10 @@ Ogni importo e ogni calcolo vengono salvati. Toccane uno per ritrovarlo con le s
 • Widget nella schermata Home: digita un importo e vedi la conversione senza aprire l'app
 • Calcolatrice con percentuali: 120 + 15%, 3 × 800 e altro, convertiti mentre digiti
 • 6 temi di colore, ognuno in versione chiara e scura
+• Una terza valuta: converti in due contemporaneamente
+• Conversioni illimitate da qualsiasi app
 
-I nuovi utenti hanno Premium gratis per 3 giorni. Poi guarda 2 brevi video per sbloccarlo per 24 ore, oppure prendi Premium per sempre con un solo pagamento, che toglie anche la pubblicità. Conversione, ricerca, valuta aggiuntiva, cronologia e conversione da altre app restano sempre gratuite.
+I nuovi utenti hanno Premium gratis per 3 giorni. Poi guarda 2 brevi video per sbloccarlo per 24 ore, oppure prendi Premium per sempre con un solo pagamento, che toglie anche la pubblicità. Conversione, ricerca e cronologia restano sempre gratuite, più 5 conversioni a settimana da altre app.
 
 ★ 13 lingue
 Italiano, inglese, ebraico, arabo, spagnolo, russo, francese, tedesco, portoghese, turco, cinese, giapponese e hindi.

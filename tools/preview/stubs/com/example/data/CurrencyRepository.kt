@@ -34,8 +34,23 @@ class CurrencyRepository(val context: android.content.Context) {
     fun getSourceCurrency(): String = "USD"
     fun getTargetCurrency(): String = "ILS"
     fun getAmount(): String = "1"
-    fun getExtraTargetCurrency(): String? = null
-    fun setExtraTargetCurrency(code: String?) {}
+    private var extra: String? = null
+    private var parked: String? = null
+    fun getExtraTargetCurrency(): String? = extra
+    fun setExtraTargetCurrency(code: String?) { extra = code }
+    fun parkExtraTargetCurrency(): Boolean {
+        val code = extra ?: return false
+        parked = code
+        extra = null
+        return true
+    }
+    fun restoreExtraTargetCurrency(): Boolean {
+        val code = parked ?: return false
+        parked = null
+        if (extra != null || code == getSourceCurrency() || code == getTargetCurrency()) return false
+        extra = code
+        return true
+    }
     fun extraCurrencyEverUsed(): Boolean = false
     fun tourTimesShown(): Int = 0
     fun tourLastShownAt(): Long = 0L

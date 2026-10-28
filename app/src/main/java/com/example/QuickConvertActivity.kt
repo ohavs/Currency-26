@@ -11,12 +11,14 @@ import androidx.activity.SystemBarStyle
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.lifecycleScope
+import com.example.premium.PremiumReason
 import com.example.ui.LocalAppLocale
 import com.example.ui.QuickConvertSheet
 import com.example.ui.theme.MyApplicationTheme
@@ -35,7 +37,8 @@ import kotlinx.coroutines.launch
  * app the text came from, with the price converted, and tapping outside returns to that app. In editable text
  * picked from the selection menu it can also put the converted price in place of the original. Tapping the
  * currency it converts to picks another one, which the bubble keeps until the app's own target changes; tapping the
- * price's currency says what it really is in (a "$" that meant Canadian dollars), for this text only.
+ * price's currency says what it really is in (a "$" that meant Canadian dollars), for this text only. Without Premium
+ * it converts [com.example.premium.QuickConvertAllowance.FREE_PER_WEEK] times a week, then offers Premium instead.
  */
 class QuickConvertActivity : ComponentActivity() {
     override fun attachBaseContext(newBase: Context) {
@@ -60,6 +63,14 @@ class QuickConvertActivity : ComponentActivity() {
         val repository = (application as CurrencyApp).repository
         val local = DeviceCountry.currency(this)
         repository.markQuickConvertUsed()
+        val monetization = (application as CurrencyApp).monetization
+        counted = savedInstanceState?.getBoolean(KEY_COUNTED) ?: false
+        // Out of free conversions this week: the bubble says so instead of converting (one counted before a
+        // rotation is still shown).
+        val freeLeftAtStart = monetization.quickConvertsLeft()
+        val locked = freeLeftAtStart == 0 && !counted
+        val nextFree = if (locked) monetization.nextFreeQuickConvert() else null
+        var freeLeft by mutableStateOf(if (counted) freeLeftAtStart else null)
 
         var offline by mutableStateOf(false)
         var chosen by mutableStateOf(repository.getQuickTarget())
@@ -89,11 +100,27 @@ class QuickConvertActivity : ComponentActivity() {
                     )
                 }
             }
+            // A free conversion counts once the bubble really shows a price converted.
+            val converted = conversion?.lines?.isNotEmpty() == true
+            LaunchedEffect(converted) {
+                if (converted && !locked && !counted && freeLeftAtStart != null) {
+                    counted = true
+                    monetization.noteQuickConvert()
+                    freeLeft = monetization.quickConvertsLeft()
+                }
+            }
             CompositionLocalProvider(LocalAppLocale provides resources.configuration.locales[0]) {
                 MyApplicationTheme(themeMode = themeMode, colorThemeStr = colorTheme) {
                     QuickConvertSheet(
                         conversion = conversion,
                         colorTheme = colorTheme,
+                        locked = locked,
+                        nextFree = nextFree,
+                        freeLeft = freeLeft,
+                        onUnlock = {
+                            startActivity(MainActivity.openPremiumIntent(this, PremiumReason.QUICK_CONVERT))
+                            finish()
+                        },
                         offline = offline,
                         canReplace = canReplace,
                         copied = copied,
@@ -136,9 +163,13 @@ class QuickConvertActivity : ComponentActivity() {
     /** The currency the user said the prices are in, picked in the bubble (null: as the text reads). */
     private var from by mutableStateOf<String?>(null)
 
+    /** This bubble's conversion was counted toward the free ones of the week. */
+    private var counted = false
+
     override fun onSaveInstanceState(outState: Bundle) {
         super.onSaveInstanceState(outState)
         outState.putString(KEY_FROM, from)
+        outState.putBoolean(KEY_COUNTED, counted)
     }
 
     /** Leaving for another app (home, recents) closes the bubble instead of leaving it behind. */
@@ -183,6 +214,7 @@ class QuickConvertActivity : ComponentActivity() {
     private companion object {
         const val STALE_AFTER_MS = 6 * 60 * 60 * 1000L
         const val KEY_FROM = "from"
+        const val KEY_COUNTED = "counted"
         val LINK = Regex("""https?://\S+""")
     }
 }

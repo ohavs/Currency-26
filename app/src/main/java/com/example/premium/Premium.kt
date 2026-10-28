@@ -1,9 +1,10 @@
 package com.example.premium
 
 /**
- * What unlocks Premium (the widget, the colour themes and the calculator): the one-time purchase, the free trial
- * of a new install, or rewarded videos ([PremiumRules.VIDEOS_PER_UNLOCK] of them buy [PremiumRules.REWARD_HOURS]
- * hours). Converting, searching, the extra currency, the history and converting selected text stay free.
+ * What unlocks Premium (the widget, the colour themes, the calculator, the third currency and converting from other
+ * apps without a limit): the one-time purchase, the free trial of a new install, or rewarded videos
+ * ([PremiumRules.VIDEOS_PER_UNLOCK] of them buy [PremiumRules.REWARD_HOURS] hours). Converting, searching and the
+ * history stay free, and so do [QuickConvertAllowance.FREE_PER_WEEK] conversions from other apps a week.
  */
 data class PremiumState(
     val purchased: Boolean = false,
@@ -80,7 +81,31 @@ internal const val HOUR_MS = 60L * 60 * 1000
 internal const val MINUTE_MS = 60L * 1000
 
 /** Why the Premium sheet opened: the feature the user reached for is shown first. */
-enum class PremiumReason { WIDGET, COLORS, CALCULATOR, NO_ADS, SETTINGS }
+enum class PremiumReason { WIDGET, COLORS, CALCULATOR, EXTRA_CURRENCY, QUICK_CONVERT, NO_ADS, SETTINGS }
+
+/**
+ * Converting selected text from other apps without Premium: [FREE_PER_WEEK] times in any 7 days (a rolling week,
+ * so nobody waits for a Monday). [uses] are the times of the free conversions, oldest first.
+ */
+object QuickConvertAllowance {
+    const val FREE_PER_WEEK = 5
+    const val WINDOW_MS = 7 * 24 * HOUR_MS
+
+    /** The uses still inside the window (a clock set back drops the ones "from the future"). */
+    fun recent(uses: List<Long>, now: Long): List<Long> = uses.filter { it in (now - WINDOW_MS + 1)..now }
+
+    /** Free conversions left right now; null when Premium makes them unlimited. */
+    fun left(access: Access, uses: List<Long>, now: Long): Int? =
+        if (access.unlocked) null else (FREE_PER_WEEK - recent(uses, now).size).coerceAtLeast(0)
+
+    fun afterUse(uses: List<Long>, now: Long): List<Long> = (recent(uses, now) + now).takeLast(FREE_PER_WEEK)
+
+    /** When the next free conversion comes back (the oldest use leaves the window); null when one is free now. */
+    fun nextFreeAt(uses: List<Long>, now: Long): Long? {
+        val recent = recent(uses, now)
+        return if (recent.size < FREE_PER_WEEK) null else recent.first() + WINDOW_MS
+    }
+}
 
 /**
  * When a full-screen ad may show: only at a natural break (leaving the currency picker, settings or the
