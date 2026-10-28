@@ -2,6 +2,9 @@ package com.example.premium
 
 import android.app.Activity
 import android.app.Application
+import android.content.Context
+import android.content.ContextWrapper
+import android.view.ViewGroup
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -9,12 +12,10 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.key
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -22,7 +23,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
-import androidx.lifecycle.compose.LocalLifecycleOwner
+import androidx.lifecycle.LifecycleOwner
 import com.android.billingclient.api.AcknowledgePurchaseParams
 import com.android.billingclient.api.BillingClient
 import com.android.billingclient.api.BillingClientStateListener
@@ -105,6 +106,8 @@ private class PlayMonetization(private val app: Application) : Monetization {
         }
         // Someone who bought Premium never sees ads, so there is nothing to ask consent for.
         if (store.access.value.adFree) return
+        bannerActivity = WeakReference(activity)
+        if (adsReady.value) preloadBanner(activity)
         val consent = UserMessagingPlatform.getConsentInformation(activity)
         consent.requestConsentInfoUpdate(
             activity,
@@ -394,6 +397,63 @@ private class PlayMonetization(private val app: Application) : Monetization {
 
     // --- Banner ---
 
+    /**
+     * The banner, one per activity: it starts loading as the app opens and stays alive while the user moves between
+     * screens, so the calculator finds its ad already there instead of loading a new one each time it comes back.
+     */
+    private class KeptBanner(val activity: WeakReference<Activity>, val widthDp: Int, val size: AdSize, val view: AdView) {
+        val loaded = MutableStateFlow(false)
+    }
+
+    private var banner: KeptBanner? = null
+    private var bannerActivity: WeakReference<Activity>? = null
+
+    private fun bannerFor(activity: Activity, widthDp: Int): KeptBanner {
+        banner?.takeIf { it.activity.get() === activity && it.widthDp == widthDp }?.let { return it }
+        dropBanner()
+        val size = AdSize.getCurrentOrientationAnchoredAdaptiveBannerAdSize(activity, widthDp)
+        val kept = KeptBanner(WeakReference(activity), widthDp, size, AdView(activity))
+        kept.view.apply {
+            setAdSize(size)
+            adUnitId = BuildConfig.AD_UNIT_BANNER
+            adListener = object : AdListener() {
+                override fun onAdLoaded() {
+                    kept.loaded.value = true
+                }
+            }
+            loadAd(AdRequest.Builder().build())
+        }
+        banner = kept
+        (activity as? LifecycleOwner)?.lifecycle?.addObserver(object : LifecycleEventObserver {
+            override fun onStateChanged(source: LifecycleOwner, event: Lifecycle.Event) {
+                when (event) {
+                    Lifecycle.Event.ON_PAUSE -> kept.view.pause()
+                    Lifecycle.Event.ON_RESUME -> kept.view.resume()
+                    Lifecycle.Event.ON_DESTROY -> {
+                        source.lifecycle.removeObserver(this)
+                        if (banner === kept) dropBanner() else kept.view.destroy()
+                    }
+                    else -> Unit
+                }
+            }
+        })
+        return kept
+    }
+
+    private fun dropBanner() {
+        banner?.view?.let { view ->
+            (view.parent as? ViewGroup)?.removeView(view)
+            view.destroy()
+        }
+        banner = null
+    }
+
+    /** Loads the banner for the calculator's width (the screen less its 16dp sides) before the screen asks for it. */
+    private fun preloadBanner(activity: Activity) {
+        if (store.access.value.adFree || activity.isFinishing || activity.isDestroyed) return
+        bannerFor(activity, activity.resources.configuration.screenWidthDp - 32)
+    }
+
     @Composable
     override fun Banner(placeholder: @Composable () -> Unit, modifier: Modifier) {
         val access by access.collectAsState()
@@ -402,44 +462,32 @@ private class PlayMonetization(private val app: Application) : Monetization {
         // A little more room from the keys above, so a tap meant for the keypad never lands on the ad.
         BoxWithConstraints(modifier.fillMaxWidth().padding(top = 4.dp), contentAlignment = Alignment.Center) {
             val context = LocalContext.current
+            val activity = remember(context) { context.findActivity() }
             val widthDp = maxWidth.value.toInt()
-            val size = remember(widthDp) { AdSize.getCurrentOrientationAnchoredAdaptiveBannerAdSize(context, widthDp) }
-            var loaded by remember { mutableStateOf(false) }
+            val kept = if (ready && activity != null) remember(activity, widthDp) { bannerFor(activity, widthDp) } else null
+            val size = kept?.size ?: remember(widthDp) { AdSize.getCurrentOrientationAnchoredAdaptiveBannerAdSize(context, widthDp) }
+            val loaded = kept?.loaded?.collectAsState()?.value ?: false
             Box(Modifier.fillMaxWidth().height(size.height.dp), contentAlignment = Alignment.Center) {
-                if (ready) {
-                    val lifecycle = LocalLifecycleOwner.current.lifecycle
-                    val adView = remember {
-                        AdView(context).apply {
-                            setAdSize(size)
-                            adUnitId = BuildConfig.AD_UNIT_BANNER
-                            adListener = object : AdListener() {
-                                override fun onAdLoaded() {
-                                    loaded = true
-                                }
-                            }
-                            loadAd(AdRequest.Builder().build())
-                        }
-                    }
-                    DisposableEffect(lifecycle, adView) {
-                        val observer = LifecycleEventObserver { _, event ->
-                            when (event) {
-                                Lifecycle.Event.ON_PAUSE -> adView.pause()
-                                Lifecycle.Event.ON_RESUME -> adView.resume()
-                                else -> Unit
-                            }
-                        }
-                        lifecycle.addObserver(observer)
-                        onDispose {
-                            lifecycle.removeObserver(observer)
-                            adView.destroy()
-                        }
-                    }
-                    AndroidView(factory = { adView }, modifier = Modifier.width(size.width.dp).height(size.height.dp))
+                if (kept != null) key(kept) {
+                    AndroidView(
+                        factory = {
+                            // Kept from an earlier visit to the screen: out of its old holder first.
+                            (kept.view.parent as? ViewGroup)?.removeView(kept.view)
+                            kept.view
+                        },
+                        modifier = Modifier.width(size.width.dp).height(size.height.dp)
+                    )
                 }
                 // On top until an ad arrives, so a tap there opens Premium rather than an empty ad view.
                 if (!loaded) placeholder()
             }
         }
+    }
+
+    private tailrec fun Context.findActivity(): Activity? = when (this) {
+        is Activity -> this
+        is ContextWrapper -> baseContext.findActivity()
+        else -> null
     }
 
     // After every property above is set.
@@ -448,10 +496,15 @@ private class PlayMonetization(private val app: Application) : Monetization {
         scope.launch {
             store.access.map { it.unlocked }.distinctUntilChanged().drop(1).collect { triggerWidgetUpdate(app, settle = true) }
         }
+        // Bought: the banner goes for good.
+        scope.launch {
+            store.access.map { it.adFree }.distinctUntilChanged().collect { if (it) dropBanner() }
+        }
         scope.launch {
             adsReady.collect { ready ->
                 if (!ready) return@collect
                 pendingWatch?.get()?.let { loadVideo(it) }
+                bannerActivity?.get()?.let { preloadBanner(it) }
             }
         }
     }

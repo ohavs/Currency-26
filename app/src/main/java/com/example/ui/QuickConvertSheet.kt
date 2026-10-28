@@ -78,8 +78,9 @@ import com.example.utils.withSymbol
 /**
  * The bubble that pops over another app when the user picks "Convert currency" on selected text.
  * [conversion] is null while the very first rates load ([offline] when they could not); tapping outside the
- * card dismisses it. Tapping the currency it converts to opens a picker in the bubble ([onChooseCurrency]);
- * [recents] are offered first there.
+ * card dismisses it. Tapping the currency it converts to opens a picker in the bubble ([onChooseCurrency]), and so
+ * does tapping the price's own currency, when the text meant another one ([onChooseSource]); [recents] are offered
+ * first there.
  */
 @Composable
 fun QuickConvertSheet(
@@ -95,20 +96,23 @@ fun QuickConvertSheet(
     rates: Map<String, Double> = emptyMap(),
     recents: List<String> = emptyList(),
     onChooseCurrency: ((String) -> Unit)? = null,
+    onChooseSource: ((String) -> Unit)? = null,
     startPicking: Boolean = false,
 ) {
     val palette = LocalPalette.current
     val appear = remember { Animatable(0f) }
     LaunchedEffect(Unit) { appear.animateTo(1f, tween(180, easing = FastOutSlowInEasing)) }
     val noRipple = remember { MutableInteractionSource() }
-    var picking by rememberSaveable { mutableStateOf(startPicking) }
+    // Which currency the picker changes: the one prices go to, or the one they are in (null: no picker).
+    var picking by rememberSaveable { mutableStateOf(if (startPicking) PICK_TARGET else null) }
     var query by rememberSaveable { mutableStateOf("") }
     val closePicker = {
-        picking = false
+        picking = null
         query = ""
     }
-    BackHandler(enabled = picking, onBack = closePicker)
-    val choose = onChooseCurrency?.let { { picking = true } }
+    BackHandler(enabled = picking != null, onBack = closePicker)
+    val choose = onChooseCurrency?.let { { picking = PICK_TARGET } }
+    val chooseSource = onChooseSource?.let { { picking = PICK_SOURCE } }
 
     Box(
         modifier = Modifier
@@ -133,18 +137,22 @@ fun QuickConvertSheet(
                 .padding(16.dp)
         ) {
             when {
-                picking && conversion != null && onChooseCurrency != null -> CurrencyPage(
-                    conversion = conversion,
-                    rates = rates,
-                    recents = recents,
-                    query = query,
-                    onQueryChange = { query = it },
-                    onBack = closePicker,
-                    onSelect = { code ->
-                        closePicker()
-                        onChooseCurrency(code)
-                    }
-                )
+                picking != null && conversion != null -> {
+                    val source = picking == PICK_SOURCE
+                    CurrencyPage(
+                        conversion = conversion,
+                        source = source,
+                        rates = rates,
+                        recents = recents,
+                        query = query,
+                        onQueryChange = { query = it },
+                        onBack = closePicker,
+                        onSelect = { code ->
+                            closePicker()
+                            (if (source) onChooseSource else onChooseCurrency)?.invoke(code)
+                        }
+                    )
+                }
                 conversion == null && offline -> Message(stringResource(R.string.offline), Icons.Rounded.CloudOff, onOpenApp)
                 conversion == null -> Box(Modifier.fillMaxWidth().height(120.dp), contentAlignment = Alignment.Center) {
                     CircularProgressIndicator(color = palette.accent, strokeWidth = 3.dp)
@@ -152,7 +160,11 @@ fun QuickConvertSheet(
                 conversion.lines.isEmpty() -> Message(stringResource(R.string.quick_no_price), Icons.Rounded.SearchOff, onOpenApp)
                 else -> {
                     val single = conversion.lines.singleOrNull()
-                    if (single != null) SinglePrice(single, conversion.others, choose) else PriceList(conversion, choose)
+                    if (single != null) {
+                        SinglePrice(single, conversion.others, choose, chooseSource)
+                    } else {
+                        PriceList(conversion, choose, chooseSource)
+                    }
                     Spacer(Modifier.height(14.dp))
                     Row(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically) {
                         PillButton(
@@ -182,13 +194,17 @@ fun QuickConvertSheet(
     }
 }
 
+private const val PICK_TARGET = "target"
+private const val PICK_SOURCE = "source"
+
 /**
- * The currencies to convert to, inside the bubble: the price on top (a single one's currency is not offered), then
- * the app's picker with its search and the user's currencies first.
+ * The currencies to convert to (or, with [source], the one the prices are in), inside the bubble: the price on top
+ * (a single one's other currency is not offered), then the app's picker with its search and the user's currencies first.
  */
 @Composable
 private fun CurrencyPage(
     conversion: QuickConversion,
+    source: Boolean,
     rates: Map<String, Double>,
     recents: List<String>,
     query: String,
@@ -197,8 +213,12 @@ private fun CurrencyPage(
     onSelect: (String) -> Unit,
 ) {
     val single = conversion.lines.singleOrNull()
-    val currencies = remember(rates.keys, single) {
-        rates.keys.ifEmpty { currencyMap.keys }.filter { it != single?.price?.currency }.sorted()
+    val from = single?.price?.currency ?: conversion.lines.firstOrNull()?.price?.currency
+    val to = single?.to ?: conversion.target
+    val current = if (source) from else to
+    val other = if (source) to else from
+    val currencies = remember(rates.keys, single, other) {
+        rates.keys.ifEmpty { currencyMap.keys }.filter { single == null || it != other }.sorted()
     }
     Column(Modifier.fillMaxWidth().fillMaxHeight(0.8f)) {
         AppTopBar(
@@ -209,8 +229,8 @@ private fun CurrencyPage(
         CurrencyChooser(
             currencies = currencies,
             rates = rates,
-            currentCode = single?.to ?: conversion.target,
-            otherCode = single?.price?.currency ?: conversion.target,
+            currentCode = current,
+            otherCode = other ?: to,
             recents = recents,
             query = query,
             onQueryChange = onQueryChange,
@@ -222,7 +242,12 @@ private fun CurrencyPage(
 
 /** The price as found (with a hint when its currency was a guess) above the converted amount, like the app's cards. */
 @Composable
-private fun SinglePrice(line: ConvertedPrice, others: List<Pair<String, Double>>, onChooseCurrency: (() -> Unit)?) {
+private fun SinglePrice(
+    line: ConvertedPrice,
+    others: List<Pair<String, Double>>,
+    onChooseCurrency: (() -> Unit)?,
+    onChooseSource: (() -> Unit)?,
+) {
     val palette = LocalPalette.current
     val from = line.price
     PriceCard(
@@ -230,7 +255,8 @@ private fun SinglePrice(line: ConvertedPrice, others: List<Pair<String, Double>>
         amount = formatOriginal(from.amount),
         note = if (from.assumed) stringResource(R.string.quick_assumed) else null,
         background = palette.card,
-        fontSize = 22
+        fontSize = 22,
+        onClick = onChooseSource
     )
     Spacer(Modifier.height(6.dp))
     PriceCard(
@@ -308,10 +334,10 @@ private fun PriceCard(code: String, amount: String, note: String?, background: C
 
 /**
  * Several prices: each one converted, and their sum when they share a currency. The currency they go to heads the
- * converted side, as a chip that changes it.
+ * converted side, as a chip that changes it; the currency they are in heads the other side (all of them, once changed).
  */
 @Composable
-private fun PriceList(conversion: QuickConversion, onChooseCurrency: (() -> Unit)?) {
+private fun PriceList(conversion: QuickConversion, onChooseCurrency: (() -> Unit)?, onChooseSource: (() -> Unit)?) {
     val palette = LocalPalette.current
     Column(
         modifier = Modifier
@@ -320,10 +346,12 @@ private fun PriceList(conversion: QuickConversion, onChooseCurrency: (() -> Unit
             .background(palette.card)
             .padding(horizontal = 16.dp, vertical = 8.dp)
     ) {
-        if (onChooseCurrency != null) {
+        if (onChooseCurrency != null || onChooseSource != null) {
             Row(Modifier.fillMaxWidth().padding(top = 4.dp, bottom = 2.dp)) {
+                val from = conversion.lines.first().price.currency
+                if (onChooseSource != null) CurrencyChip(from, onChooseSource, background = palette.background)
                 Spacer(Modifier.weight(1f))
-                CurrencyChip(conversion.target, onChooseCurrency)
+                if (onChooseCurrency != null) CurrencyChip(conversion.target, onChooseCurrency)
             }
         }
         conversion.lines.forEach { line ->
@@ -353,12 +381,12 @@ private fun PriceList(conversion: QuickConversion, onChooseCurrency: (() -> Unit
 
 /** A currency's flag and code with a chevron: tapping it picks another one. */
 @Composable
-private fun CurrencyChip(code: String, onClick: () -> Unit) {
+private fun CurrencyChip(code: String, onClick: () -> Unit, background: Color = LocalPalette.current.highlight) {
     val palette = LocalPalette.current
     Row(
         modifier = Modifier
             .clip(CircleShape)
-            .background(palette.highlight)
+            .background(background)
             .clickable(role = Role.Button, onClickLabel = stringResource(R.string.change_currency), onClick = onClick)
             .padding(start = 10.dp, end = 6.dp, top = 4.dp, bottom = 4.dp),
         verticalAlignment = Alignment.CenterVertically
