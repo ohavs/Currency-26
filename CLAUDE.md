@@ -46,7 +46,8 @@ Hebrew, and show rendered previews of visual changes (see `tools/preview`).
   (`pyaxmlparser` or a UTF-16 search), new strings in `resources.arsc`.
 - When a task is done, save what the next session needs (this file, `docs/PLAY_LAUNCH_PLAN.md`), merge it,
   and tell the owner it is safe to `/clear`. The owner asked for this every time.
-- Latest release: 5.0.28 (PR #48, run 40532720077: the widget works in the Play build (WorkManager/R8), tour hand,
+- Latest release: 5.0.30 (PR #54, run 40633545346: widget previews in the add dialog, the banner kept between
+  screens, the price's currency picked in the bubble; its Play bundle went to the closed test). 5.0.28 (PR #48, run 40532720077: the widget works in the Play build (WorkManager/R8), tour hand,
   Premium crown, test tools; its Play bundle (test ads) is the one to upload to the closed test). 5.0.27 (PR #44: Play bundle with test ads, translation review). 5.0.26 (PR #40: the privacy policy link moved to https://ohavs.github.io/privacy.html; checked
   in the APK). 5.0.25 (PR #35) brought the real AdMob ids to the store build; its run (40078765153) built the signed Play
   bundle with the real ads (artifact `currency-26-play-bundle`; the log prints the AdMob app id), the one for the
@@ -152,13 +153,13 @@ Hebrew, and show rendered previews of visual changes (see `tools/preview`).
   and the main screen shows the same `UpdateBanner` as the GitHub build; "Update" opens the store page (never
   forced), the X hides it for that version (`dismissedUpdateVersion`). Play reports a version code only:
   500 + N is shown as 5.0.N. It only works for installs from Play.
-- Widget previews (5.0.29): without `previewImage`/`previewLayout` Samsung's "Add to Home screen?" showed a grey
+- Widget previews (5.0.30): without `previewImage`/`previewLayout` Samsung's "Add to Home screen?" showed a grey
   "Couldn't add widget" box (the widget itself was added). The pictures are the preview tool's widget mocks in the
   Classic set, one per language (`tools/preview/widget_previews.sh` writes `drawable[-<lang>]-nodpi/*.webp`); re-run it
   when the widgets' look changes.
-- Banner (5.0.29): `PlayMonetization` keeps one `AdView` per activity, loaded as `start()` runs and moved between
+- Banner (5.0.30): `PlayMonetization` keeps one `AdView` per activity, loaded as `start()` runs and moved between
   screens (never destroyed when the calculator leaves), so coming back from Settings doesn't wait for a new ad.
-- Quick-convert bubble (5.0.29): tapping the price's own card (or its chip over a list) says which currency the text
+- Quick-convert bubble (5.0.30): tapping the price's own card (or its chip over a list) says which currency the text
   really meant (`QuickConvert.convert(from = ...)`, this text only, not saved).
 - History panel (5.0.19): the header is just the clock icon (the link already says "History"); the clear key
   is icon-only and exactly the size of the keypad key beside it, widening to "Clear all?" on the first tap.
@@ -166,6 +167,10 @@ Hebrew, and show rendered previews of visual changes (see `tools/preview`).
 
 ## Next
 - **Open as of 2026-10-26 (owner's wishes, next session starts here):**
+  - 2026-10-28: the owner asked whether the third currency and quick convert should become Premium ("reasons to buy
+    or watch many videos"). Proposed: third currency fully Premium; quick convert free 3 times a day, then a locked
+    bubble (videos/purchase). Awaiting the owner's answer; if yes, also update the store texts, the reviewer note
+    (plan doc) and the free/Premium table.
   - 2026-10-27: Store settings and the privacy URL fix are done (owner). The closed test ("Alpha") was SENT FOR REVIEW
     on 2026-10-27: 5.0.27 (versionCode 527, run 40501759554, test ads), list "צוות בודקים" (17 people), 177 countries +
     rest of world. Along the way the owner filled the en-US default store listing by hand (texts and images from
