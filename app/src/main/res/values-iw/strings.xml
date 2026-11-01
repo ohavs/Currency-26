@@ -158,7 +158,7 @@
     <string name="premium_pending">הרכישה ממתינה לאישור התשלום</string>
     <string name="premium_locked">חלק מפרימיום</string>
     <string name="premium_promo">פרימיום: בלי פרסומות, וידג\'ט, מחשבון ועוד</string>
-    <string name="premium_settings_free">%1$d סרטונים קצרים פותחים %2$d שעות</string>
+    <string name="premium_settings_free">שני סרטונים קצרים פותחים %1$d שעות</string>
     <string name="widget_locked_title">הווידג\'ט הוא חלק מפרימיום</string>
     <string name="widget_locked_action">פתיחה</string>
     <string name="ad_privacy">פרטיות בפרסומות</string>

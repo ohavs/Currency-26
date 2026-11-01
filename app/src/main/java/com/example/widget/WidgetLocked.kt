@@ -82,7 +82,7 @@ internal fun LockedWidgetContent(data: WidgetData) {
                 // The free way back in, for the larger sizes.
                 Spacer(GlanceModifier.height(10.dp))
                 Text(
-                    localized.getString(R.string.premium_settings_free, PremiumRules.VIDEOS_PER_UNLOCK, PremiumRules.REWARD_HOURS),
+                    localized.getString(R.string.premium_settings_free, PremiumRules.REWARD_HOURS),
                     style = TextStyle(color = colors.inkMuted, fontSize = 12.sp, textAlign = TextAlign.Center),
                     maxLines = 2
                 )

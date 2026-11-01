@@ -726,7 +726,7 @@ private fun PremiumRow(premium: PremiumSummary, onClick: () -> Unit) {
     val summary = when {
         premium.access.purchased -> stringResource(R.string.premium_owned)
         else -> premiumStatus(premium.access, premium.purchasePending)
-            ?: stringResource(R.string.premium_settings_free, PremiumRules.VIDEOS_PER_UNLOCK, PremiumRules.REWARD_HOURS)
+            ?: stringResource(R.string.premium_settings_free, PremiumRules.REWARD_HOURS)
     }
     Row(
         modifier = Modifier

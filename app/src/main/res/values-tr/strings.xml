@@ -158,7 +158,7 @@
     <string name="premium_pending">Satın alımınız ödemenin onaylanmasını bekliyor</string>
     <string name="premium_locked">Premium\'a dahil</string>
     <string name="premium_promo">Premium: reklamsız, widget, hesap makinesi ve dahası</string>
-    <string name="premium_settings_free">%1$d kısa videoyla %2$d saatlik erişim</string>
+    <string name="premium_settings_free">İki kısa videoyla %1$d saatlik erişim</string>
     <string name="widget_locked_title">Widget, Premium\'un bir parçası</string>
     <string name="widget_locked_action">Kilidi aç</string>
     <string name="ad_privacy">Reklam gizliliği</string>

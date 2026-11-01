@@ -158,7 +158,7 @@
     <string name="premium_pending">購入は支払いの確認待ちです</string>
     <string name="premium_locked">プレミアム機能</string>
     <string name="premium_promo">プレミアム：広告なし、ウィジェット・電卓などつき</string>
-    <string name="premium_settings_free">短い動画%1$d本で%2$d時間利用可能</string>
+    <string name="premium_settings_free">短い動画2本で%1$d時間利用可能</string>
     <string name="widget_locked_title">ウィジェットはプレミアム機能です</string>
     <string name="widget_locked_action">ロック解除</string>
     <string name="ad_privacy">広告のプライバシー設定</string>

@@ -471,7 +471,7 @@ fun main() {
             Box(Modifier.fillMaxSize().background(androidx.compose.ui.graphics.Color(0xFF3B4E66)).padding(10.dp)) {
                 androidx.compose.foundation.layout.Row(horizontalArrangement = androidx.compose.foundation.layout.Arrangement.spacedBy(12.dp)) {
                     com.example.widget.LockedWidgetMock(p, 300f, 380f, strings("widget_locked_title"), strings("widget_locked_action"),
-                        hint = String.format(strings("premium_settings_free"), 2, 24))
+                        hint = String.format(strings("premium_settings_free"), 24))
                     androidx.compose.foundation.layout.Column(verticalArrangement = androidx.compose.foundation.layout.Arrangement.spacedBy(12.dp)) {
                         com.example.widget.LockedWidgetMock(p, 220f, 120f, strings("widget_locked_title"), strings("widget_locked_action"))
                         com.example.widget.LockedWidgetMock(p, 220f, 80f, strings("widget_locked_title"), strings("widget_locked_action"))

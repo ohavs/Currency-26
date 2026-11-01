@@ -158,7 +158,7 @@
     <string name="premium_pending">आपकी खरीदारी भुगतान की पुष्टि का इंतज़ार कर रही है</string>
     <string name="premium_locked">प्रीमियम का हिस्सा</string>
     <string name="premium_promo">प्रीमियम: बिना विज्ञापन, विजेट, कैलकुलेटर और बहुत कुछ</string>
-    <string name="premium_settings_free">%1$d छोटे वीडियो से %2$d घंटे खुलते हैं</string>
+    <string name="premium_settings_free">दो छोटे वीडियो से %1$d घंटे खुलते हैं</string>
     <string name="widget_locked_title">विजेट प्रीमियम का हिस्सा है</string>
     <string name="widget_locked_action">अनलॉक करें</string>
     <string name="ad_privacy">विज्ञापन गोपनीयता</string>

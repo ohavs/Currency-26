@@ -158,7 +158,7 @@
     <string name="premium_pending">Покупка ожидает подтверждения оплаты</string>
     <string name="premium_locked">Входит в Премиум</string>
     <string name="premium_promo">Премиум: без рекламы, виджет, калькулятор и другое</string>
-    <string name="premium_settings_free">%1$d коротких видео открывают доступ на %2$d ч</string>
+    <string name="premium_settings_free">Два коротких видео открывают доступ на %1$d ч</string>
     <string name="widget_locked_title">Виджет входит в Премиум</string>
     <string name="widget_locked_action">Открыть</string>
     <string name="ad_privacy">Конфиденциальность рекламы</string>
