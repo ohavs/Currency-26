@@ -22,7 +22,8 @@ Hebrew, and show rendered previews of visual changes (see `tools/preview`).
 - **Every push to `main` is a release**: `release.yml` publishes `v5.0.<run>` with
   `currency-26-5.0.N.apk` (github flavor; the in-app updater installs it), and its `play` job builds the AAB
   with the same version once the `UPLOAD_KEYSTORE_*` secrets exist, uploading it to Play's closed test
-  (`PLAY_TRACK: alpha`; status `PLAY_STATUS`, draft until the app's first review, so the owner taps "Start rollout")
+  (`PLAY_TRACK: alpha`; `PLAY_STATUS: completed` since 2026-11-01 at the owner's request, so each release is sent for
+  review by itself; 5.0.32 was the last draft the owner had to send by hand)
   since `PLAY_SERVICE_ACCOUNT_JSON` exists (2026-10-27: project `currency-play` in Google Cloud, invited in Play
   Console). Check the `play` job's "Send to Google Play" step after each release.
   Pushes that only touch notes, `docs/`, `store/`, `tools/` or the other workflows don't release
@@ -46,7 +47,7 @@ Hebrew, and show rendered previews of visual changes (see `tools/preview`).
   (`pyaxmlparser` or a UTF-16 search), new strings in `resources.arsc`.
 - When a task is done, save what the next session needs (this file, `docs/PLAY_LAUNCH_PLAN.md`), merge it,
   and tell the owner it is safe to `/clear`. The owner asked for this every time.
-- Latest release: 5.0.30 (PR #54, run 40633545346: widget previews in the add dialog, the banner kept between
+- Latest release: 5.0.32 (PR #59, run 41273699884: the locked widget spells out "two videos"). 5.0.30 (PR #54, run 40633545346: widget previews in the add dialog, the banner kept between
   screens, the price's currency picked in the bubble; its Play bundle went to the closed test). 5.0.28 (PR #48, run 40532720077: the widget works in the Play build (WorkManager/R8), tour hand,
   Premium crown, test tools; its Play bundle (test ads) is the one to upload to the closed test). 5.0.27 (PR #44: Play bundle with test ads, translation review). 5.0.26 (PR #40: the privacy policy link moved to https://ohavs.github.io/privacy.html; checked
   in the APK). 5.0.25 (PR #35) brought the real AdMob ids to the store build; its run (40078765153) built the signed Play
@@ -227,5 +228,5 @@ Hebrew, and show rendered previews of visual changes (see `tools/preview`).
   test with 12 testers for 14 days). AdMob is done (2026-10-24): the real ids are in `gradle.properties`
   and only the store build uses them; smoke and branch builds pass `-PadmobTestAds=true` (Google's test ads,
   since real ads on an emulator are invalid traffic). Each build logs the AdMob app id it carries. When the service account secret
-  exists, the owner runs `play-listing.yml` from the Actions tab (we can't dispatch); read its log. After the first production review, set `PLAY_STATUS: completed`.
+  exists, the owner runs `play-listing.yml` from the Actions tab (we can't dispatch); read its log. `PLAY_STATUS` is already `completed`; for production change `PLAY_TRACK`.
 - The Play upload key was generated in session 2026-10-20 and sent to the owner (not in git).
