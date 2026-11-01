@@ -158,7 +158,7 @@
     <string name="premium_pending">عملية الشراء بانتظار تأكيد الدفع</string>
     <string name="premium_locked">جزء من بريميوم</string>
     <string name="premium_promo">بريميوم: بلا إعلانات، مع الأداة والآلة الحاسبة والمزيد</string>
-    <string name="premium_settings_free">%1$d مقاطع فيديو قصيرة تفتح %2$d ساعة</string>
+    <string name="premium_settings_free">مقطعا فيديو قصيران يفتحان %1$d ساعة</string>
     <string name="widget_locked_title">الأداة جزء من بريميوم</string>
     <string name="widget_locked_action">فتح</string>
     <string name="ad_privacy">خصوصية الإعلانات</string>

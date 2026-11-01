@@ -166,6 +166,9 @@ Hebrew, and show rendered previews of visual changes (see `tools/preview`).
   (`openPremiumIntent(reason = QUICK_CONVERT)`).
 - Quick-convert bubble (5.0.30): tapping the price's own card (or its chip over a list) says which currency the text
   really meant (`QuickConvert.convert(from = ...)`, this text only, not saved).
+- Widget text (5.0.32): a widget line in Hebrew/Arabic that starts with a digit shows the digit at the wrong end
+  ("2 סרטונים..." came out as "... 24 שעות 2"); `premium_settings_free` now spells the number out ("שני סרטונים") in
+  every language and takes only the hours. Don't start widget strings with a number.
 - History panel (5.0.19): the header is just the clock icon (the link already says "History"); the clear key
   is icon-only and exactly the size of the keypad key beside it, widening to "Clear all?" on the first tap.
   The owner notices mismatched button sizes: keep neighbouring buttons the same height and shape.

@@ -158,7 +158,7 @@
     <string name="premium_pending">你的购买正在等待付款确认</string>
     <string name="premium_locked">高级版功能</string>
     <string name="premium_promo">高级版：无广告，并提供小组件、计算器等</string>
-    <string name="premium_settings_free">%1$d 个短视频可解锁 %2$d 小时</string>
+    <string name="premium_settings_free">两个短视频可解锁 %1$d 小时</string>
     <string name="widget_locked_title">小组件是高级版功能</string>
     <string name="widget_locked_action">解锁</string>
     <string name="ad_privacy">广告隐私设置</string>

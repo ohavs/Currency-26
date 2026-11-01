@@ -169,7 +169,7 @@ ROWS = [
  ("premium_pending", "הרכישה ממתינה לאישור התשלום", "Your purchase is waiting for the payment to go through", "Tu compra está esperando a que se confirme el pago"),
  ("premium_locked", "חלק מפרימיום", "Part of Premium", "Parte de Premium"),
  ("premium_promo", "פרימיום: בלי פרסומות, וידג'ט, מחשבון ועוד", "Premium: no ads, widget, calculator and more", "Premium: sin anuncios, widget, calculadora y más"),
- ("premium_settings_free", "%1$d סרטונים קצרים פותחים %2$d שעות", "%1$d short videos unlock %2$d hours", "%1$d vídeos cortos desbloquean %2$d horas"),
+ ("premium_settings_free", "שני סרטונים קצרים פותחים %1$d שעות", "Two short videos unlock %1$d hours", "Dos vídeos cortos desbloquean %1$d horas"),
  ("widget_locked_title", "הווידג'ט הוא חלק מפרימיום", "The widget is part of Premium", "El widget es parte de Premium"),
  ("widget_locked_action", "פתיחה", "Unlock", "Desbloquear"),
  ("ad_privacy", "פרטיות בפרסומות", "Ad privacy choices", "Privacidad de los anuncios"),

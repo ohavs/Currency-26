@@ -158,7 +158,7 @@
     <string name="premium_pending">Votre achat attend la confirmation du paiement</string>
     <string name="premium_locked">Inclus dans Premium</string>
     <string name="premium_promo">Premium : sans pub, widget, calculatrice et plus</string>
-    <string name="premium_settings_free">%1$d courtes vidéos débloquent %2$d h</string>
+    <string name="premium_settings_free">Deux courtes vidéos débloquent %1$d h</string>
     <string name="widget_locked_title">Le widget fait partie de Premium</string>
     <string name="widget_locked_action">Débloquer</string>
     <string name="ad_privacy">Confidentialité des annonces</string>
